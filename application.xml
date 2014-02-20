@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	<!-- NMML reference: https://gist.github.com/1763850 -->
+	
+	<!-- metadata, make sure 'package' is at least 3 segments (ie. com.mycompany.myproject) -->
+	<meta title="HaxeSpriter" package="spriter.example.HaxeSpriter" version="1.0.0" company="Loudo" />
+	
+	<!-- output -->
+	<app main="spriter.example.Main" file="HaxeSpriter" path="bin" />
+	
+	<window background="#ffffff" fps="30" />
+	<window width="800" height="480" unless="mobile" />
+	<window orientation="landscape" vsync="false" antialiasing="0" if="cpp" />
+	
+	<!-- classpath, haxe libs -->
+	<source path="src" />
+	<haxelib name="openfl-bitfive" />
+	<haxelib name="openfl" />
+	<haxelib name="tilelayer" />
+	
+	<!-- assets -->
+	<icon path="assets/openfl.svg" />
+	<assets path="assets" rename="assets" />
+	
+	<!-- optimize output
+	<haxeflag name="-dce full" /> -->
+	
+</project>
