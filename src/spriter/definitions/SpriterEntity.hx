@@ -11,26 +11,26 @@ class SpriterEntity
 
     public var id:Int;
 	public var name:String;
-    public var characterMaps:Array<CharacterMap>;
-    public var animations:Array<SpriterAnimation>;
+    public var characterMaps:Map<String,CharacterMap>;
+    public var animations:Map<String,SpriterAnimation>;
 
 	
 	public function new(fast:Fast, spatialInfo:IScml) 
 	{
-		characterMaps = new Array<CharacterMap>();
-		animations = new Array<SpriterAnimation>();
+		characterMaps = new Map<String,CharacterMap>();
+		animations = new Map<String,SpriterAnimation>();
 		
 		id = Std.parseInt(fast.att.id);
 		name = fast.att.name;
 		
 		for (cm in fast.nodes.character_map)
 		{
-			characterMaps.push(new CharacterMap(cm));
+			characterMaps.set(cm.att.name, new CharacterMap(cm));
 		}
 		
 		for (a in fast.nodes.animation)
 		{
-			animations.push(new SpriterAnimation(a,spatialInfo));
+			animations.set(a.att.name,new SpriterAnimation(a,spatialInfo));
 		}
 	}
 	

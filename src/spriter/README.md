@@ -41,7 +41,7 @@ Spriter Engine Features
 
 TODO
 ----
- - add interpolation support
+ - add bone support
  - add tilelayer support : https://github.com/matthewswallace/openfl-tilelayer
  - add tilesheet stage 3d support : https://github.com/as3boyan/TilesheetStage3D/
  - add ash and haxepunk support
@@ -50,4 +50,5 @@ TODO
 
 Known issues
 ------------
- - interpolation doesn't work for now
+ - bones doesn't work for now (wrong values x and y)
+ - interpolation are not enough smooth

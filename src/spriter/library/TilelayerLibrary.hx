@@ -61,12 +61,14 @@ class TilelayerLibrary extends SpriterLibrary
 		var sprite:TileSprite = getFile(name);
 		_layer.addChild(sprite);
 		
-		sprite.x =  info.x;
-		sprite.y =  info.y;
-		sprite.scaleX = info.scaleX;
-		sprite.scaleY = info.scaleY;
-		sprite.rotation = info.angle;
-		sprite.offset = new Point(pivots.pivotX*sprite.width, pivots.pivotY*sprite.height);
+		var spatialResult:SpatialInfo = compute(info, pivots, sprite.width, sprite.height);
+		
+		sprite.x =  spatialResult.x;
+		sprite.y =  spatialResult.y;
+		sprite.scaleX = spatialResult.scaleX;
+		sprite.scaleY = spatialResult.scaleY;
+		sprite.rotation = SpriterUtil.toRadians(spatialResult.angle);
+		//sprite.offset = new Point(pivots.pivotX*sprite.width, pivots.pivotY*sprite.height);
 		sprite.visible = true;
 	}
 	

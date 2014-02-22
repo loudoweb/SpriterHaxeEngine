@@ -20,8 +20,7 @@ class SpatialInfo
 		this.x = x; 
 		this.y = y; 
 		if(fromSCML){
-			this.angle = angle;
-			this.angle = this.angle == 0 ? 0 : 360 - this.angle;//because rotation on spriter vs flash are inverted
+			this.angle = SpriterUtil.fixRotation(angle);//because rotation on spriter vs flash are inverted
 		}else {
 			this.angle = angle;
 		}
@@ -44,7 +43,7 @@ class SpatialInfo
 		{
 			var preMultX = x * parentInfo.scaleX;
 			var preMultY = y * parentInfo.scaleY;
-			var parentRad = SpriterUtil.toRadians(parentInfo.angle);
+			var parentRad = SpriterUtil.toRadians(SpriterUtil.normalizeRotation(parentInfo.angle));
 			var s = Math.sin(parentRad);
 			var c = Math.cos(parentRad);
 			

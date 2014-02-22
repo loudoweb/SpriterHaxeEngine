@@ -5,6 +5,7 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 import flash.Lib;
 import openfl.Assets;
+import openfl.display.FPS;
 import spriter.definitions.ScmlObject;
 import spriter.engine.Spriter;
 import spriter.engine.SpriterEngine;
@@ -38,21 +39,39 @@ class Main extends Sprite
 		if (inited) return;
 		inited = true;
 		
-		scml = new ScmlObject(Xml.parse(Assets.getText('assets/spriter/player_map.scml')));
-		var lib:SpriterLibrary = new SpriterLibrary('assets/spriter/');
-		spriter = new Spriter('spriterLibrary',scml, lib);
-		spriter.y = 100;
-		spriter.x = 100;
-		addChild(spriter);
+		var len:Int = 20;
 		
-		var scml2:ScmlObject = new ScmlObject(Xml.parse(Assets.getText('assets/briton/briton.scml')));
-		var lib2:TilelayerLibrary = new TilelayerLibrary('assets/briton/briton.xml' , 'assets/briton/briton.png');
-		spriter2 = new Spriter('tileLayerLibrary', scml2, lib2);
-		spriter2.y = 250;
-		spriter2.x = 250;
+		var fps:FPS = new FPS();
+		addChild(fps);
 		
 		engine = new SpriterEngine();
-		engine.add('spriterLibrary',spriter);
+		
+		/*
+		scml = new ScmlObject(Xml.parse(Assets.getText('assets/briton/briton.scml')));
+
+		for (i in 0...len) {
+			
+			var lib:SpriterLibrary = new SpriterLibrary('assets/briton/');
+			spriter = new Spriter('spriterLibrary_'+i,scml, lib);
+			spriter.x = 0  + 50 * (i % 10);
+			spriter.y = 50 + 50 * (Std.int(i / 10) % 6);
+			addChild(spriter);
+			engine.add('spriterLibrary_'+i, spriter);
+		}
+		*/
+		var scml2:ScmlObject = new ScmlObject(Xml.parse(Assets.getText('assets/briton/briton.scml')));
+		for (i in 0...len) {
+			
+			var lib2:TilelayerLibrary = new TilelayerLibrary('assets/briton/briton.xml' , 'assets/briton/briton.png');
+			spriter2 = new Spriter('tileLayerLibrary_'+i, scml2, lib2);
+			spriter2.x = 50  + 50 * (i % 10);
+			spriter2.y = 200 + 50 * (Std.int(i / 10) % 6);
+			addChild(spriter2);
+			engine.add('tileLayerLibrary_'+i, spriter2);
+		}
+
+		
+		
 		
 		addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		addEventListener(MouseEvent.CLICK, onClick);
@@ -66,9 +85,10 @@ class Main extends Sprite
 	private function onClick(e:MouseEvent):Void
 	{
 		
-		addChild(spriter2);
-		engine.add('tileLayerLibrary',spriter2);
-		scml.applyCharacterMap(null, true);
+		//addChild(spriter2);
+		//engine.add('tileLayerLibrary',spriter2);
+		//spriter.applyCharacterMap('lance', true);
+		spriter.playAnim('run');
 	}
 	
 	private function onEnterFrame(e:Event):Void

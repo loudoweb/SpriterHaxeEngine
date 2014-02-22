@@ -14,7 +14,7 @@ class SpriterEngine
 	private var _time:Int;
 	private var _frameRate:Int;
 	
-	public function new(frameRate:Int = 30) 
+	public function new(frameRate:Int = 60) 
 	{
 		_sprites = new Map<String ,SpriterComponent>();
 		_frameRate = frameRate;

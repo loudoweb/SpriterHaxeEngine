@@ -88,7 +88,7 @@ class SpriterLibrary
 		setting(compute(info, pivots, bitmap.bitmapData.width, bitmap.bitmapData.height), bitmap);
 		
 	}
-	public function setting(info:SpatialInfo, display:DisplayObject):Void
+	public function setting(info:SpatialInfo, display:Dynamic):Void
 	{
 		display.x = info.x;
 		display.y = info.y;
@@ -99,8 +99,9 @@ class SpriterLibrary
 	
 	public function compute(info:SpatialInfo, pivots:PivotInfo, width:Float, height:Float):SpatialInfo
 	{
-		var s = Math.sin(SpriterUtil.toRadians(info.angle));
-		var c = Math.cos(SpriterUtil.toRadians(info.angle));
+		var rad = SpriterUtil.toRadians(SpriterUtil.normalizeRotation(info.angle));
+		var s = Math.sin(rad);
+		var c = Math.cos(rad);
 		var imagex = -(pivots.pivotX + 0.0) * width * info.scaleX;
 		var imagey = (pivots.pivotY  - 1.0) * height * info.scaleY;		
 		return new SpatialInfo(((imagex * c) - (imagey * s) + info.x), ((imagex * s) + (imagey * c) - info.y), info.angle, info.scaleX, info.scaleY, info.a, info.spin);

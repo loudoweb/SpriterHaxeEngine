@@ -9,7 +9,7 @@ class SpriterFolder
 {
 
 	public var id:Int;
-	public var name:String;
+	public var name:String = '';
     public var files:Array<SpriterFile>;
 	
 	
@@ -18,7 +18,9 @@ class SpriterFolder
 		files = new Array<SpriterFile>();
 		
 		id = Std.parseInt(fast.att.id);
-		name = fast.att.name;
+		if(fast.hasNode.name){
+			name = fast.att.name;
+		}
 		
 		for (f in fast.nodes.file)
 		{

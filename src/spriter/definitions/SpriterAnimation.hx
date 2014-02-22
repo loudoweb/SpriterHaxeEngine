@@ -78,48 +78,47 @@ class SpriterAnimation
 
     public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:SpriterLibrary):Void
     {
-        var transformedBoneKeys:Array<BoneTimelineKey> = new Array<BoneTimelineKey>();
-		var currentBoneKey:BoneTimelineKey;
+        var transformedBoneKeys:Array<SpatialInfo> = new Array<SpatialInfo>();
+		var currentKey:SpatialTimelineKey;
 		
 		var	currentRef:Ref;
-		var parentInfo:SpatialInfo;
+		var spatialInfo:SpatialInfo;
 		var len:Int = mainKey.boneRefs.length;
         for (b in 0...len)
         {
-            currentRef = mainKey.boneRefs[b]; 
-            if(currentRef.parent >= 0)
-            {
-                parentInfo = transformedBoneKeys[currentRef.parent].info;
+            currentRef = mainKey.boneRefs[b];
+			currentKey = cast keyFromRef(currentRef, newTime);
+            if (currentRef.parent >= 0)
+			{
+                spatialInfo = transformedBoneKeys[currentRef.parent];
             }
-            else
-            {
-                parentInfo = _root.characterInfo();
-            }
+			else 
+			{
+				spatialInfo = _root.characterInfo();
+			}
 
-            currentBoneKey = cast keyFromRef(currentRef, newTime);
-            currentBoneKey.info = currentBoneKey.info.unmapFromParent(parentInfo);
-            transformedBoneKeys.push(currentBoneKey);
+            spatialInfo = currentKey.info.unmapFromParent(spatialInfo);
+            transformedBoneKeys.push(spatialInfo);
         }
 
-        var objectKeys:Array<TimelineKey>;
-		var currentKey:SpatialTimelineKey;
+        //var objectKeys:Array<TimelineKey>;
 		len = mainKey.objectRefs.length;
         for(o in 0...len)
         {
             currentRef = mainKey.objectRefs[o];
+			currentKey = cast keyFromRef(currentRef,newTime);
 
-            if(currentRef.parent>=0)
+            if(currentRef.parent >= 0)
             {
-                parentInfo = transformedBoneKeys[currentRef.parent].info;
+                spatialInfo = transformedBoneKeys[currentRef.parent];
             }
             else
             {
-                parentInfo = _root.characterInfo();
+                spatialInfo = _root.characterInfo();
             }
 			
-			currentKey = cast keyFromRef(currentRef,newTime);
 		   //currentKey.info = currentKey.info.unmapFromParent(parentInfo);//TOFIX and remove next line ?
-			var spatialInfo:SpatialInfo = currentKey.info.unmapFromParent(parentInfo);
+			spatialInfo = currentKey.info.unmapFromParent(spatialInfo);
 			var activePivots:PivotInfo;
 			if (Std.is(currentKey, SpriteTimelineKey)) {
 				var currentSpriteKey:SpriteTimelineKey = cast(currentKey, SpriteTimelineKey);
@@ -132,7 +131,7 @@ class SpriterAnimation
 				}
 			}else {
 				activePivots = new PivotInfo();
-				currentKey.paint(activePivots.pivotX, activePivots.pivotY);
+				currentKey.paint(activePivots.pivotX, activePivots.pivotY);//TODO
 			}
 			
 

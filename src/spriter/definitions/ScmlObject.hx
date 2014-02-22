@@ -12,11 +12,11 @@ class ScmlObject implements IScml
 {
 
 	public var folders:Array<SpriterFolder>;
-	public var entities:Array<SpriterEntity>;
 	public var activeCharacterMap:Array<SpriterFolder>;
+	public var entities:Map<String, SpriterEntity>;
 
-    public var currentEntity:Int = 0; 
-    public var currentAnimation:Int = 0; 
+    public var currentEntity:String 	= ""; 
+    public var currentAnimation:String  = ""; 
 
     public var currentTime:Float; 
 	
@@ -25,13 +25,13 @@ class ScmlObject implements IScml
 	public function new(source:Xml) 
 	{
 		folders = new Array<SpriterFolder>();
-		entities = new Array<SpriterEntity>();
+		entities = new Map<String,SpriterEntity>();
 		
 		var fast = new Fast(source.firstElement());
 		
 		if (fast.att.scml_version != "1.0")
 			trace("Warning, unsupported format.");
-					
+		
 		for(el in fast.elements)
         {
             if(el.name == "folder")
@@ -40,7 +40,11 @@ class ScmlObject implements IScml
             }
             else if(el.name == "entity")
             {
-                entities.push(new SpriterEntity(el, this));
+                entities.set(el.att.name, new SpriterEntity(el, this));
+				if (el.att.id == '0') {
+					currentEntity = el.att.name;
+					currentAnimation = el.node.animation.att.name;
+				}
             }
         }
 		
@@ -88,34 +92,39 @@ class ScmlObject implements IScml
 	//interface IScml end
     public function setCurrentTime(newTime:Int, library:SpriterLibrary):Void
     {
-        var currentEnt:SpriterEntity 		=	entities[currentEntity];
-		var currentAnim:SpriterAnimation	=	currentEnt.animations[currentAnimation];
+        var currentEnt:SpriterEntity 		=	entities.get(currentEntity);
+		var currentAnim:SpriterAnimation	=	currentEnt.animations.get(currentAnimation);
 		currentAnim.setCurrentTime(newTime, library);
     }		
 
-    public function applyCharacterMap(charMap:CharacterMap, reset:Bool):Void
+    public function applyCharacterMap(name:String, reset:Bool):Bool
     {
-		//TODO remove this
-		var	entity:SpriterEntity = entities[currentEntity];
-		charMap = entity.characterMaps[0];
-		//end TODO
+		var	entity:SpriterEntity = entities.get(currentEntity);
 		
-		if(reset)
-		{
-			activeCharacterMap	=	folders;
-		}
-		var len:Int = charMap.maps.length;
-        for(m in 0...len)
-		{
-			var currentMap:MapInstruction = charMap.maps[m];
-			if(currentMap.tarFolder > -1 && currentMap.tarFile > -1)
+		if (entity.characterMaps.exists(name)) {
+			
+			var charMap:CharacterMap = entity.characterMaps.get(name);
+			
+			if(reset)
 			{
-				var targetFolder:SpriterFolder	=	activeCharacterMap[currentMap.tarFolder];
-				var targetFile:SpriterFile		=	targetFolder.files[currentMap.tarFile];
-				activeCharacterMap[currentMap.folder].files[currentMap.file]	=	targetFile;
-			}else {
-				activeCharacterMap[currentMap.folder].files[currentMap.file]	=	null;//hidden
+				activeCharacterMap	=	folders;
 			}
+			var len:Int = charMap.maps.length;
+			for(m in 0...len)
+			{
+				var currentMap:MapInstruction = charMap.maps[m];
+				if(currentMap.tarFolder > -1 && currentMap.tarFile > -1)
+				{
+					var targetFolder:SpriterFolder	=	activeCharacterMap[currentMap.tarFolder];
+					var targetFile:SpriterFile		=	targetFolder.files[currentMap.tarFile];
+					activeCharacterMap[currentMap.folder].files[currentMap.file]	=	targetFile;
+				}else {
+					activeCharacterMap[currentMap.folder].files[currentMap.file]	=	null;//hidden
+				}
+			}
+			return true;
+		}else {
+			return false;
 		}
     }
 	/* //TODO
