@@ -46,16 +46,16 @@ class Main extends Sprite
 		var fps:FPS = new FPS();
 		addChild(fps);
 		
-		
-		var spriterRoot:Sprite = new Sprite();
 		/*
+		var spriterRoot:Sprite = new Sprite();
+		*/
 		var canvas:BitmapData = new BitmapData(800, 480);
 		var spriterRoot:Bitmap = new Bitmap(canvas, PixelSnapping.AUTO, true);
-		*/
+		
 		addChild(spriterRoot);
 		
 	
-		
+		/*
 		var lib:SpriterLibrary = new SpriterLibrary('assets/briton/');
 		
 		engine = new SpriterEngine(Assets.getText('assets/briton/briton.scml'), lib, spriterRoot );
@@ -63,23 +63,23 @@ class Main extends Sprite
 		for (i in 0...len) {
 			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10),  50 * (Std.int(i / 10) % 6));
 		}
-		
+		*/
 		/*
 		var lib:TilelayerLibrary = new TilelayerLibrary('assets/briton/briton.xml' , 'assets/briton/briton.png');
 		engine = new SpriterEngine(Assets.getText('assets/briton/briton.scml'), lib, spriterRoot );
 		for (i in 0...len) {
-			engine.addEntity('lib_' + i, 100  + 50 * (i % 10), - 50 * (Std.int(i / 10) % 6));
+			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10),  50 * (Std.int(i / 10) % 6));
 		}
 		*/
-		/*
+		
 		var lib:BitmapLibrary = new BitmapLibrary('assets/briton/', canvas);
 		
 		engine = new SpriterEngine(Assets.getText('assets/briton/briton.scml'), lib, null );
 
 		for (i in 0...len) {
-			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10), - 50 * (Std.int(i / 10) % 6));//TOFIX y
+			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10),  50 * (Std.int(i / 10) % 6));
 		}
-		*/
+		
 		
 		addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		addEventListener(MouseEvent.CLICK, onClick);
