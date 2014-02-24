@@ -14,9 +14,8 @@ import spriter.util.SpriterUtil;
  * ...
  * @author Loudo
  */
-class SpriterLibrary
+class SpriterLibrary extends AbstractLibrary
 {
-	private var _basePath:String;
 	private var _root:Sprite;
 	
 	/**
@@ -34,10 +33,11 @@ class SpriterLibrary
 	{
 		_basePath = basePath;
 		_groups = new Map < String, Map < String, Bitmap >> ();
+		super(basePath);
 	}
 	
-	public function setRoot(root:Sprite):Void {
-		_root = root;
+	override public function setRoot(root:Dynamic):Void {
+		_root = cast root;
 	}
 	
 	/**
@@ -45,12 +45,12 @@ class SpriterLibrary
 	 * @param	name of the image
 	 * @return
 	 */
-	public function getFile(name:String):Dynamic
+	override public function getFile(name:String):Dynamic
 	{
 		return Assets.getBitmapData(_basePath+name,true);
 	}
 	
-	public function clear():Void
+	override public function clear():Void
 	{
 		//TODO optimization : clear only image that can not be reuse or something
 		var i:Int = _root.numChildren;
@@ -62,12 +62,12 @@ class SpriterLibrary
 		
 	}
 	
-	public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
+	override public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
 		var idImage:String = timeline + ':' + key + ':' + name;
 		
 		var bitmap:Bitmap;
-		if (_groups.exists(group)) {
+		if (_groups.exists(group) && group == "okugutf") {
 			_assets = _groups.get(group);
 			if(_assets.exists(idImage)){
 				bitmap = _assets.get(idImage);
@@ -83,32 +83,16 @@ class SpriterLibrary
 			_groups.set(group, _assets);
 		}
 		
+		var spatialResult:SpatialInfo = compute(info, pivots, bitmap.bitmapData.width, bitmap.bitmapData.height);
+		bitmap.x = spatialResult.x;
+		bitmap.y = spatialResult.y;
+		bitmap.scaleX = spatialResult.scaleX;
+		bitmap.scaleY = spatialResult.scaleY;
+		bitmap.rotation = SpriterUtil.fixRotation(spatialResult.angle);
 		_root.addChild(bitmap);
-
-		setting(compute(info, pivots, bitmap.bitmapData.width, bitmap.bitmapData.height), bitmap);
-		
-	}
-	public function setting(info:SpatialInfo, display:Dynamic):Void
-	{
-		display.x = info.x;
-		display.y = info.y;
-		display.scaleX = info.scaleX;
-		display.scaleY = info.scaleY;
-		display.rotation = info.angle;
 	}
 	
-	public function compute(info:SpatialInfo, pivots:PivotInfo, width:Float, height:Float):SpatialInfo
-	{
-		var rad = SpriterUtil.toRadians(SpriterUtil.normalizeRotation(info.angle));
-		var s = Math.sin(rad);
-		var c = Math.cos(rad);
-		var imagex = -(pivots.pivotX + 0.0) * width * info.scaleX;
-		var imagey = (pivots.pivotY  - 1.0) * height * info.scaleY;		
-		return new SpatialInfo(((imagex * c) - (imagey * s) + info.x), ((imagex * s) + (imagey * c) - info.y), info.angle, info.scaleX, info.scaleY, info.a, info.spin);
-	}
-	
-	
-	public function render():Void
+	override public function render():Void
 	{
 		
 	}

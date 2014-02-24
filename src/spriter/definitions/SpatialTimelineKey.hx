@@ -1,5 +1,6 @@
 package spriter.definitions;
 import haxe.xml.Fast;
+import spriter.util.SpriterUtil;
 
 /**
  * ...
@@ -30,7 +31,7 @@ class SpatialTimelineKey extends TimelineKey
 			var scale_y = fast.has.scale_y ? Std.parseFloat(fast.att.scale_y) : 1;
 			var alpha = fast.has.a ? Std.parseFloat(fast.att.a) : 1;
 			
-			info = new SpatialInfo(x, y, angle, scale_x, scale_y, alpha, spin, true);
+			info = new SpatialInfo(x, y, angle, scale_x, scale_y, alpha, spin);
 		}
 	}
 	
@@ -69,7 +70,7 @@ class SpatialTimelineKey extends TimelineKey
 	
 	public function paint(pivotX:Float, pivotY:Float):PivotInfo
 	{
-		return new PivotInfo();
+		return new PivotInfo(pivotX,pivotY);
 	}
 	
 }

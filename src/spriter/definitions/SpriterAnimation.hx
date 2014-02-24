@@ -2,6 +2,7 @@ package spriter.definitions;
 import haxe.xml.Fast;
 import spriter.definitions.SpriterAnimation.LoopType;
 import spriter.interfaces.IScml;
+import spriter.library.AbstractLibrary;
 import spriter.library.SpriterLibrary;
 
 /**
@@ -23,7 +24,6 @@ class SpriterAnimation
     public var mainlineKeys:Array<MainlineKey>;
     public var timelines:Array<SpriterTimeline>;
 	
-	private var _root:IScml;
 	private var _library:SpriterLibrary;
 	
 	/**
@@ -31,9 +31,8 @@ class SpriterAnimation
 	 * 
 	 * @param	root SpatialInfo for the root of the Spriter Animation
 	 */
-	public function new(fast:Fast, root:IScml) 
+	public function new(fast:Fast) 
 	{
-		_root = root;
 		mainlineKeys = new Array<MainlineKey>();
 		timelines = new Array<SpriterTimeline>();
 		
@@ -63,7 +62,7 @@ class SpriterAnimation
 		}
 	}
 	
-	public function setCurrentTime(newTime:Int, library:SpriterLibrary):Void
+	public function setCurrentTime(newTime:Int, library:AbstractLibrary, root:IScml):Void
     {
 		switch(loopType)
         {
@@ -73,10 +72,10 @@ class SpriterAnimation
             newTime = Std.int(Math.min(newTime, length));
         }
 
-        updateCharacter(mainlineKeyFromTime(newTime), newTime, library);
+        updateCharacter(mainlineKeyFromTime(newTime), newTime, library, root);
     }
 
-    public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:SpriterLibrary):Void
+    public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:AbstractLibrary, root:IScml):Void
     {
         var transformedBoneKeys:Array<SpatialInfo> = new Array<SpatialInfo>();
 		var currentKey:SpatialTimelineKey;
@@ -94,7 +93,7 @@ class SpriterAnimation
             }
 			else 
 			{
-				spatialInfo = _root.characterInfo();
+				spatialInfo = root.characterInfo();
 			}
 
             spatialInfo = currentKey.info.unmapFromParent(spatialInfo);
@@ -114,20 +113,20 @@ class SpriterAnimation
             }
             else
             {
-                spatialInfo = _root.characterInfo();
+                spatialInfo = root.characterInfo();
             }
 			
-		   //currentKey.info = currentKey.info.unmapFromParent(parentInfo);//TOFIX and remove next line ?
+		    //currentKey.info = currentKey.info.unmapFromParent(parentInfo);//TOFIX and remove next line ?
 			spatialInfo = currentKey.info.unmapFromParent(spatialInfo);
 			var activePivots:PivotInfo;
 			if (Std.is(currentKey, SpriteTimelineKey)) {
 				var currentSpriteKey:SpriteTimelineKey = cast(currentKey, SpriteTimelineKey);
-				activePivots = _root.getPivots(currentSpriteKey.folder, currentSpriteKey.file);
+				activePivots = root.getPivots(currentSpriteKey.folder, currentSpriteKey.file);
 				activePivots = currentKey.paint(activePivots.pivotX, activePivots.pivotY);
 				//render from library
-				var currentKeyName:String = _root.getFileName(currentSpriteKey.folder, currentSpriteKey.file);
+				var currentKeyName:String = root.getFileName(currentSpriteKey.folder, currentSpriteKey.file);
 				if (currentKeyName != null) {//hidden object test (via mapping)
-					library.addGraphic(_root.getSpriterName(), currentRef.timeline, currentRef.key, currentKeyName, spatialInfo, activePivots);
+					library.addGraphic(root.getSpriterName(), currentRef.timeline, currentRef.key, currentKeyName, spatialInfo, activePivots);
 				}
 			}else {
 				activePivots = new PivotInfo();

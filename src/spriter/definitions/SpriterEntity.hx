@@ -15,7 +15,7 @@ class SpriterEntity
     public var animations:Map<String,SpriterAnimation>;
 
 	
-	public function new(fast:Fast, spatialInfo:IScml) 
+	public function new(fast:Fast) 
 	{
 		characterMaps = new Map<String,CharacterMap>();
 		animations = new Map<String,SpriterAnimation>();
@@ -30,7 +30,7 @@ class SpriterEntity
 		
 		for (a in fast.nodes.animation)
 		{
-			animations.set(a.att.name,new SpriterAnimation(a,spatialInfo));
+			animations.set(a.att.name,new SpriterAnimation(a));
 		}
 	}
 	

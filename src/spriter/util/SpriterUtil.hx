@@ -11,20 +11,17 @@ class SpriterUtil
     {
         return deg * Math.PI / 180;
     }
-	
+	//because rotation on spriter vs flash are inverted
 	inline static public function fixRotation(rotation : Float) : Float 
 	{
 		if (rotation == 0)
-			return 0;
+			rotation = 360;
 		
 		return 360 - rotation;
 	}
 	
 	inline static public function normalizeRotation(rotation : Float) : Float 
-	{
-		if (rotation == 0)
-			return 0;
-			
+	{	
 		while (rotation > 360)
 		{
 			rotation -= 360;
@@ -36,6 +33,12 @@ class SpriterUtil
 		}
 		return rotation;
 	}
+	
+	inline static public function fixPivotY(pivotY : Float) : Float 
+	{
+		return 1 - pivotY;
+	}
+	
     
 
 	

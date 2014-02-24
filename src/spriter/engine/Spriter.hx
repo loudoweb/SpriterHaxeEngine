@@ -2,36 +2,37 @@ package spriter.engine;
 import flash.display.Sprite;
 import haxe.macro.Expr.Function;
 import spriter.definitions.ScmlObject;
+import spriter.definitions.SpatialInfo;
+import spriter.library.AbstractLibrary;
 import spriter.library.SpriterLibrary;
 
 /**
  * ...
  * @author Loudo
  */
-class Spriter extends Sprite
+class Spriter
 {
 
 	public var scml:ScmlObject;
-	public var library:SpriterLibrary;
+	public var library:AbstractLibrary;
 	public var spriterName:String;
+	public var beginTime:Int;
 	
-	public function new(_name:String, _scml:ScmlObject, _library:SpriterLibrary) 
+	public var info:SpatialInfo;
+	
+	public function new(_name:String, _scml:ScmlObject, _library:AbstractLibrary, _beginTime:Int, _info:SpatialInfo) 
 	{
-		scml 	= _scml;//TODO copy  or original ?
+		scml 	= _scml;
 		library = _library;
 		spriterName = _name;
-		
-		super();
-		
-		library.setRoot(this);
+		beginTime = _beginTime;
 		scml.name = spriterName;
+		info = _info;
 	}
 	
 	public function advanceTime(time:Int):Void
 	{
-		library.clear();
-		scml.setCurrentTime(time, library);
-		library.render();
+		scml.setCurrentTime(time, library, info);
 	}
 	/**
 	 * Apply character mapping to change an element in the animation.

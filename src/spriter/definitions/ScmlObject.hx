@@ -2,7 +2,7 @@ package spriter.definitions;
 
 import haxe.xml.Fast;
 import spriter.interfaces.IScml;
-import spriter.library.SpriterLibrary;
+import spriter.library.AbstractLibrary;
 
 /**
  * ...
@@ -21,51 +21,43 @@ class ScmlObject implements IScml
     public var currentTime:Float; 
 	
 	public var name:String;
+	
+	private var _characterInfo:SpatialInfo;
 		
-	public function new(source:Xml) 
+	public function new(source:Xml = null) 
 	{
-		folders = new Array<SpriterFolder>();
-		entities = new Map<String,SpriterEntity>();
-		
-		var fast = new Fast(source.firstElement());
-		
-		if (fast.att.scml_version != "1.0")
-			trace("Warning, unsupported format.");
-		
-		for(el in fast.elements)
-        {
-            if(el.name == "folder")
-            {
-                folders.push(new SpriterFolder(el));
-            }
-            else if(el.name == "entity")
-            {
-                entities.set(el.att.name, new SpriterEntity(el, this));
-				if (el.att.id == '0') {
-					currentEntity = el.att.name;
-					currentAnimation = el.node.animation.att.name;
+		if(source != null){
+			folders = new Array<SpriterFolder>();
+			entities = new Map<String,SpriterEntity>();
+			
+			var fast = new Fast(source.firstElement());
+			
+			if (fast.att.scml_version != "1.0")
+				trace("Warning, unsupported format.");
+			
+			for(el in fast.elements)
+			{
+				if(el.name == "folder")
+				{
+					folders.push(new SpriterFolder(el));
 				}
-            }
-        }
-		
-		activeCharacterMap = folders;
+				else if(el.name == "entity")
+				{
+					entities.set(el.att.name, new SpriterEntity(el));
+					if (el.att.id == '0') {
+						currentEntity = el.att.name;
+						currentAnimation = el.node.animation.att.name;
+					}
+				}
+			}
+			
+			activeCharacterMap = folders;
+		}
 	}
 	//interface IScml begin
 	public function characterInfo():SpatialInfo
     {
-		//SCML Ref :
-	// Fill a SpatialInfo class with the 
-        // x,y,angle,etc of this character in game
-	
-        // To avoid distortion the character keep 
-        // scaleX and scaleY values equal
-
-	// Make scaleX or scaleY negative to flip on that axis
-		
-	// Examples (scaleX,scaleY)
-	// (1,1) Normal size
-        // (-2.5,2.5) 2.5x the normal size, and flipped on the x axis
-		return new SpatialInfo(0, 0, 0, 1, 1, 1, 1);//TODO ?
+		return _characterInfo;
     }
 	public function getPivots(folder:Int, file:Int):PivotInfo
 	{
@@ -90,11 +82,12 @@ class ScmlObject implements IScml
 		return name;
 	}
 	//interface IScml end
-    public function setCurrentTime(newTime:Int, library:SpriterLibrary):Void
+    public function setCurrentTime(newTime:Int, library:AbstractLibrary, characterInfo:SpatialInfo):Void
     {
         var currentEnt:SpriterEntity 		=	entities.get(currentEntity);
 		var currentAnim:SpriterAnimation	=	currentEnt.animations.get(currentAnimation);
-		currentAnim.setCurrentTime(newTime, library);
+		_characterInfo = characterInfo;
+		currentAnim.setCurrentTime(newTime, library, this);
     }		
 
     public function applyCharacterMap(name:String, reset:Bool):Bool
@@ -127,9 +120,16 @@ class ScmlObject implements IScml
 			return false;
 		}
     }
-	/* //TODO
-	public function clone():ScmlObject
+	public function copy():ScmlObject
 	{
-		return new ScmlObject()
-	}*/
+		var newSCML:ScmlObject = new ScmlObject();
+		newSCML.folders = folders.copy();
+		newSCML.activeCharacterMap = newSCML.folders;
+		newSCML.entities = entities;//TODO copy ?
+
+		newSCML.currentEntity 	= currentEntity.toString(); 
+		newSCML.currentAnimation  = currentAnimation.toString(); 
+		newSCML.currentTime = 0; 
+		return newSCML;
+	}
 }

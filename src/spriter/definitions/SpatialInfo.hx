@@ -15,15 +15,11 @@ class SpatialInfo
     public var a:Float=1;
     public var spin:Int=1;
 	
-	public function new(x:Float = 0, y:Float = 0, angle:Float = 0, scaleX:Float = 1, scaleY:Float = 1, a:Float = 1, spin:Int = 1, fromSCML:Bool = false) 
+	public function new(x:Float = 0, y:Float = 0, angle:Float = 0, scaleX:Float = 1, scaleY:Float = 1, a:Float = 1, spin:Int = 1) 
 	{
 		this.x = x; 
 		this.y = y; 
-		if(fromSCML){
-			this.angle = SpriterUtil.fixRotation(angle);//because rotation on spriter vs flash are inverted
-		}else {
-			this.angle = angle;
-		}
+		this.angle = angle;
 		this.scaleX = scaleX; 
 		this.scaleY = scaleY; 
 		this.a = a;

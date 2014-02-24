@@ -16,8 +16,10 @@ import spriter.util.SpriterUtil;
  * ...
  * @author Loudo
  */
-class TilelayerLibrary extends SpriterLibrary
+class TilelayerLibrary extends AbstractLibrary
 {
+	private var _root:Sprite;
+	
 	private var _layer:TileLayer;
 	
 	private var _group:TileGroup;
@@ -40,7 +42,7 @@ class TilelayerLibrary extends SpriterLibrary
 	}
 	
 	override public function setRoot(root:Sprite):Void {
-		super.setRoot(root);
+		_root = root;
 		_root.addChild(_layer.view); // layer is NOT a DisplayObject
 	}
 	

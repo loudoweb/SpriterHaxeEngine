@@ -55,7 +55,7 @@ class BoneTimelineKey extends SpatialTimelineKey
             // of length drawLength, and height drawHeight
 			
          }
-		 return new PivotInfo();
+		 return new PivotInfo(pivotX, pivotY);
     }           
 
     override public function linearKey(keyB:TimelineKey,t:Float):Void

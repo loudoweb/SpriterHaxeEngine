@@ -1,5 +1,8 @@
 package spriter.example;
 
+import flash.display.Bitmap;
+import flash.display.BitmapData;
+import flash.display.PixelSnapping;
 import flash.display.Sprite;
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -9,6 +12,7 @@ import openfl.display.FPS;
 import spriter.definitions.ScmlObject;
 import spriter.engine.Spriter;
 import spriter.engine.SpriterEngine;
+import spriter.library.BitmapLibrary;
 import spriter.library.SpriterLibrary;
 import spriter.library.TilelayerLibrary;
 
@@ -23,8 +27,6 @@ class Main extends Sprite
 
 	/* ENTRY POINT */
 	
-	public var spriter:Spriter;
-	public var spriter2:Spriter;
 	public var engine:SpriterEngine;
 	public var scml:ScmlObject;
 	
@@ -39,39 +41,45 @@ class Main extends Sprite
 		if (inited) return;
 		inited = true;
 		
-		var len:Int = 20;
+		var len:Int = 10;
 		
 		var fps:FPS = new FPS();
 		addChild(fps);
 		
-		engine = new SpriterEngine();
+		
+		var spriterRoot:Sprite = new Sprite();
+		/*
+		var canvas:BitmapData = new BitmapData(800, 480);
+		var spriterRoot:Bitmap = new Bitmap(canvas, PixelSnapping.AUTO, true);
+		*/
+		addChild(spriterRoot);
+		
+	
+		
+		var lib:SpriterLibrary = new SpriterLibrary('assets/briton/');
+		
+		engine = new SpriterEngine(Assets.getText('assets/briton/briton.scml'), lib, spriterRoot );
+
+		for (i in 0...len) {
+			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10),  50 * (Std.int(i / 10) % 6));
+		}
 		
 		/*
-		scml = new ScmlObject(Xml.parse(Assets.getText('assets/briton/briton.scml')));
-
+		var lib:TilelayerLibrary = new TilelayerLibrary('assets/briton/briton.xml' , 'assets/briton/briton.png');
+		engine = new SpriterEngine(Assets.getText('assets/briton/briton.scml'), lib, spriterRoot );
 		for (i in 0...len) {
-			
-			var lib:SpriterLibrary = new SpriterLibrary('assets/briton/');
-			spriter = new Spriter('spriterLibrary_'+i,scml, lib);
-			spriter.x = 0  + 50 * (i % 10);
-			spriter.y = 50 + 50 * (Std.int(i / 10) % 6);
-			addChild(spriter);
-			engine.add('spriterLibrary_'+i, spriter);
+			engine.addEntity('lib_' + i, 100  + 50 * (i % 10), - 50 * (Std.int(i / 10) % 6));
 		}
 		*/
-		var scml2:ScmlObject = new ScmlObject(Xml.parse(Assets.getText('assets/briton/briton.scml')));
-		for (i in 0...len) {
-			
-			var lib2:TilelayerLibrary = new TilelayerLibrary('assets/briton/briton.xml' , 'assets/briton/briton.png');
-			spriter2 = new Spriter('tileLayerLibrary_'+i, scml2, lib2);
-			spriter2.x = 50  + 50 * (i % 10);
-			spriter2.y = 200 + 50 * (Std.int(i / 10) % 6);
-			addChild(spriter2);
-			engine.add('tileLayerLibrary_'+i, spriter2);
-		}
+		/*
+		var lib:BitmapLibrary = new BitmapLibrary('assets/briton/', canvas);
+		
+		engine = new SpriterEngine(Assets.getText('assets/briton/briton.scml'), lib, null );
 
-		
-		
+		for (i in 0...len) {
+			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10), - 50 * (Std.int(i / 10) % 6));//TOFIX y
+		}
+		*/
 		
 		addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		addEventListener(MouseEvent.CLICK, onClick);
@@ -84,11 +92,9 @@ class Main extends Sprite
 	}
 	private function onClick(e:MouseEvent):Void
 	{
-		
-		//addChild(spriter2);
-		//engine.add('tileLayerLibrary',spriter2);
-		//spriter.applyCharacterMap('lance', true);
-		spriter.playAnim('run');
+		//engine.getEntity('lib_1').playAnim('run');
+		//engine.addEntity('lib_00', -10,  -10);
+		engine.getEntity('lib_1').applyCharacterMap('lance', true);
 	}
 	
 	private function onEnterFrame(e:Event):Void
