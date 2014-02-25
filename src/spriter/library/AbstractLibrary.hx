@@ -57,13 +57,10 @@ class AbstractLibrary
 	
 	public function compute(info:SpatialInfo, pivots:PivotInfo, width:Float, height:Float):SpatialInfo
 	{
-		var normalizedDegree = SpriterUtil.normalizeRotation(info.angle);
-		var rad = SpriterUtil.toRadians(normalizedDegree);
+		var degreesUnder360 = SpriterUtil.under360(info.angle);
+		var rad = SpriterUtil.toRadians(degreesUnder360);
 		var s = Math.sin(rad);
 		var c = Math.cos(rad);
-		/*var preX = info.x - (pivots.pivotX + 0.0) * width * info.scaleX;
-		var preY = info.y + (pivots.pivotY  - 1.0) * height * info.scaleY;		
-		return new SpatialInfo(((preX * c) - (-preY * s)), ((preX * s) + (-preY * c)), info.angle, info.scaleX, info.scaleY, info.a, info.spin);*/
 		
 		var pivotX =  info.x;
 		var pivotY =  info.y;
@@ -73,7 +70,7 @@ class AbstractLibrary
 		
 		var x2 = (preX - pivotX) * c - (preY - pivotY) * s + pivotX;
         var y2 = (preX - pivotX) * s + (preY - pivotY) * c + pivotY;
-		return new SpatialInfo(x2, -y2, normalizedDegree, info.scaleX, info.scaleY, info.a, info.spin);
+		return new SpatialInfo(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
 	}
 	
 	

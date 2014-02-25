@@ -39,7 +39,7 @@ class SpatialInfo
 		{
 			var preMultX = x * parentInfo.scaleX;
 			var preMultY = y * parentInfo.scaleY;
-			var parentRad = SpriterUtil.toRadians(SpriterUtil.normalizeRotation(parentInfo.angle));
+			var parentRad = SpriterUtil.toRadians(SpriterUtil.under360(parentInfo.angle));
 			var s = Math.sin(parentRad);
 			var c = Math.cos(parentRad);
 			

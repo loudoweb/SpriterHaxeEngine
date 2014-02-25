@@ -20,7 +20,7 @@ class SpriterUtil
 		return 360 - rotation;
 	}
 	
-	inline static public function normalizeRotation(rotation : Float) : Float 
+	inline static public function under360(rotation : Float) : Float 
 	{	
 		while (rotation > 360)
 		{
@@ -32,6 +32,11 @@ class SpriterUtil
 			rotation += 360;
 		}
 		return rotation;
+	}
+	
+	inline static public function normalizeRotation(rotation : Float) : Float
+	{
+		return rotation / 360;
 	}
 	
 	inline static public function fixPivotY(pivotY : Float) : Float 

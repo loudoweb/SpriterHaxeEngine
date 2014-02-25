@@ -65,13 +65,42 @@ class TilelayerLibrary extends AbstractLibrary
 		
 		var spatialResult:SpatialInfo = compute(info, pivots, sprite.width, sprite.height);
 		
+		
+		//sprite.offset = getPivotsRelativeToCenter(info, pivots, sprite.width, sprite.height);//TOFIX tilelayer seems buggy
 		sprite.x =  spatialResult.x;
 		sprite.y =  spatialResult.y;
+		sprite.rotation = SpriterUtil.toRadians(SpriterUtil.fixRotation(spatialResult.angle));
 		sprite.scaleX = spatialResult.scaleX;
 		sprite.scaleY = spatialResult.scaleY;
-		sprite.rotation = SpriterUtil.toRadians(spatialResult.angle);
-		//sprite.offset = new Point(pivots.pivotX*sprite.width, pivots.pivotY*sprite.height);
+		
 		sprite.visible = true;
+	}
+	
+	private function getPivotsRelativeToCenter(info:SpatialInfo, pivots:PivotInfo, width:Float, height:Float):Point
+	{
+		var x:Float = (pivots.pivotX - 0.5) * width * info.scaleX;
+		var y:Float = (0.5 - pivots.pivotY) * height * info.scaleY;
+		return new Point(x, y);
+	}
+	
+	//overrided because tilelayer use the center of the sprite for the coordinates
+	override public function compute(info:SpatialInfo, pivots:PivotInfo, width:Float, height:Float):SpatialInfo
+	{
+		var degreesUnder360 = SpriterUtil.under360(info.angle);
+		var rad = SpriterUtil.toRadians(degreesUnder360);
+		var s = Math.sin(rad);
+		var c = Math.cos(rad);
+		
+		var pivotX =  info.x;
+		var pivotY =  info.y;
+		
+		var preX = info.x - pivots.pivotX * width * info.scaleX + 0.5 * width * info.scaleX;
+		var preY = info.y + (1 - pivots.pivotY) * height * info.scaleY - 0.5 * height * info.scaleY;
+		
+		var x2 = (preX - pivotX) * c - (preY - pivotY) * s + pivotX;
+        var y2 = (preX - pivotX) * s + (preY - pivotY) * c + pivotY;
+		
+		return new SpatialInfo(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
 	}
 	
 	override public function render():Void

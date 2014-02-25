@@ -75,5 +75,5 @@ TODO
 Known issues
 ------------
  - interpolation are not enough smooth
- - tilelayer library does not display entities correctly
+ - tilelayer library does not display correctly in html5
  

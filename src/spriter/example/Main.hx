@@ -68,7 +68,7 @@ class Main extends Sprite
 		/*
 		 * BLOCK 2 : tilelayer library
 		 */
-		/*
+		
 		var spriterRoot:Sprite = new Sprite();
 		
 		var lib:TilelayerLibrary = new TilelayerLibrary('assets/briton/briton.xml' , 'assets/briton/briton.png');
@@ -76,13 +76,14 @@ class Main extends Sprite
 		for (i in 0...len) {
 			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10),  50 * (Std.int(i / 10) % 6));
 		}
-		*/
+		
 		/*
 		 * END BLOCK 2
 		 */
 		/*
 		 * BLOCK 3 : use BitmapLibrary
 		 */
+		/*
 		var canvas:BitmapData = new BitmapData(800, 480);
 		var spriterRoot:Bitmap = new Bitmap(canvas, PixelSnapping.AUTO, true);
 		
@@ -93,6 +94,7 @@ class Main extends Sprite
 		for (i in 0...len) {
 			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10),  50 * (Std.int(i / 10) % 6));
 		}
+		*/
 		/*
 		 * END BLOCK 3
 		 */
