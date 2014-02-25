@@ -36,7 +36,7 @@ engine.getEntity(0).applyCharacterMap('gun', true);
 engine.update();
 ```
 
-Spriter Engine Features
+Spriter Haxe Engine Features
 --------------
 
 **SCML API**
@@ -49,13 +49,12 @@ Spriter Engine Features
  - character mapping by name
  - change animation easily by name in a Spriter entity
  - you can display duplicate of spriter entity and manipulate them separatly
- - catch when animation ended to launch another
 
 **Libraries**
  - Simple bitmap library
  - BitmapData library
- - Tilelayer library (dependency : https://github.com/matthewswallace/openfl-tilelayer)
- - use the AbstractLibrary to provide a new library
+ - Tilelayer library (dependency : https://github.com/matthewswallace/openfl-tilelayer).
+ - override the AbstractLibrary to provide a new library
 
 **Cross-platform**
  - flash
@@ -71,9 +70,14 @@ TODO
  - Optimized engine : draw call only when needed. So "instant" keys are not updated between keys.
  - test performance
  - retrieve entity by his name (for now, you have to use z-order)
+ - catch when animation ended to launch another
 
+Additional information
+------------
+ - With Tilelayer library, don't use openfl-bitfive for html5 target.
+ 
+ 
 Known issues
 ------------
  - interpolation are not enough smooth
- - tilelayer library does not display correctly in html5
  
