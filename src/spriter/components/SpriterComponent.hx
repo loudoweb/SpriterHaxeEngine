@@ -9,13 +9,12 @@ class SpriterComponent
 {
 
 	public var spriter:Spriter;
-	public var beginTime:Int;
-	public var zOrder:Int;//TODO
+	public var id:String;
 
-	public function new(spriter:Spriter, beginTime:Int)
+	public function new(spriter:Spriter, id:String)
 	{
 		this.spriter = spriter;
-		this.beginTime = beginTime;
+		this.id = id;
 	}
 	
 }

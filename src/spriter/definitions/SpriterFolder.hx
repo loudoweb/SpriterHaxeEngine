@@ -13,19 +13,33 @@ class SpriterFolder
     public var files:Array<SpriterFile>;
 	
 	
-	public function new(fast:Fast) 
+	public function new(fast:Fast = null) 
 	{
 		files = new Array<SpriterFile>();
 		
-		id = Std.parseInt(fast.att.id);
-		if(fast.hasNode.name){
-			name = fast.att.name;
+		if(fast != null){
+			id = Std.parseInt(fast.att.id);
+			if(fast.hasNode.name){
+				name = fast.att.name;
+			}
+			
+			for (f in fast.nodes.file)
+			{
+				files.push(new SpriterFile(f));
+			}
 		}
-		
-		for (f in fast.nodes.file)
+	}
+	
+	public function copy():SpriterFolder
+	{
+		var copy:SpriterFolder = new SpriterFolder();
+		copy.name = name;
+		copy.id = id;
+		for (i in 0...files.length)
 		{
-			files.push(new SpriterFile(f));
+			copy.files[i] = files[i].copy();
 		}
+		return copy;
 	}
 	
 }

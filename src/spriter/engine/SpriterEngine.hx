@@ -6,6 +6,7 @@ import spriter.definitions.ScmlObject;
 import spriter.definitions.SpatialInfo;
 import spriter.library.AbstractLibrary;
 import spriter.library.SpriterLibrary;
+import spriter.nodes.SpriterNode;
 
 /**
  * ...
@@ -14,10 +15,12 @@ import spriter.library.SpriterLibrary;
 class SpriterEngine
 {
 	//spriters
-	private var _spriters:Map<String , Spriter>;
+	private var _spriters:Map<Int , SpriterNode>;
 	private var _scml:ScmlObject;
 	private var _lib:AbstractLibrary;
 	private var _graphics:Sprite;
+	private var _lastZOrder:Int = -1;
+	private var _firstZOrder:Null<Int> = null;
 	
 	//time
 	private var _elapsed:Int = 0;
@@ -26,7 +29,7 @@ class SpriterEngine
 	
 	public function new(scml:String, library:AbstractLibrary, graphics:Sprite, frameRate:Int = 60) 
 	{
-		_spriters = new Map<String ,Spriter>();
+		_spriters = new Map<Int ,SpriterNode>();
 		
 		_scml = new ScmlObject(Xml.parse(scml));
 		_lib = library;
@@ -35,38 +38,82 @@ class SpriterEngine
 		_lib.setRoot(_graphics);
 	}
 	
-	public function addEntity(id:String, x:Float = 0, y:Float = 0, z_order:Int = 0, copySCML:Bool = true):Void {
-		//TODO zorder
-		var info:SpatialInfo = new SpatialInfo(x, -y);//-y because use inverted coordinates
-		if (copySCML) {
-			var copy:ScmlObject 	  =  _scml.copy();
-			copy.name = id;
-			_spriters.set(id, new Spriter(id, copy, _lib, getTime(_time),info));
+	public function addEntity(id:String, x:Float = 0, y:Float = 0, ?layer:Null<Int>, copySCML:Bool = true):Void {
+		var currentZOrder:Int;
+		if (layer == null) {
+			currentZOrder = ++_lastZOrder;
 		}else {
-			_spriters.set(id, new Spriter(id, _scml, _lib, getTime(_time),info));
+			currentZOrder = layer;
+			if (currentZOrder > _lastZOrder)
+				_lastZOrder = layer;
+			
 		}
+		if (currentZOrder < _firstZOrder || _firstZOrder == null)
+				_firstZOrder = currentZOrder;
+				
+		var info:SpatialInfo = new SpatialInfo(x, -y);//-y because use inverted y coordinates
 		
-		
+		var currentSCML:ScmlObject;
+		if (copySCML) {
+			currentSCML 	  =  _scml.copy();//TOFIX something wrong in the copy : see character map
+			currentSCML.name = id;
+		}else {
+			currentSCML = _scml;
+		}
+		var node:SpriterNode = new SpriterNode(new Spriter(id, currentSCML, _lib, getTime(_time), info));
+		var next:SpriterNode = _spriters.get(currentZOrder);
+		if (next != null)
+		{
+			node.next = next;
+			next.previous = node;
+			var previous:SpriterNode = _spriters.get(currentZOrder - 1);
+			if (previous != null) {
+				previous.next = node;
+			}
+			_spriters.set(currentZOrder, node);
+			
+			insertNode(currentZOrder + 1, next);//update all next node
+		}
+		else
+		{
+			_spriters.set(currentZOrder, node);
+			node.previous = _spriters.get(currentZOrder - 1);
+			if(node.previous != null)
+				node.previous.next = node;
+			node.next = _spriters.get(currentZOrder + 1);
+			if(node.next != null)
+				node.next.previous = node;
+		}
 	}
-	public function removeEntity(id:String):Void {
-		if(_spriters.exists(id))
-			_spriters.remove(id);
+	public function removeEntity(layer:Int):Void {
+		if(_spriters.exists(layer))
+			_spriters.remove(layer);
 	}
-	public function getEntity(id:String):Spriter
+	public function getEntity(layer:Int):Spriter
 	{
-		if (_spriters.exists(id))
-			return _spriters.get(id);
+		if (_spriters.exists(layer))
+			return _spriters.get(layer).spriter;
 		return null;
 	}
+	private function insertNode(index:Int, node:SpriterNode) 
+    { 
+		_spriters.set(index, node);
+		if (node.next != null)
+		{
+			insertNode(index + 1, node.next);
+		}
+    }
 	public function update(time:Int = -1)
 	{
 		++_elapsed;
 		
 		_time = getTime(time);
-		_lib.clear();//TODO handle different for other platform
-	 	for(node in _spriters)
+		_lib.clear();//TODO handle different for other platform?
+	 	var node:SpriterNode = _spriters.get(_firstZOrder);
+		while(node != null)
 	 	{
-			node.advanceTime(_time - node.beginTime);
+			node.spriter.advanceTime(_time - node.spriter.beginTime);
+			node = node.next;
 	 	}
 		_lib.render();
 	}

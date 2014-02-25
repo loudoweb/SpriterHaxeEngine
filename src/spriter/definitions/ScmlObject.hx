@@ -123,12 +123,16 @@ class ScmlObject implements IScml
 	public function copy():ScmlObject
 	{
 		var newSCML:ScmlObject = new ScmlObject();
-		newSCML.folders = folders.copy();
+		newSCML.folders = new Array<SpriterFolder>();
+		for (i in 0...folders.length)
+		{
+			newSCML.folders[i] = folders[i].copy();
+		}
 		newSCML.activeCharacterMap = newSCML.folders;
 		newSCML.entities = entities;//TODO copy ?
 
-		newSCML.currentEntity 	= currentEntity.toString(); 
-		newSCML.currentAnimation  = currentAnimation.toString(); 
+		newSCML.currentEntity 	= Std.string(currentEntity); 
+		newSCML.currentAnimation  = Std.string(currentAnimation); 
 		newSCML.currentTime = 0; 
 		return newSCML;
 	}

@@ -46,16 +46,14 @@ class Main extends Sprite
 		var fps:FPS = new FPS();
 		addChild(fps);
 		
+		
+		
+		/*
+		 * BLOCK 1 : Simple bitmap library
+		 */
 		/*
 		var spriterRoot:Sprite = new Sprite();
-		*/
-		var canvas:BitmapData = new BitmapData(800, 480);
-		var spriterRoot:Bitmap = new Bitmap(canvas, PixelSnapping.AUTO, true);
 		
-		addChild(spriterRoot);
-		
-	
-		/*
 		var lib:SpriterLibrary = new SpriterLibrary('assets/briton/');
 		
 		engine = new SpriterEngine(Assets.getText('assets/briton/briton.scml'), lib, spriterRoot );
@@ -65,36 +63,61 @@ class Main extends Sprite
 		}
 		*/
 		/*
+		 * END BLOCK 1
+		 */
+		/*
+		 * BLOCK 2 : tilelayer library
+		 */
+		/*
+		var spriterRoot:Sprite = new Sprite();
+		
 		var lib:TilelayerLibrary = new TilelayerLibrary('assets/briton/briton.xml' , 'assets/briton/briton.png');
 		engine = new SpriterEngine(Assets.getText('assets/briton/briton.scml'), lib, spriterRoot );
 		for (i in 0...len) {
 			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10),  50 * (Std.int(i / 10) % 6));
 		}
 		*/
+		/*
+		 * END BLOCK 2
+		 */
+		/*
+		 * BLOCK 3 : use BitmapLibrary
+		 */
+		var canvas:BitmapData = new BitmapData(800, 480);
+		var spriterRoot:Bitmap = new Bitmap(canvas, PixelSnapping.AUTO, true);
 		
 		var lib:BitmapLibrary = new BitmapLibrary('assets/briton/', canvas);
 		
 		engine = new SpriterEngine(Assets.getText('assets/briton/briton.scml'), lib, null );
-
+		
 		for (i in 0...len) {
 			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10),  50 * (Std.int(i / 10) % 6));
 		}
+		/*
+		 * END BLOCK 3
+		 */
 		
 		
+		addChild(spriterRoot);
 		addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		addEventListener(MouseEvent.CLICK, onClick);
 		
-		// Stage:
-		// stage.stageWidth x stage.stageHeight @ stage.dpiScale
-		
-		// Assets:
-		// nme.Assets.getBitmapData("img/assetname.jpg");
 	}
 	private function onClick(e:MouseEvent):Void
 	{
-		//engine.getEntity('lib_1').playAnim('run');
-		//engine.addEntity('lib_00', -10,  -10);
-		engine.getEntity('lib_1').applyCharacterMap('lance', true);
+		
+		/*
+		 * Change animation by name :
+		 */
+		//engine.getEntity(0).playAnim('run');
+		/*
+		 * Apply character map by name :
+		 */
+		engine.getEntity(0).applyCharacterMap('lance', true);
+		/*
+		 * Add new entity
+		 */
+		//engine.addEntity('lib_00', -10,  75, 6);
 	}
 	
 	private function onEnterFrame(e:Event):Void
