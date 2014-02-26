@@ -8,6 +8,8 @@ Inspired by
  - https://bitbucket.org/ClockworkMagpie/haxe-spriter/
  - https://github.com/ibilon/HaxePunk-Spriter
 
+Install it:
+``haxelib install SpriterHaxeEngine``
 
 Configure it:
 

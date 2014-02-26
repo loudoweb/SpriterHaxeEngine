@@ -29,6 +29,10 @@ local.properties
 # PDT-specific
 .buildpath
 
+# haxelib
+*.json
+*.zip
+
 
 #################
 ## Visual Studio
