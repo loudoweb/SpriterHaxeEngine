@@ -41,7 +41,7 @@ class Main extends Sprite
 		if (inited) return;
 		inited = true;
 		
-		var len:Int = 10;
+		var len:Int = 1;
 		
 		var fps:FPS = new FPS();
 		addChild(fps);
@@ -54,12 +54,12 @@ class Main extends Sprite
 		/*
 		var spriterRoot:Sprite = new Sprite();
 		
-		var lib:SpriterLibrary = new SpriterLibrary('assets/briton/');
+		var lib:SpriterLibrary = new SpriterLibrary('assets/spriter/');
 		
-		engine = new SpriterEngine(Assets.getText('assets/briton/briton.scml'), lib, spriterRoot );
+		engine = new SpriterEngine(Assets.getText('assets/spriter/player_map.scml'), lib, spriterRoot );
 
 		for (i in 0...len) {
-			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10),  50 * (Std.int(i / 10) % 6));
+			engine.addEntity('lib_' + Std.int(i+1), 100  + 50 * (i % 10), 300+  50 * (Std.int(i / 10) % 6));
 		}
 		*/
 		/*
@@ -68,7 +68,7 @@ class Main extends Sprite
 		/*
 		 * BLOCK 2 : tilelayer library
 		 */
-		
+		/*
 		var spriterRoot:Sprite = new Sprite();
 		
 		var lib:TilelayerLibrary = new TilelayerLibrary('assets/briton/briton.xml' , 'assets/briton/briton.png');
@@ -76,25 +76,25 @@ class Main extends Sprite
 		for (i in 0...len) {
 			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10),  50 * (Std.int(i / 10) % 6));
 		}
-		
+		*/
 		/*
 		 * END BLOCK 2
 		 */
 		/*
 		 * BLOCK 3 : use BitmapLibrary
 		 */
-		/*
+		
 		var canvas:BitmapData = new BitmapData(800, 480);
 		var spriterRoot:Bitmap = new Bitmap(canvas, PixelSnapping.AUTO, true);
 		
-		var lib:BitmapLibrary = new BitmapLibrary('assets/briton/', canvas);
+		var lib:BitmapLibrary = new BitmapLibrary('assets/spriter/', canvas);
 		
-		engine = new SpriterEngine(Assets.getText('assets/briton/briton.scml'), lib, null );
+		engine = new SpriterEngine(Assets.getText('assets/spriter/player.scml'), lib, null );
 		
 		for (i in 0...len) {
-			engine.addEntity('lib_' + Std.int(i+1), 0  + 50 * (i % 10),  50 * (Std.int(i / 10) % 6));
+			engine.addEntity('lib_' + Std.int(i+1), 100 + 50 * (i % 10), 300 + 50 * (Std.int(i / 10) % 6));
 		}
-		*/
+		
 		/*
 		 * END BLOCK 3
 		 */
@@ -111,11 +111,11 @@ class Main extends Sprite
 		/*
 		 * Change animation by name :
 		 */
-		//engine.getEntity(0).playAnim('run');
+		//engine.getEntity(0).playAnim('walk');
 		/*
 		 * Apply character map by name :
 		 */
-		engine.getEntity(0).applyCharacterMap('lance', true);
+		engine.getEntity(0).applyCharacterMap('weapons', true);
 		/*
 		 * Add new entity
 		 */

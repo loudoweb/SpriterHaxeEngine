@@ -198,7 +198,7 @@ class SpriterAnimation
             keyBTime = keyBTime+length;
         }
 		
-        //keyA.interpolate(keyB, keyBTime, newTime);//TOFIX strange bug, added copy function but doesn't fix it
+        keyA.interpolate(keyB, keyBTime, newTime);
 		return keyA;
     }
 	/**
