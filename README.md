@@ -68,7 +68,8 @@ Spriter Haxe Engine Features
 TODO
 ----
  - add tilesheet stage 3d support : https://github.com/as3boyan/TilesheetStage3D/
- - add ash, haxepunk and haxeflixel support
+ - add ash and haxepunk support
+ - add atlas support for flixel
  - Optimized engine : draw call only when needed. So "instant" keys are not updated between keys.
  - test performance
  - retrieve entity by his name (for now, you have to use z-order)
