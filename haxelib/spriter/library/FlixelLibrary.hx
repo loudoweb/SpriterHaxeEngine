@@ -2,6 +2,9 @@ package spriter.library;
 
 import flixel.FlxSprite;
 import flixel.group.FlxTypedGroup.FlxTypedGroup;
+import flixel.util.loaders.SparrowData;
+import flixel.util.loaders.TexturePackerData;
+import flixel.util.loaders.TexturePackerXMLData;
 import openfl.Assets;
 import spriter.definitions.PivotInfo;
 import spriter.definitions.SpatialInfo;
@@ -19,15 +22,71 @@ class FlixelLibrary extends AbstractLibrary
 	
 	private var _sprites:Map<String, Array<FlxSprite>>;
 	
-	public function new(basePath:String, group:FlxTypedGroup<FlxSprite>) 
+	private var _atlasData:TexturePackerData;
+	
+	/**
+	 * Flixel lib constructor
+	 * @param	group		flixel group to render spriter animation to
+	 * @param	basePath	Path to folder with bitmap assets. Used only if you are not using atlases
+	 * @param	atlasData	texture packer data object. Used when you are using atlases
+	 * 
+	 * Usage examples:
+	 * 1) without atlases
+	 * var spriterGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
+	 * var lib:FlixelLibrary = new FlixelLibrary(spriterGroup, 'assets/sprites/brawler/');
+	 * engine = new SpriterEngine(Assets.getText('assets/sprites/brawler/brawler.scml'), lib, null);
+	 * var len:Int = 1;
+	 * for (i in 0...len) {
+	 *  	engine.addEntity('lib_' + Std.int(i+1), 100 + 50 * (i % 10), 100 + 50 * (Std.int(i / 10) % 6));
+	 * }
+	 * 
+	 * add(spriterGroup);
+	 *
+	 * 2) with atlases
+	 * var spriterGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
+	 * var data:SparrowData = new SparrowData("assets/ugly/ugly.xml", "assets/ugly/ugly.png");
+	 * var lib:FlixelLibrary = new FlixelLibrary(spriterGroup, null, data);
+	 * engine = new SpriterEngine(Assets.getText('assets/sprites/brawler/brawler.scml'), lib, null);
+	 * var len:Int = 1;
+	 * for (i in 0...len) {
+	 *  	engine.addEntity('lib_' + Std.int(i+1), 100 + 50 * (i % 10), 100 + 50 * (Std.int(i / 10) % 6));
+	 * }
+	 * 
+	 * add(spriterGroup);
+	 * 
+	 * 
+	 * and don't forget to call engine.update(); at the state update() method
+	 */
+	public function new(group:FlxTypedGroup<FlxSprite>, basePath:String = null, atlasData:TexturePackerData = null) 
 	{
 		super(basePath);
 		
 		_flxGroup = group;
 		_sprites = new Map<String, Array<FlxSprite>>();
+		_atlasData = atlasData;
 	}
+	
 	override public function getFile(name:String):Dynamic
 	{
+		if (_atlasData != null)
+		{
+			var sprite:FlxSprite = null;
+			
+			if (_sprites.exists(_atlasData.assetName) && _sprites.get(_atlasData.assetName).length > 0)
+			{
+				sprite = _sprites.get(_atlasData.assetName).shift();
+			}
+			else
+			{
+				sprite = new FlxSprite();
+				sprite.loadGraphicFromTexture(_atlasData);
+			}
+			
+			sprite.animation.frameName = name;
+			
+			return sprite;
+		}
+		
 		var key:String = _basePath + name;
 		
 		if (_sprites.exists(key) && _sprites.get(key).length > 0)
@@ -107,6 +166,12 @@ class FlixelLibrary extends AbstractLibrary
 		}
 		
 		_sprites = null;
+		
+		if (_atlasData != null)
+		{
+			_atlasData.destroy();
+			_atlasData = null;
+		}
 	}
 	
 }
