@@ -67,6 +67,7 @@ Spriter Haxe Engine Features
 
 TODO
 ----
+ - support for Spriter b7
  - add tilesheet stage 3d support : https://github.com/as3boyan/TilesheetStage3D/
  - add ash and haxepunk support
  - add atlas support for flixel
@@ -78,6 +79,7 @@ TODO
 
 Additional information
 ------------
+ - compatible with Spriter b6.1 (Spriter b7 is in the todolist)
  - With Tilelayer library, don't use openfl-bitfive for html5 target.
  
  
