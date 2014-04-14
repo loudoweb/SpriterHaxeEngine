@@ -7,6 +7,10 @@
 .metadata
 bin/
 assets/
+src/
+SpriterHaxeEngine.hxproj
+openfl-readme.txt
+application.xml
 tmp/
 *.tmp
 *.bak

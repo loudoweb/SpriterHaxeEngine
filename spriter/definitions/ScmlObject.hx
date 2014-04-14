@@ -136,4 +136,11 @@ class ScmlObject implements IScml
 		newSCML.currentTime = 0; 
 		return newSCML;
 	}
+	
+	public function destroy():Void
+	{
+		folders = null;
+		activeCharacterMap = null;
+		entities = null;
+	}
 }

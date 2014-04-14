@@ -20,6 +20,7 @@ class Spriter
 	
 	public var info:SpatialInfo;
 	
+	
 	public function new(_name:String, _scml:ScmlObject, _library:AbstractLibrary, _beginTime:Int, _info:SpatialInfo) 
 	{
 		scml 	= _scml;
@@ -79,6 +80,11 @@ class Spriter
 		}else {
 			return false;
 		}
+	}
+	
+	public function destroy():Void
+	{
+		scml.destroy();
 	}
 	
 }

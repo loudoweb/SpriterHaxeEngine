@@ -28,10 +28,10 @@ engine = new SpriterEngine(Assets.getText('assets/test.scml'), lib, null );
 engine.addEntity('entityName', x,  y);
 
 //set the "run" animation of the entity at z-order 0
-engine.getEntity(0).playAnim('run');
+engine.getEntity('entityName').playAnim('run');
 
 //apply the "gun" map of the entity at z-order 0
-engine.getEntity(0).applyCharacterMap('gun', true);
+engine.getEntity('entityName').applyCharacterMap('gun', true);
 
 
 //update on enter frame
@@ -56,6 +56,7 @@ Spriter Haxe Engine Features
  - Simple bitmap library
  - BitmapData library
  - Tilelayer library (dependency : https://github.com/matthewswallace/openfl-tilelayer).
+ - Flixel Library (atlas support)
  - override the AbstractLibrary to provide a new library
 
 **Cross-platform**
@@ -70,13 +71,16 @@ TODO
  - support for Spriter b7
  - add tilesheet stage 3d support : https://github.com/as3boyan/TilesheetStage3D/
  - add ash and haxepunk support
- - add atlas support for flixel
  - Optimized engine : draw call only when needed. So "instant" keys are not updated between keys.
  - test performance
- - retrieve entity by his name (for now, you have to use z-order)
  - catch when animation ended to launch another
+ - check Garbage collector
  - rename Library by Rendering
-
+ 
+Examples
+------------
+ - Please see this repo : https://github.com/loudoweb/Spriter-Example
+ 
 Additional information
 ------------
  - compatible with Spriter b6.1 (Spriter b7 is in the todolist)
