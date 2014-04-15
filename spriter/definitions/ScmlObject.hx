@@ -23,6 +23,8 @@ class ScmlObject implements IScml
 	public var name:String;
 	
 	private var _characterInfo:SpatialInfo;
+	
+	public var endAnimCallback:String->Void;
 		
 	public function new(source:Xml = null) 
 	{
@@ -81,6 +83,11 @@ class ScmlObject implements IScml
 	{
 		return name;
 	}
+	public function onEndAnim(animName:String):Void
+	{
+		if (endAnimCallback != null)
+			endAnimCallback(animName);
+	}
 	//interface IScml end
     public function setCurrentTime(newTime:Int, library:AbstractLibrary, characterInfo:SpatialInfo):Void
     {
@@ -92,16 +99,17 @@ class ScmlObject implements IScml
 
     public function applyCharacterMap(name:String, reset:Bool):Bool
     {
+		if(reset)
+		{
+			activeCharacterMap	=	folders;//TOFIX copy everything ? or find other solution
+		}
+		
 		var	entity:SpriterEntity = entities.get(currentEntity);
 		
 		if (entity.characterMaps.exists(name)) {
 			
 			var charMap:CharacterMap = entity.characterMaps.get(name);
 			
-			if(reset)
-			{
-				activeCharacterMap	=	folders;
-			}
 			var len:Int = charMap.maps.length;
 			for(m in 0...len)
 			{

@@ -10,6 +10,8 @@ assets/
 src/
 SpriterHaxeEngine.hxproj
 openfl-readme.txt
+.gitignore
+pass.txt
 application.xml
 tmp/
 *.tmp

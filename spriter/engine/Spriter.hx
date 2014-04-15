@@ -16,24 +16,27 @@ class Spriter
 	public var scml:ScmlObject;
 	public var library:AbstractLibrary;
 	public var spriterName:String;
-	public var beginTime:Int;
+	public var timeMS:Int = 0;
 	
 	public var info:SpatialInfo;
 	
+	private var _endAnimCallback:Spriter->String->Void;
 	
-	public function new(_name:String, _scml:ScmlObject, _library:AbstractLibrary, _beginTime:Int, _info:SpatialInfo) 
+	
+	public function new(_name:String, _scml:ScmlObject, _library:AbstractLibrary, _info:SpatialInfo) 
 	{
 		scml 	= _scml;
 		library = _library;
 		spriterName = _name;
-		beginTime = _beginTime;
 		scml.name = spriterName;
 		info = _info;
 	}
 	
-	public function advanceTime(time:Int):Void
+	public function advanceTime(elapsedMS:Int):Void
 	{
-		scml.setCurrentTime(time, library, info);
+		timeMS += elapsedMS;
+		scml.setCurrentTime(timeMS, library, info);
+		
 	}
 	/**
 	 * Apply character mapping to change an element in the animation.
@@ -49,13 +52,18 @@ class Spriter
 	/**
 	 * Play a specific animation
 	 * @param	name of the animation
-	 * @param	f function callback TODO
+	 * @param	f function callback
 	 * @return  true if the animation exist, false if doesn't exist
 	 */
-	public function playAnim(name:String, ?f:Function):Bool
+	public function playAnim(name:String, ?f:Spriter->String->Void):Bool
 	{
 		if (scml.entities.get(scml.currentEntity).animations.exists(name)) {
-			scml.currentAnimation = name;//TODO reset time ?
+			resetTime();
+			scml.currentAnimation = name;
+			if(f != null){
+				scml.endAnimCallback = handleEndAnim;
+				_endAnimCallback = f;
+			}
 			return true;
 		}else {
 			return false;
@@ -70,7 +78,8 @@ class Spriter
 	public function playEntity(name:String, anim:String = ''):Bool
 	{
 		if (scml.entities.exists(name)) {
-			scml.currentEntity = name;//TODO reset time ?
+			resetTime();
+			scml.currentEntity = name;
 			if(anim != ''){
 				if (scml.entities.get(name).animations.exists(anim)) {
 					scml.currentAnimation = anim;
@@ -82,9 +91,20 @@ class Spriter
 		}
 	}
 	
+	public function resetTime():Void
+	{
+		timeMS = 0;
+	}
+	
 	public function destroy():Void
 	{
 		scml.destroy();
+	}
+	
+	private function handleEndAnim(anim:String):Void
+	{
+		if (_endAnimCallback != null)
+			_endAnimCallback(this, anim);
 	}
 	
 }

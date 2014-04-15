@@ -14,18 +14,80 @@ import spriter.nodes.SpriterNode;
  */
 class SpriterEngine
 {
-	//data structure
-	private var _spriters:Array<Spriter>;
-	private var _spritersNamed:Map<String , Spriter>;
-	//spriters
-	private var _scml:ScmlObject;
-	private var _lib:AbstractLibrary;
-	private var _graphics:Sprite;
-	
-	//time
-	private var _elapsed:Int = 0;
-	private var _time:Int;
-	private var _frameRate:Int;
+	/*
+	 * #############################################
+	 * Data structure
+	 * #############################################
+	 */
+	/**
+	 * Contains all the Spriter entities ordering by index (z-ordering).
+	 */
+	var _spriters:Array<Spriter>;
+	/**
+	 * Contains all the Spriter entities ordering by their name.
+	 */
+	var _spritersNamed:Map<String , Spriter>;
+	/*
+	 * #############################################
+	 * Spriter stuff
+	 * #############################################
+	 */
+	/**
+	 * SCML object created with the Brashmonkey Spriter document (.scml).
+	 */
+	var _scml:ScmlObject;
+	/**
+	 * This is the lib used to retrieve a graphic and display the Spriter on screen.
+	 */
+	var _lib:AbstractLibrary;
+	/**
+	 * Main Graphic Sprite where all the Spriter are displayed.
+	 */
+	var _graphics:Sprite;
+	/*
+	 * #############################################
+	 * Time
+	 * #############################################
+	 */
+	/**
+	 * If the engine is paused.
+	 */
+	public var paused(default, null):Bool = false;
+	/**
+	 * Time in Milliseconds when engine starts, unpauses, or updates.
+	 */
+	var _lastTime:Int = 0;
+	/**
+	 * How many ticks each second.
+	 */
+	public var framerate(get, set):Int;
+	var _framerate:Int;
+	/**
+	 * Fixed Time in Milliseconds between each tick.
+	 */
+	var _frameDuration:Int = 0;
+	/**
+	 * Time in Milliseconds since last frame.
+	 */
+	var _elapsed:Int;
+	/**
+	 * Framerate locked to avoid frameskip. Used with variable tick.
+	 * @default 100 (10 fps)
+	 * @see fixedTick
+	 */
+	public var maxElapsed:Int = 100;
+	/**
+	 * Total number of milliseconds elapsed since game start.
+	 */
+	var _total:Int = 0;
+	/**
+	 * Total Ticks passed since game start.
+	 */
+	var _totalTicks:Int = 0;
+	/**
+	 * Fixed or variable tick.
+	 */
+	public var fixedTick:Bool = true;
 	
 	public function new(scml:String, library:AbstractLibrary, graphics:Sprite, frameRate:Int = 60) 
 	{
@@ -35,11 +97,21 @@ class SpriterEngine
 		_scml = new ScmlObject(Xml.parse(scml));
 		_lib = library;
 		_graphics = graphics;
-		_frameRate = frameRate;
 		_lib.setRoot(_graphics);
+		this.framerate = frameRate;
+		_lastTime = Lib.getTimer();
 	}
-	
-	public function addEntity(id:String, x:Float = 0, y:Float = 0, ?index:Null<Int>, copySCML:Bool = true):Void {
+	/**
+	 * Allow you to add a Spriter on screen.
+	 * @param	id unique name of your Spriter.
+	 * @param	x
+	 * @param	y
+	 * @param	?index if null same result as addChild, else same result as addChildAt(index). Spriters at and after the replaced index move up. You can use index out of range but negative means 0.
+	 * @param	copySCML if false, you can use a same SCML for multiple Spriter entity, allow you to have 
+	 * @return  the Spriter created
+	 */
+	public function addEntity(id:String, x:Float = 0, y:Float = 0, ?index:Null<Int>, copySCML:Bool = true):Spriter 
+	{
 
 		//create spatial info for the current Spriter
 		var info:SpatialInfo = new SpatialInfo(x, -y);//-y because use inverted y coordinates
@@ -47,13 +119,13 @@ class SpriterEngine
 		//select scmlObject
 		var currentSCML:ScmlObject;
 		if (copySCML) {
-			currentSCML 	  =  _scml.copy();//TOFIX something wrong in the copy : see character map
+			currentSCML 	  =  _scml.copy();
 			currentSCML.name = id;
 		}else {
 			currentSCML = _scml;
 		}
 		//create the Spriter
-		var spriter:Spriter = new Spriter(id, currentSCML, _lib, getTime(_time), info);
+		var spriter:Spriter = new Spriter(id, currentSCML, _lib, info);
 		//store in array
 		if(index == null || index > _spriters.length){
 			_spriters.push(spriter);
@@ -65,6 +137,8 @@ class SpriterEngine
 		
 		//store by name/id
 		_spritersNamed.set(id, spriter);
+		//return the spriter
+		return spriter;
 	}
 	public function getIndex(spriter:Spriter):Int
 	{
@@ -98,7 +172,8 @@ class SpriterEngine
 		_spriters[index1] = spriter2;
 		_spriters[index2] = spriter1;
 	}
-	public function removeEntity(id:String):Void {
+	public function removeEntity(id:String):Void 
+	{
 		if (_spritersNamed.exists(id)) {
 			var current:Spriter = _spritersNamed.get(id);
 			_spritersNamed.remove(id);
@@ -110,7 +185,8 @@ class SpriterEngine
 			trace("id doesn't exist");
 		}
 	}
-	public function removeEntityAt(index:Int):Void {
+	public function removeEntityAt(index:Int):Void 
+	{
 		if (index >= 0 && index < _spriters.length) {
 			var current:Spriter = _spriters[index];
 			_spriters.splice(index, 1);
@@ -120,6 +196,17 @@ class SpriterEngine
 		}else {
 			trace('index outside range');
 		}
+	}
+	public function removeAll():Void
+	{
+		for (i in 0..._spriters.length)
+		{
+			var current:Spriter = _spriters[i];
+			current.destroy();
+			current = null;
+		}
+		_spritersNamed = null;
+		_spriters = null;
 	}
 	public function getEntity(id:String):Spriter
 	{
@@ -135,24 +222,92 @@ class SpriterEngine
 			trace("index outside range");
 		return null;
 	}
-	public function update(time:Int = -1)
+	/**
+	 * You should call this function to have Spriter animation working.
+	 * Call it from ENTER_FRAME or your own update engine.
+	 * @param	?customElasped (optional) if you have your own engine handles elapsedTime. MilliSeconds!
+	 */
+	public function update(?customElapsed:Int):Void
 	{
-		++_elapsed;
-		_time = getTime(time);
-		
-		_lib.clear();//TODO handle different for other platform?
-		
-		var spriter:Spriter;
-		for (i in 0..._spriters.length)
+		if (!paused)
 		{
-			spriter = _spriters[i];
-			spriter.advanceTime(_time - spriter.beginTime);
+			if (customElapsed != null) {
+				_elapsed = customElapsed;
+			}else {
+				computeTime();
+			}
+			
+			_lib.clear();//TODO handle different for other platform?
+			
+			var spriter:Spriter;
+			for (i in 0..._spriters.length)
+			{
+				spriter = _spriters[i];
+				spriter.advanceTime(_elapsed);
+			}
+			
+			_lib.render();
+		}
+	}
+	public function destroy():Void
+	{
+		removeAll();
+		_lib.destroy();
+		_scml.destroy();
+	}
+	/**
+	 * Pauses animations. Use unpause() after.
+	 * @see unpause();
+	 */
+	public function pause():Void
+	{
+		if(!paused){
+			paused = true;
+		}
+	}
+	/**
+	 * Starts animations after a pause.
+	 * @see pause();
+	 */
+	public function unpause():Void
+	{
+		if(paused){
+			paused = false;
+			_lastTime = Lib.getTimer();
 		}
 		
-		_lib.render();
 	}
-	public function getTime(time:Int = -1):Int {
-		return time != -1 ? time  : Std.int(_elapsed * 1000 / _frameRate);
+	/**
+	 * Time 
+	 */
+	function computeTime():Void
+	{
+		_totalTicks++;
+		if (fixedTick)
+		{
+			_elapsed = _frameDuration;
+		}
+		else
+		{
+			var previous:Int = _lastTime;
+			_lastTime = Lib.getTimer();
+			_elapsed = _lastTime - previous;
+
+			if (_elapsed > maxElapsed) 
+				_elapsed = maxElapsed;
+		}
+		_total += _elapsed;
+	}
+
+	function set_framerate(framerate_:Int):Int
+	{
+		_frameDuration = Std.int(Math.abs(1000 / framerate_));
+		_framerate = framerate_;
+		return _framerate;
+	}
+	function get_framerate():Int
+	{
+		return _framerate;
 	}
 	
 }

@@ -72,6 +72,7 @@ class TilelayerLibrary extends AbstractLibrary
 		sprite.rotation = SpriterUtil.toRadians(SpriterUtil.fixRotation(spatialResult.angle));
 		sprite.scaleX = spatialResult.scaleX;
 		sprite.scaleY = spatialResult.scaleY;
+		sprite.alpha = spatialResult.a;
 		
 		sprite.visible = true;
 	}

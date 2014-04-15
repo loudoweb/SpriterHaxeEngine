@@ -1,5 +1,6 @@
 package spriter.library;
 import flash.display.BitmapData;
+import flash.geom.ColorTransform;
 import flash.geom.Matrix;
 import flash.geom.Point;
 import openfl.Assets;
@@ -14,9 +15,10 @@ import spriter.util.SpriterUtil;
 class BitmapLibrary extends AbstractLibrary
 {
 	
-	private var _canvas : BitmapData;
-    private var _point : Point;
-    private var _matrix : Matrix;
+	var _canvas : BitmapData;
+    var _point : Point;
+    var _matrix : Matrix;
+	var _alphaTransform:ColorTransform; 
 	
 	public function new(basePath:String, canvas : BitmapData) 
 	{
@@ -24,6 +26,7 @@ class BitmapLibrary extends AbstractLibrary
 		_canvas = canvas;
         _point = new Point();
         _matrix = new Matrix();
+		_alphaTransform = new ColorTransform(1, 1, 1, 1);
 	}
 	override public function getFile(name:String):Dynamic
 	{
@@ -32,6 +35,7 @@ class BitmapLibrary extends AbstractLibrary
 	override public function clear():Void
 	{
         _canvas.fillRect(_canvas.rect, 0);
+		_canvas.lock();
     }
 	override public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
@@ -44,6 +48,8 @@ class BitmapLibrary extends AbstractLibrary
         {
             _point.x = spatialResult.x;
             _point.y = spatialResult.y;
+			_alphaTransform.alphaMultiplier = Math.abs(spatialResult.a);//TOFIX bug negative alpha
+			bmp.colorTransform(bmp.rect, _alphaTransform);//TOFIX doesn't work weel
             _canvas.copyPixels(bmp, bmp.rect, _point,true);
         }
         else
@@ -52,7 +58,8 @@ class BitmapLibrary extends AbstractLibrary
             _matrix.scale(spatialResult.scaleX, spatialResult.scaleY);
             _matrix.rotate(SpriterUtil.toRadians(SpriterUtil.fixRotation(spatialResult.angle)));
             _matrix.translate(spatialResult.x, spatialResult.y);
-            _canvas.draw(bmp, _matrix, null, null, null, true);
+			_alphaTransform.alphaMultiplier = spatialResult.a;
+            _canvas.draw(bmp, _matrix, _alphaTransform, null, null, true);
         }
 	}
 	override public function setRoot(root:Dynamic):Void 
@@ -60,6 +67,7 @@ class BitmapLibrary extends AbstractLibrary
 	}
 	override public function render():Void
 	{	
+		_canvas.unlock();
 	}
 	
 }

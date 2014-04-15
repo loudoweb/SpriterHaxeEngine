@@ -64,15 +64,25 @@ class SpriterAnimation
 	
 	public function setCurrentTime(newTime:Int, library:AbstractLibrary, root:IScml):Void
     {
+		var currentTime:Int;
+		var loop:Int;
 		switch(loopType)
         {
         case LOOPING:
-            newTime = newTime % length;//newTime%360;
+            loop = Std.int(newTime / length);
+			currentTime = newTime % length;
+			//callback
+			if (loop == 1){
+				root.onEndAnim(name);
+			
         case NO_LOOPING:
-            newTime = Std.int(Math.min(newTime, length));
+            currentTime = Std.int(Math.min(newTime, length));
+			//callback
+			if (currentTime == length)
+				root.onEndAnim(name);
         }
 
-        updateCharacter(mainlineKeyFromTime(newTime), newTime, library, root);
+        updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root);
     }
 
     public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:AbstractLibrary, root:IScml):Void
@@ -106,7 +116,7 @@ class SpriterAnimation
         {
             currentRef = mainKey.objectRefs[o];
 			currentKey = cast keyFromRef(currentRef,newTime);
-
+			//trace(currentKey.info.a);
             if(currentRef.parent >= 0)
             {
                 spatialInfo = transformedBoneKeys[currentRef.parent];

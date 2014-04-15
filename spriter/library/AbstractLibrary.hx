@@ -79,4 +79,9 @@ class AbstractLibrary
 		
 	}
 	
+	public function destroy():Void
+	{
+		
+	}
+	
 }

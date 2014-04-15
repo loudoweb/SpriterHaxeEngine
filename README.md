@@ -73,7 +73,7 @@ TODO
  - add ash and haxepunk support
  - Optimized engine : draw call only when needed. So "instant" keys are not updated between keys.
  - test performance
- - catch when animation ended to launch another
+ - animation callback optimization
  - check Garbage collector
  - rename Library by Rendering
  
@@ -89,5 +89,7 @@ Additional information
  
 Known issues
 ------------
- - interpolation are not enough smooth
+ - interpolation are not enough smooth (end of animation only)
+ - alpha on BitmapLibrary when no scale and no rotation (copypixels)
+ - reset character mapping doesn't work
  

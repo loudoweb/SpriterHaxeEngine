@@ -12,6 +12,9 @@ class SpatialInfo
     public var angle:Float=0;
     public var scaleX:Float=1; 
     public var scaleY:Float=1; 
+	/**
+	 * Alpha
+	 */
     public var a:Float=1;
     public var spin:Int=1;
 	

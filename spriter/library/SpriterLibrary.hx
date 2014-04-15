@@ -89,6 +89,7 @@ class SpriterLibrary extends AbstractLibrary
 		bitmap.scaleX = spatialResult.scaleX;
 		bitmap.scaleY = spatialResult.scaleY;
 		bitmap.rotation = SpriterUtil.fixRotation(spatialResult.angle);
+		bitmap.alpha = spatialResult.a;
 		_root.addChild(bitmap);
 	}
 	

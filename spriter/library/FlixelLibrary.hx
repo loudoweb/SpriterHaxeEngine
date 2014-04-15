@@ -132,6 +132,7 @@ class FlixelLibrary extends AbstractLibrary
 		sprite.angle = SpriterUtil.fixRotation(spatialResult.angle);
 		sprite.scale.x = spatialResult.scaleX;
 		sprite.scale.y = spatialResult.scaleY;
+		sprite.alpha = spatialResult.a;
 		
 		_flxGroup.add(sprite);
 	}
@@ -142,7 +143,7 @@ class FlixelLibrary extends AbstractLibrary
 	{		
 	}
 	
-	public function destroy():Void
+	override public function destroy():Void
 	{
 		if (_flxGroup != null)
 		{
