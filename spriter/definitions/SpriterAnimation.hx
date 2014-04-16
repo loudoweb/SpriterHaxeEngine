@@ -72,7 +72,7 @@ class SpriterAnimation
             loop = Std.int(newTime / length);
 			currentTime = newTime % length;
 			//callback
-			if (loop == 1){
+			if (loop == 1)
 				root.onEndAnim(name);
 			
         case NO_LOOPING:
