@@ -27,15 +27,18 @@ engine = new SpriterEngine(Assets.getText('assets/test.scml'), lib, null );
 //to add and entity
 engine.addEntity('entityName', x,  y);
 
-//set the "run" animation of the entity at z-order 0
-engine.getEntity('entityName').playAnim('run');
+//set the "run" animation of the entity
+engine.getEntity('entityName').playAnim('run', myCallback);
 
-//apply the "gun" map of the entity at z-order 0
+//apply the "gun" map of the entity
 engine.getEntity('entityName').applyCharacterMap('gun', true);
 
 
 //update on enter frame
 engine.update();
+
+//callback on end anim
+function myCallback(s:Spriter, anim:String):Void{}
 ```
 
 Spriter Haxe Engine Features
@@ -89,7 +92,8 @@ Additional information
  
 Known issues
 ------------
- - interpolation are not enough smooth (end of animation only)
- - alpha on BitmapLibrary when no scale and no rotation (copypixels)
- - reset character mapping doesn't work
+ - interpolation are not enough smooth at the end of a looping animation (need to check if the interpolation with the first frame is ok)
+ - [Flash, Windows] alpha on BitmapLibrary when no scale and no rotation (copypixels)
+ - reset character mapping doesn't work (need to duplicate all the content of the array to make it working)
+ - [html5] some issues on html5 depending on the backend used and the Library used.
  
