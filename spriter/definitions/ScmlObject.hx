@@ -24,7 +24,8 @@ class ScmlObject implements IScml
 	
 	private var _characterInfo:SpatialInfo;
 	
-	public var endAnimCallback:String->Void;
+	public var endAnimCallback:Void->Void;
+	public var endAnimRemoval:Bool = true;
 		
 	public function new(source:Xml = null) 
 	{
@@ -83,10 +84,15 @@ class ScmlObject implements IScml
 	{
 		return name;
 	}
-	public function onEndAnim(animName:String):Void
+	public function onEndAnim():Void
 	{
-		if (endAnimCallback != null)
-			endAnimCallback(animName);
+		if (endAnimCallback != null) {
+			var tempCallback:Void->Void = endAnimCallback;
+			if (endAnimRemoval)
+				endAnimCallback = null;
+			tempCallback();
+		}
+		
 	}
 	//interface IScml end
     public function setCurrentTime(newTime:Int, library:AbstractLibrary, characterInfo:SpatialInfo):Void

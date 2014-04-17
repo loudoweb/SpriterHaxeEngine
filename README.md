@@ -38,7 +38,7 @@ engine.getEntity('entityName').applyCharacterMap('gun', true);
 engine.update();
 
 //callback on end anim
-function myCallback(s:Spriter, anim:String):Void{}
+function myCallback(s:Spriter, entity:String, anim:String):Void
 ```
 
 Spriter Haxe Engine Features
@@ -49,17 +49,21 @@ Spriter Haxe Engine Features
 **Engine**
  - Can be overrided to fit your need
  - simple z-ordering
+ - Fixed tick, variable tick or use your own time
+ - Pause
  
 **Spriter entity**
  - character mapping by name
  - change animation easily by name in a Spriter entity
+ - callback when animation ended
+ - play, stack anim, pause
  - you can display duplicate of spriter entity and manipulate them separatly
 
 **Libraries**
- - Simple bitmap library
- - BitmapData library
- - Tilelayer library (dependency : https://github.com/matthewswallace/openfl-tilelayer).
- - Flixel Library (atlas support)
+ - Simple bitmap library (bitmaps handled with addChild)
+ - BitmapData library (copypixels)
+ - Tilelayer library (drawTiles)(dependency : https://github.com/matthewswallace/openfl-tilelayer).
+ - Flixel Library (atlas support or bitmaps handled with addChild)
  - override the AbstractLibrary to provide a new library
 
 **Cross-platform**
@@ -93,7 +97,7 @@ Additional information
 Known issues
 ------------
  - interpolation are not enough smooth at the end of a looping animation (need to check if the interpolation with the first frame is ok)
- - [Flash, Windows] alpha on BitmapLibrary when no scale and no rotation (copypixels)
+ - [Flash, Windows, openfl-html5] alpha on BitmapLibrary when no scale and no rotation (copypixels)
  - reset character mapping doesn't work (need to duplicate all the content of the array to make it working)
  - [html5] some issues on html5 depending on the backend used and the Library used.
  

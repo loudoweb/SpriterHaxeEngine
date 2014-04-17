@@ -5,9 +5,7 @@ import aze.display.TileLayer;
 import aze.display.TileSprite;
 import flash.display.Sprite;
 import flash.geom.Point;
-import flash.geom.Rectangle;
 import openfl.Assets;
-import openfl.display.Tilesheet;
 import spriter.definitions.PivotInfo;
 import spriter.definitions.SpatialInfo;
 import spriter.util.SpriterUtil;
@@ -107,6 +105,13 @@ class TilelayerLibrary extends AbstractLibrary
 	override public function render():Void
 	{
 		_layer.render();
+	}
+	
+	override public function destroy():Void
+	{
+		clear();
+		_group = null;
+		_layer = null;
 	}
 	
 	

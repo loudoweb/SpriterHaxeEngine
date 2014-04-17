@@ -1,13 +1,10 @@
 package spriter.library;
 import flash.display.Bitmap;
-import flash.display.DisplayObject;
 import flash.display.PixelSnapping;
 import flash.display.Sprite;
 import openfl.Assets;
-import openfl.display.Tilesheet;
 import spriter.definitions.PivotInfo;
 import spriter.definitions.SpatialInfo;
-import spriter.definitions.TimelineKey.CurveType;
 import spriter.util.SpriterUtil;
 
 /**
@@ -89,13 +86,20 @@ class SpriterLibrary extends AbstractLibrary
 		bitmap.scaleX = spatialResult.scaleX;
 		bitmap.scaleY = spatialResult.scaleY;
 		bitmap.rotation = SpriterUtil.fixRotation(spatialResult.angle);
-		bitmap.alpha = spatialResult.a;
+		bitmap.alpha = Math.abs(spatialResult.a);
 		_root.addChild(bitmap);
 	}
 	
 	override public function render():Void
 	{
 		
+	}
+	
+	override public function destroy():Void
+	{
+		clear();
+		_assets = null;
+		_groups = null;
 	}
 	
 }

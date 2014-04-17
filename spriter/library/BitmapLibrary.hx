@@ -34,7 +34,7 @@ class BitmapLibrary extends AbstractLibrary
 	}
 	override public function clear():Void
 	{
-        _canvas.fillRect(_canvas.rect, 0);
+        _canvas.fillRect(_canvas.rect, 0xffffffff);
 		_canvas.lock();
     }
 	override public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
@@ -49,7 +49,7 @@ class BitmapLibrary extends AbstractLibrary
             _point.x = spatialResult.x;
             _point.y = spatialResult.y;
 			_alphaTransform.alphaMultiplier = Math.abs(spatialResult.a);//TOFIX bug negative alpha
-			bmp.colorTransform(bmp.rect, _alphaTransform);//TOFIX doesn't work weel
+			bmp.colorTransform(bmp.rect, _alphaTransform);//TOFIX doesn't work well
             _canvas.copyPixels(bmp, bmp.rect, _point,true);
         }
         else
@@ -58,7 +58,7 @@ class BitmapLibrary extends AbstractLibrary
             _matrix.scale(spatialResult.scaleX, spatialResult.scaleY);
             _matrix.rotate(SpriterUtil.toRadians(SpriterUtil.fixRotation(spatialResult.angle)));
             _matrix.translate(spatialResult.x, spatialResult.y);
-			_alphaTransform.alphaMultiplier = spatialResult.a;
+			_alphaTransform.alphaMultiplier = Math.abs(spatialResult.a);
             _canvas.draw(bmp, _matrix, _alphaTransform, null, null, true);
         }
 	}
@@ -68,6 +68,14 @@ class BitmapLibrary extends AbstractLibrary
 	override public function render():Void
 	{	
 		_canvas.unlock();
+	}
+	override public function destroy():Void
+	{
+		clear();
+		_alphaTransform = null;
+		 _point = null;
+        _matrix = null;
+		render();//to unlock canvas and make it available
 	}
 	
 }

@@ -1,12 +1,9 @@
 package spriter.engine;
 import flash.display.Sprite;
 import flash.Lib;
-import spriter.components.SpriterComponent;
 import spriter.definitions.ScmlObject;
 import spriter.definitions.SpatialInfo;
 import spriter.library.AbstractLibrary;
-import spriter.library.SpriterLibrary;
-import spriter.nodes.SpriterNode;
 
 /**
  * ...
@@ -199,14 +196,16 @@ class SpriterEngine
 	}
 	public function removeAll():Void
 	{
+		var current:Spriter;
 		for (i in 0..._spriters.length)
 		{
-			var current:Spriter = _spriters[i];
+			current = _spriters[i];
 			current.destroy();
 			current = null;
 		}
-		_spritersNamed = null;
-		_spriters = null;
+		_spriters = new Array<Spriter>();
+		_spritersNamed = new Map<String ,Spriter>();
+		_lib.clear();
 	}
 	public function getEntity(id:String):Spriter
 	{
@@ -237,21 +236,25 @@ class SpriterEngine
 				computeTime();
 			}
 			
-			_lib.clear();//TODO handle different for other platform?
+			var numSpriters:Int = _spriters.length;
+			if(numSpriters > 0){
+				_lib.clear();//TODO handle different for other platform?
 			
-			var spriter:Spriter;
-			for (i in 0..._spriters.length)
-			{
-				spriter = _spriters[i];
-				spriter.advanceTime(_elapsed);
+				var spriter:Spriter;
+				for (i in 0...numSpriters)
+				{
+					spriter = _spriters[i];
+					spriter.advanceTime(_elapsed);
+				}
+				_lib.render();
 			}
-			
-			_lib.render();
 		}
 	}
 	public function destroy():Void
 	{
 		removeAll();
+		_spritersNamed = null;
+		_spriters = null;
 		_lib.destroy();
 		_scml.destroy();
 	}

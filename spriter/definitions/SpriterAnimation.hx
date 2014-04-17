@@ -3,7 +3,6 @@ import haxe.xml.Fast;
 import spriter.definitions.SpriterAnimation.LoopType;
 import spriter.interfaces.IScml;
 import spriter.library.AbstractLibrary;
-import spriter.library.SpriterLibrary;
 
 /**
  * ...
@@ -17,6 +16,9 @@ enum LoopType
  
 class SpriterAnimation
 {
+	/*
+	 * SCML definitions
+	 */
 	public var id:Int;
 	public var name:String;
     public var length:Int;
@@ -24,13 +26,12 @@ class SpriterAnimation
     public var mainlineKeys:Array<MainlineKey>;
     public var timelines:Array<SpriterTimeline>;
 	
-	private var _library:SpriterLibrary;
-	
-	/**
+	/*
+	 * Custom definitions
 	 * 
-	 * 
-	 * @param	root SpatialInfo for the root of the Spriter Animation
 	 */
+	var loop:Int = 0;
+	
 	public function new(fast:Fast) 
 	{
 		mainlineKeys = new Array<MainlineKey>();
@@ -65,21 +66,22 @@ class SpriterAnimation
 	public function setCurrentTime(newTime:Int, library:AbstractLibrary, root:IScml):Void
     {
 		var currentTime:Int;
-		var loop:Int;
+		var tempLoop:Int;
 		switch(loopType)
         {
         case LOOPING:
+            tempLoop = loop;
             loop = Std.int(newTime / length);
 			currentTime = newTime % length;
-			//callback
-			if (loop == 1)
-				root.onEndAnim(name);
+			//callback only at the first loop and once
+			if (loop == 1 && tempLoop < 1)
+				root.onEndAnim();
 			
         case NO_LOOPING:
             currentTime = Std.int(Math.min(newTime, length));
 			//callback
 			if (currentTime == length)
-				root.onEndAnim(name);
+				root.onEndAnim();
         }
 
         updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root);
