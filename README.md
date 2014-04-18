@@ -75,7 +75,6 @@ Spriter Haxe Engine Features
 
 TODO
 ----
- - support for Spriter b7
  - add tilesheet stage 3d support : https://github.com/as3boyan/TilesheetStage3D/
  - add ash and haxepunk support
  - Optimized engine : draw call only when needed. So "instant" keys are not updated between keys.
@@ -90,14 +89,13 @@ Examples
  
 Additional information
 ------------
- - compatible with Spriter b6.1 (Spriter b7 is in the todolist)
+ - compatible with Spriter b7
  - With Tilelayer library, don't use openfl-bitfive for html5 target.
  
  
 Known issues
 ------------
  - interpolation are not enough smooth at the end of a looping animation (need to check if the interpolation with the first frame is ok)
- - [Flash, Windows, openfl-html5] alpha on BitmapLibrary when no scale and no rotation (copypixels)
  - reset character mapping doesn't work (need to duplicate all the content of the array to make it working)
  - [html5] some issues on html5 depending on the backend used and the Library used.
  
