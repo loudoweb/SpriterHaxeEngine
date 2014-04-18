@@ -6,6 +6,7 @@ import flash.geom.Point;
 import openfl.Assets;
 import spriter.definitions.PivotInfo;
 import spriter.definitions.SpatialInfo;
+import spriter.util.ColorUtils;
 import spriter.util.SpriterUtil;
 
 /**
@@ -18,7 +19,8 @@ class BitmapLibrary extends AbstractLibrary
 	var _canvas : BitmapData;
     var _point : Point;
     var _matrix : Matrix;
-	var _alphaTransform:ColorTransform; 
+	var _alphaTransform:ColorTransform;
+	var _alphaBd:BitmapData;
 	
 	public function new(basePath:String, canvas : BitmapData) 
 	{
@@ -34,7 +36,7 @@ class BitmapLibrary extends AbstractLibrary
 	}
 	override public function clear():Void
 	{
-        _canvas.fillRect(_canvas.rect, 0xffffffff);
+        _canvas.fillRect(_canvas.rect, 0x00ffffff);
 		_canvas.lock();
     }
 	override public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
@@ -48,9 +50,8 @@ class BitmapLibrary extends AbstractLibrary
         {
             _point.x = spatialResult.x;
             _point.y = spatialResult.y;
-			_alphaTransform.alphaMultiplier = Math.abs(spatialResult.a);//TOFIX bug negative alpha
-			bmp.colorTransform(bmp.rect, _alphaTransform);//TOFIX doesn't work well
-            _canvas.copyPixels(bmp, bmp.rect, _point,true);
+			_alphaBd = new BitmapData(bmp.width, bmp.height, true, ColorUtils.multiplyAlpha(Math.abs(spatialResult.a)));
+            _canvas.copyPixels(bmp, bmp.rect, _point,_alphaBd, _point,true);
         }
         else
         {
