@@ -110,6 +110,8 @@ class TilelayerLibrary extends AbstractLibrary
 	override public function destroy():Void
 	{
 		clear();
+		if (_layer.view != null && _layer.view.parent != null)
+			_layer.view.parent.removeChild(_layer.view);
 		_group = null;
 		_layer = null;
 	}
