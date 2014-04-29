@@ -1,7 +1,7 @@
 package spriter.library;
 
 import flixel.FlxSprite;
-import flixel.group.FlxTypedGroup.FlxTypedGroup;
+import flixel.group.FlxTypedSpriteGroup;
 import flixel.util.loaders.SparrowData;
 import flixel.util.loaders.TexturePackerData;
 import flixel.util.loaders.TexturePackerXMLData;
@@ -18,7 +18,7 @@ import spriter.util.SpriterUtil;
  */
 class FlixelLibrary extends AbstractLibrary
 {
-	private var _flxGroup:FlxTypedGroup<FlxSprite>;
+	private var _flxGroup:FlxTypedSpriteGroup<FlxSprite>;
 	
 	private var _sprites:Map<String, Array<FlxSprite>>;
 	
@@ -32,7 +32,7 @@ class FlixelLibrary extends AbstractLibrary
 	 * 
 	 * Usage examples:
 	 * 1) without atlases
-	 * var spriterGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
+	 * var spriterGroup:FlxTypedSpriteGroup<FlxSprite> = new FlxTypedSpriteGroup<FlxSprite>();
 	 * var lib:FlixelLibrary = new FlixelLibrary(spriterGroup, 'assets/sprites/brawler/');
 	 * engine = new SpriterEngine(Assets.getText('assets/sprites/brawler/brawler.scml'), lib, null);
 	 * var len:Int = 1;
@@ -43,7 +43,7 @@ class FlixelLibrary extends AbstractLibrary
 	 * add(spriterGroup);
 	 *
 	 * 2) with atlases
-	 * var spriterGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
+	 * var spriterGroup:FlxTypedSpriteGroup<FlxSprite> = new FlxTypedSpriteGroup<FlxSprite>();
 	 * var data:SparrowData = new SparrowData("assets/ugly/ugly.xml", "assets/ugly/ugly.png");
 	 * var lib:FlixelLibrary = new FlixelLibrary(spriterGroup, null, data);
 	 * engine = new SpriterEngine(Assets.getText('assets/sprites/brawler/brawler.scml'), lib, null);
@@ -57,7 +57,7 @@ class FlixelLibrary extends AbstractLibrary
 	 * 
 	 * and don't forget to call engine.update(); at the state update() method
 	 */
-	public function new(group:FlxTypedGroup<FlxSprite>, basePath:String = null, atlasData:TexturePackerData = null) 
+	public function new(group:FlxTypedSpriteGroup<FlxSprite>, basePath:String = null, atlasData:TexturePackerData = null) 
 	{
 		super(basePath);
 		
@@ -118,7 +118,7 @@ class FlixelLibrary extends AbstractLibrary
 			_sprites.get(key).push(sprite);
 		}
 		
-		_flxGroup.length = 0;
+	untyped	_flxGroup.length = 0;
     }
 	
 	override public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
