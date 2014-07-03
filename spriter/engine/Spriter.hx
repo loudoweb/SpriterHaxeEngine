@@ -56,9 +56,16 @@ class Spriter
 	 * @param	removeCallback remove function callback after dispatch
 	 * @return  true if the animation exist, false if doesn't exist
 	 */
-	public function playAnim(name:String, ?endAnimCallback:Spriter->String->String->Void, removeCallback:Bool = true):Bool
+	public function playAnim(?name:String, ?endAnimCallback:Spriter->String->String->Void, removeCallback:Bool = true):Bool
 	{
-		if (scml.entities.get(scml.currentEntity).animations.exists(name)) {
+		if (name == null) {
+			resetTime();
+			if (endAnimCallback != null) {
+				scml.endAnimCallback = endAnimCallback.bind(this, scml.currentEntity, scml.currentAnimation);
+				scml.endAnimRemoval = removeCallback;
+			}
+			return true;
+		}else if (scml.entities.get(scml.currentEntity).animations.exists(name)) {
 			resetTime();
 			scml.currentAnimation = name;
 			if (endAnimCallback != null) {
@@ -72,24 +79,24 @@ class Spriter
 	}
 	/**
 	 * Play a specific entity.
-	 * @param	name of the entity
-	 * @param	name of the animation (optional)
+	 * @param	entity name of the entity
+	 * @param	anim name of the animation (optional)
 	 * @param	endAnimCallback function callback, return (s:Spriter, entity:String, anim:String)
 	 * @param	removeCallback remove function callback after dispatch
 	 * @return  true if the entity exist, false if doesn't exist
 	 */
-	public function playEntity(name:String, anim:String = '', ?endAnimCallback:Spriter->String->String->Void, removeCallback:Bool = true):Bool
+	public function playAnimFromEntity(entity:String, anim:String = '', ?endAnimCallback:Spriter->String->String->Void, removeCallback:Bool = true):Bool
 	{
-		if (scml.entities.exists(name)) {
+		if (scml.entities.exists(entity)) {
 			resetTime();
-			scml.currentEntity = name;
+			scml.currentEntity = entity;
 			if(anim != ''){
-				if (scml.entities.get(name).animations.exists(anim)) {
+				if (scml.entities.get(entity).animations.exists(anim)) {
 					scml.currentAnimation = anim;
 				}
 			}
 			if(endAnimCallback != null){
-				scml.endAnimCallback = endAnimCallback.bind(this, name, scml.currentAnimation);
+				scml.endAnimCallback = endAnimCallback.bind(this, entity, scml.currentAnimation);
 				scml.endAnimRemoval = removeCallback;
 			}
 			return true;
@@ -118,21 +125,45 @@ class Spriter
 	}
 	/**
 	 * Play a stack of animations from a specific entity.
+	 * @param	entity name of the entity
+	 * @param	anims names of the animations in order
+	 * @param	endAnimCallback function callback, return (s:Spriter, entity:String, anim:String)
+	 * @param	removeCallback remove function callback after dispatch
+	 * @return  true if the entity exist, false if doesn't exist
+	 */
+	public function playAnimsStackFromEntity(entity:String, anims:Array<String>, ?endAnimCallback:Spriter->String->String->Void):Bool
+	{
+		if (scml.entities.exists(entity)) {
+			resetTime();
+			scml.currentEntity = entity;
+			if (scml.entities.get(entity).animations.exists(anims[0])) {
+				scml.currentAnimation = anims[0];
+			}
+			scml.endAnimCallback = stackAnims.bind(anims, 1, endAnimCallback);
+			scml.endAnimRemoval = true;
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Play a stack of animations whatever the entity.
 	 * @param	name of the entity
 	 * @param	anims names of the animations in order
 	 * @param	endAnimCallback function callback, return (s:Spriter, entity:String, anim:String)
 	 * @param	removeCallback remove function callback after dispatch
 	 * @return  true if the entity exist, false if doesn't exist
 	 */
-	public function playEntityAnimsStack(name:String, anims:Array<String>, ?endAnimCallback:Spriter->String->String->Void):Bool
+	public function playAnimsStackFromEntities(entities:Array<String>, anims:Array<String>, ?endAnimCallback:Spriter->String->String->Void):Bool
 	{
-		if (scml.entities.exists(name)) {
+		if (scml.entities.exists(entities[0])) {
 			resetTime();
-			scml.currentEntity = name;
-			if (scml.entities.get(name).animations.exists(anims[0])) {
+			scml.currentEntity = entities[0];
+			if (scml.entities.get(entities[0]).animations.exists(anims[0])) {
 				scml.currentAnimation = anims[0];
 			}
-			scml.endAnimCallback = stackAnims.bind(anims, 1, endAnimCallback);
+			scml.endAnimCallback = stackAnimsWithEntitiesChange.bind(entities , anims, 1, endAnimCallback);
 			scml.endAnimRemoval = true;
 			return true;
 		}else {
@@ -153,6 +184,25 @@ class Spriter
 				scml.endAnimCallback = endAnimsCallback.bind(this, scml.currentEntity, scml.currentAnimation);
 		}else {
 				scml.endAnimCallback = stackAnims.bind(anims, nextAnim, endAnimsCallback);
+		}
+	}
+	
+	private function stackAnimsWithEntitiesChange(entities:Array<String>, anims:Array<String>, nextAnim:Int, endAnimsCallback:Spriter->String->String->Void):Void
+	{
+		if (scml.entities.exists(entities[nextAnim])) {
+			scml.currentEntity = entities[nextAnim];
+			if (scml.entities.get(scml.currentEntity).animations.exists(anims[nextAnim])) {
+				resetTime();
+				scml.currentAnimation = anims[nextAnim];
+			}
+		}
+		trace('stackAnims', scml.currentAnimation);
+		//anim after next anim handler
+		if (++nextAnim >= anims.length) {
+			if(endAnimsCallback != null)
+				scml.endAnimCallback = endAnimsCallback.bind(this, scml.currentEntity, scml.currentAnimation);
+		}else {
+				scml.endAnimCallback = stackAnimsWithEntitiesChange.bind(entities, anims, nextAnim, endAnimsCallback);
 		}
 	}
 	

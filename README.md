@@ -51,6 +51,7 @@ Spriter Haxe Engine Features
  - simple z-ordering
  - Fixed tick, variable tick or use your own time
  - Pause
+ - simple auto removal
  
 **Spriter entity**
  - character mapping by name
@@ -81,7 +82,7 @@ TODO
  - test performance
  - animation callback optimization
  - check Garbage collector
- - rename Library by Rendering
+ - add Variables, Tags, Points, Boxes
  
 Examples
 ------------
@@ -89,13 +90,13 @@ Examples
  
 Additional information
 ------------
- - compatible with Spriter b7
+ - compatible with Spriter b8
  - With Tilelayer library, don't use openfl-bitfive for html5 target.
  
  
 Known issues
 ------------
  - interpolation are not enough smooth at the end of a looping animation (need to check if the interpolation with the first frame is ok)
- - reset character mapping doesn't work (need to duplicate all the content of the array to make it working)
  - [html5] some issues on html5 depending on the backend used and the Library used.
+ - [neko] if you have trouble with TileLayerLibrary, please update tilelayer with : https://github.com/matthewswallace/openfl-tilelayer/pull/5
  

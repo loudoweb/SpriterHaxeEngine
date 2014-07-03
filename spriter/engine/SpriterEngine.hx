@@ -17,11 +17,11 @@ class SpriterEngine
 	 * #############################################
 	 */
 	/**
-	 * Contains all the Spriter entities ordering by index (z-ordering).
+	 * Contains all the Spriter entities currently playing, ordering by index (z-ordering).
 	 */
 	var _spriters:Array<Spriter>;
 	/**
-	 * Contains all the Spriter entities ordering by their name.
+	 * Contains all the Spriter entities currently playing, ordering by their name.
 	 */
 	var _spritersNamed:Map<String , Spriter>;
 	/*
@@ -32,7 +32,7 @@ class SpriterEngine
 	/**
 	 * SCML object created with the Brashmonkey Spriter document (.scml).
 	 */
-	var _scml:ScmlObject;
+	public var scml(default,null):ScmlObject;
 	/**
 	 * This is the lib used to retrieve a graphic and display the Spriter on screen.
 	 */
@@ -86,12 +86,12 @@ class SpriterEngine
 	 */
 	public var fixedTick:Bool = true;
 	
-	public function new(scml:String, library:AbstractLibrary, graphics:Sprite, frameRate:Int = 60) 
+	public function new(scml_str:String, library:AbstractLibrary, graphics:Sprite, frameRate:Int = 60) 
 	{
 		_spriters = new Array<Spriter>();
 		_spritersNamed = new Map<String ,Spriter>();
 		
-		_scml = new ScmlObject(Xml.parse(scml));
+		scml = new ScmlObject(Xml.parse(scml_str));
 		_lib = library;
 		_graphics = graphics;
 		_lib.setRoot(_graphics);
@@ -105,9 +105,10 @@ class SpriterEngine
 	 * @param	y
 	 * @param	?index if null same result as addChild, else same result as addChildAt(index). Spriters at and after the replaced index move up. You can use index out of range but negative means 0.
 	 * @param	copySCML if false, you can use a same SCML for multiple Spriter entity, allow you to have 
+	 * @param	autoRemoval if true, the Spriter will be removed after the animation is ended
 	 * @return  the Spriter created
 	 */
-	public function addEntity(id:String, x:Float = 0, y:Float = 0, ?index:Null<Int>, copySCML:Bool = true):Spriter 
+	public function addEntity(id:String, x:Float = 0, y:Float = 0, ?index:Null<Int>, autoRemoval:Bool = false, copySCML:Bool = true):Spriter 
 	{
 
 		//create spatial info for the current Spriter
@@ -116,13 +117,17 @@ class SpriterEngine
 		//select scmlObject
 		var currentSCML:ScmlObject;
 		if (copySCML) {
-			currentSCML 	  =  _scml.copy();
+			currentSCML 	  =  scml.copy();
 			currentSCML.name = id;
 		}else {
-			currentSCML = _scml;
+			currentSCML = scml;
 		}
 		//create the Spriter
 		var spriter:Spriter = new Spriter(id, currentSCML, _lib, info);
+		if (autoRemoval) {
+			spriter.playAnim(removeSpriterEntity, true);
+		}
+		
 		//store in array
 		if(index == null || index > _spriters.length){
 			_spriters.push(spriter);
@@ -207,6 +212,10 @@ class SpriterEngine
 		_spritersNamed = new Map<String ,Spriter>();
 		_lib.clear();
 	}
+	private function removeSpriterEntity(spriter:Spriter, entity:String, anim:String):Void
+	{
+		removeEntity(spriter.spriterName);
+	}
 	public function getEntity(id:String):Spriter
 	{
 		if (_spritersNamed.exists(id))
@@ -236,10 +245,10 @@ class SpriterEngine
 				computeTime();
 			}
 			
+			_lib.clear();//TODO handle different for other platform?
+			
 			var numSpriters:Int = _spriters.length;
 			if(numSpriters > 0){
-				_lib.clear();//TODO handle different for other platform?
-			
 				var spriter:Spriter;
 				for (i in 0...numSpriters)
 				{
@@ -256,7 +265,7 @@ class SpriterEngine
 		_spritersNamed = null;
 		_spriters = null;
 		_lib.destroy();
-		_scml.destroy();
+		scml.destroy();
 	}
 	/**
 	 * Pauses animations. Use unpause() after.

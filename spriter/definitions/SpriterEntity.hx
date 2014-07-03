@@ -33,5 +33,4 @@ class SpriterEntity
 			animations.set(a.att.name,new SpriterAnimation(a));
 		}
 	}
-	
 }

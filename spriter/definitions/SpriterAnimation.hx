@@ -69,22 +69,24 @@ class SpriterAnimation
 		var tempLoop:Int;
 		switch(loopType)
         {
-        case LOOPING:
-            tempLoop = loop;
-            loop = Std.int(newTime / length);
-			currentTime = newTime % length;
-			//callback only at the first loop and once
-			if (loop == 1 && tempLoop < 1)
-				root.onEndAnim();
-			
-        case NO_LOOPING:
-            currentTime = Std.int(Math.min(newTime, length));
-			//callback
-			if (currentTime == length)
-				root.onEndAnim();
+			case LOOPING:
+				tempLoop = loop;
+				loop = Std.int(newTime / length);
+				currentTime = newTime % length;
+				//update
+				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root);
+				//callback only at the first loop and once
+				if (loop == 1 && tempLoop < 1)
+					root.onEndAnim();
+				
+			case NO_LOOPING:
+				currentTime = Std.int(Math.min(newTime, length));
+				//update
+				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root);
+				//callback
+				if (currentTime == length)
+					root.onEndAnim();
         }
-
-        updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root);
     }
 
     public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:AbstractLibrary, root:IScml):Void
