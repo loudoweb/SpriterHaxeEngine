@@ -59,6 +59,8 @@ class Spriter
 	public function playAnim(?name:String, ?endAnimCallback:Spriter->String->String->Void, removeCallback:Bool = true):Bool
 	{
 		if (name == null) {
+			if (paused) 
+				paused = false;
 			resetTime();
 			if (endAnimCallback != null) {
 				scml.endAnimCallback = endAnimCallback.bind(this, scml.currentEntity, scml.currentAnimation);
@@ -66,6 +68,8 @@ class Spriter
 			}
 			return true;
 		}else if (scml.entities.get(scml.currentEntity).animations.exists(name)) {
+			if (paused) 
+				paused = false;
 			resetTime();
 			scml.currentAnimation = name;
 			if (endAnimCallback != null) {
@@ -88,6 +92,8 @@ class Spriter
 	public function playAnimFromEntity(entity:String, anim:String = '', ?endAnimCallback:Spriter->String->String->Void, removeCallback:Bool = true):Bool
 	{
 		if (scml.entities.exists(entity)) {
+			if (paused) 
+				paused = false;
 			resetTime();
 			scml.currentEntity = entity;
 			if(anim != ''){
@@ -114,6 +120,8 @@ class Spriter
 	public function playAnimsStack(names:Array<String>, ?endAnimCallback:Spriter->String->String->Void):Bool
 	{
 		if (scml.entities.get(scml.currentEntity).animations.exists(names[0])) {
+			if (paused) 
+				paused = false;
 			resetTime();
 			scml.currentAnimation = names[0];
 			scml.endAnimCallback = stackAnims.bind(names, 1, endAnimCallback);
@@ -134,6 +142,8 @@ class Spriter
 	public function playAnimsStackFromEntity(entity:String, anims:Array<String>, ?endAnimCallback:Spriter->String->String->Void):Bool
 	{
 		if (scml.entities.exists(entity)) {
+			if (paused) 
+				paused = false;
 			resetTime();
 			scml.currentEntity = entity;
 			if (scml.entities.get(entity).animations.exists(anims[0])) {
@@ -158,6 +168,8 @@ class Spriter
 	public function playAnimsStackFromEntities(entities:Array<String>, anims:Array<String>, ?endAnimCallback:Spriter->String->String->Void):Bool
 	{
 		if (scml.entities.exists(entities[0])) {
+			if (paused) 
+				paused = false;
 			resetTime();
 			scml.currentEntity = entities[0];
 			if (scml.entities.get(entities[0]).animations.exists(anims[0])) {
@@ -174,6 +186,8 @@ class Spriter
 	private function stackAnims(anims:Array<String>, nextAnim:Int, endAnimsCallback:Spriter->String->String->Void):Void
 	{
 		if (scml.entities.get(scml.currentEntity).animations.exists(anims[nextAnim])) {
+			if (paused) 
+				paused = false;
 			resetTime();
 			scml.currentAnimation = anims[nextAnim];
 		}
@@ -192,6 +206,8 @@ class Spriter
 		if (scml.entities.exists(entities[nextAnim])) {
 			scml.currentEntity = entities[nextAnim];
 			if (scml.entities.get(scml.currentEntity).animations.exists(anims[nextAnim])) {
+				if (paused) 
+					paused = false;
 				resetTime();
 				scml.currentAnimation = anims[nextAnim];
 			}
