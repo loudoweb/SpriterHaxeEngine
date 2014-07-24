@@ -22,6 +22,11 @@ class Spriter
 	 */
 	public var paused:Bool = false;
 	
+	/**
+	 * To slow down or speed up an animation.
+	 */
+	public var playbackSpeed:Float = 1;
+	
 	public function new(_name:String, _scml:ScmlObject, _library:AbstractLibrary, _info:SpatialInfo) 
 	{
 		scml 	= _scml;
@@ -34,7 +39,7 @@ class Spriter
 	public function advanceTime(elapsedMS:Int):Void
 	{
 		if(!paused)
-			timeMS += elapsedMS;
+			timeMS += Std.int(elapsedMS * playbackSpeed);
 			
 		scml.setCurrentTime(timeMS, library, info);//even if paused we need to draw it
 	}
