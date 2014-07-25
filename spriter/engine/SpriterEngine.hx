@@ -117,8 +117,8 @@ class SpriterEngine
 		//select scmlObject
 		var currentSCML:ScmlObject;
 		if (copySCML) {
-			currentSCML 	  =  scml.copy();
-			currentSCML.name = id;
+			currentSCML 	  		=  scml.copy();
+			currentSCML.spriterName = id;
 		}else {
 			currentSCML = scml;
 		}

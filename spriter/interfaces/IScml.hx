@@ -8,9 +8,9 @@ import spriter.definitions.SpatialInfo;
 
 interface IScml 
 {
-	function characterInfo():SpatialInfo;
+	var spriterSpatialInfo:SpatialInfo;
+	var spriterName:String;
 	function getPivots(folder:Int, file:Int):PivotInfo;
 	function getFileName(folder:Int, file:Int):String;
-	function getSpriterName():String;
 	function onEndAnim():Void;
 }

@@ -32,7 +32,7 @@ class Spriter
 		scml 	= _scml;
 		library = _library;
 		spriterName = _name;
-		scml.name = spriterName;
+		scml.spriterName = spriterName;
 		info = _info;
 	}
 	

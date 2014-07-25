@@ -1,6 +1,7 @@
 package spriter.definitions;
 import haxe.xml.Fast;
 import spriter.definitions.SpriterAnimation.LoopType;
+import spriter.definitions.SpriterAnimation.MetaDispatch;
 import spriter.interfaces.IScml;
 import spriter.library.AbstractLibrary;
 
@@ -12,6 +13,13 @@ enum LoopType
 {
     LOOPING;
     NO_LOOPING;
+}
+
+enum MetaDispatch
+{
+	ONCE;
+	ONCE_PER_LOOP;
+	ALWAYS;
 }
  
 class SpriterAnimation
@@ -25,6 +33,9 @@ class SpriterAnimation
     public var loopType:LoopType;
     public var mainlineKeys:Array<MainlineKey>;
     public var timelines:Array<SpriterTimeline>;
+	public var taglines:Array<TaglineKey>;
+	public var varlines:Array<VarlineKey>;
+	public var metaDispatch:MetaDispatch = ONCE_PER_LOOP;
 	
 	/*
 	 * Custom definitions
@@ -61,6 +72,27 @@ class SpriterAnimation
 		{
 			timelines.push(new SpriterTimeline(t));
 		}
+		if (fast.hasNode.meta)
+		{
+			fast = fast.node.meta;
+			if (fast.hasNode.tagline)
+			{
+				taglines = [];
+				for (tag in fast.node.tagline.nodes.key)
+				{
+					taglines.push(new TaglineKey(tag));
+				}
+			}
+			if (fast.hasNode.varline)
+			{
+				varlines = [];
+				for (currVar in fast.node.varline.nodes.key)
+				{
+					varlines.push(new VarlineKey(currVar));
+				}
+			}
+			
+		}
 	}
 	
 	public function setCurrentTime(newTime:Int, library:AbstractLibrary, root:IScml):Void
@@ -75,6 +107,9 @@ class SpriterAnimation
 				currentTime = newTime % length;
 				//update
 				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root);
+				if (metaDispatch == ONCE_PER_LOOP && tempLoop != loop) {
+					resetMetaDispatch();
+				}
 				//callback only at the first loop and once
 				if (loop == 1 && tempLoop < 1)
 					root.onEndAnim();
@@ -107,7 +142,7 @@ class SpriterAnimation
             }
 			else 
 			{
-				spatialInfo = root.characterInfo();
+				spatialInfo = root.spriterSpatialInfo;
 			}
 
             spatialInfo = currentKey.info.unmapFromParent(spatialInfo);
@@ -127,7 +162,7 @@ class SpriterAnimation
             }
             else
             {
-                spatialInfo = root.characterInfo();
+                spatialInfo = root.spriterSpatialInfo;
             }
 			
 		    //currentKey.info = currentKey.info.unmapFromParent(parentInfo);//TOFIX and remove next line ?
@@ -140,11 +175,11 @@ class SpriterAnimation
 				//render from library
 				var currentKeyName:String = root.getFileName(currentSpriteKey.folder, currentSpriteKey.file);
 				if (currentKeyName != null) {//hidden object test (via mapping)
-					library.addGraphic(root.getSpriterName(), currentRef.timeline, currentRef.key, currentKeyName, spatialInfo, activePivots);
+					library.addGraphic(root.spriterName, currentRef.timeline, currentRef.key, currentKeyName, spatialInfo, activePivots);
 				}
 			}else {
 				activePivots = new PivotInfo();
-				currentKey.paint(activePivots.pivotX, activePivots.pivotY);//TODO
+				currentKey.paint(activePivots.pivotX, activePivots.pivotY);
 			}
 			
 
@@ -152,12 +187,33 @@ class SpriterAnimation
         }
 
         //SCML REF : <expose objectKeys to api users to retrieve AND replace objectKeys>
+		//(devnote :I'm not doing that, instead I add directly the element in the library (since libraries compute differently))
 		
 		/*len = objectKeys.length;
         for(k in 0...len)
         {            
             objectKeys[k].paint();
         }*/
+		
+		//following lines not in scml references yet
+		
+		if(taglines != null){
+			for (tag in taglines) {
+				if (tag.time == mainKey.time)
+				{
+					if (metaDispatch == ALWAYS)
+					{
+						trace("tag", tag.id);
+					}else if (metaDispatch == ONCE_PER_LOOP && mainKey.time != tag.lastDispatched) {
+						tag.lastDispatched = mainKey.time;
+						trace("tag", tag.id);
+					}else if (metaDispatch == ONCE && !tag.dispatched) {
+						tag.lastDispatched = mainKey.time;
+						trace("tag", tag.id);
+					}
+				}
+			}
+		}
     }
 
     public function mainlineKeyFromTime(time:Int):MainlineKey
@@ -235,6 +291,15 @@ class SpriterAnimation
         }
 		return true;
         
+	}
+	
+	private function resetMetaDispatch():Void
+	{
+		if(taglines != null){
+			for (tag in taglines) {
+				tag.dispatched = false;
+			}
+		}
 	}
 	
 }

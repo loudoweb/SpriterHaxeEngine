@@ -14,15 +14,16 @@ class ScmlObject implements IScml
 	public var folders:Array<SpriterFolder>;
 	public var activeCharacterMap:Array<SpriterFolder>;
 	public var entities:Map<String, SpriterEntity>;
+	public var tags:Array<String>;
 
     public var currentEntity:String 	= ""; 
     public var currentAnimation:String  = ""; 
 
     public var currentTime:Float; 
 	
-	public var name:String;
+	public var spriterName:String;
 	
-	private var _characterInfo:SpatialInfo;
+	public var spriterSpatialInfo:SpatialInfo;
 	
 	/**
 	 * Callback at called at the end of the anim
@@ -53,10 +54,19 @@ class ScmlObject implements IScml
 				else if(el.name == "entity")
 				{
 					entities.set(el.att.name, new SpriterEntity(el));
-					if (el.att.id == '0') {
+					if (el.att.id == "0") {
 						currentEntity = el.att.name;
 						currentAnimation = el.node.animation.att.name;
 					}
+				}else if (el.name == "tag_list")
+				{
+					if (tags == null)
+						tags = [];
+					for (t in el.elements)
+					{
+						tags.push(t.att.name);
+					}
+					
 				}
 			}
 			
@@ -64,10 +74,6 @@ class ScmlObject implements IScml
 		}
 	}
 	//interface IScml begin
-	public function characterInfo():SpatialInfo
-    {
-		return _characterInfo;
-    }
 	public function getPivots(folder:Int, file:Int):PivotInfo
 	{
 		var currentFile:SpriterFile = activeCharacterMap[folder].files[file];
@@ -86,10 +92,6 @@ class ScmlObject implements IScml
 			return null;
 		}
 	}
-	public function getSpriterName():String
-	{
-		return name;
-	}
 	public function onEndAnim():Void
 	{
 		if (endAnimCallback != null) {
@@ -105,7 +107,7 @@ class ScmlObject implements IScml
     {
         var currentEnt:SpriterEntity 		=	entities.get(currentEntity);
 		var currentAnim:SpriterAnimation	=	currentEnt.animations.get(currentAnimation);
-		_characterInfo = characterInfo;
+		spriterSpatialInfo = characterInfo;
 		currentAnim.setCurrentTime(newTime, library, this);
     }		
 

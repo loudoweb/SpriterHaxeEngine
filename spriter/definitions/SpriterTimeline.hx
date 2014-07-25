@@ -45,7 +45,11 @@ class SpriterTimeline
 				{
 					keys.push(new BoneTimelineKey(k));
 				}
-				
+			case ObjectType.POINT:
+				for (k in fast.nodes.key)
+				{
+					keys.push(new ObjectTimelineKey(k));
+				}
 			default:
 				
 		}
