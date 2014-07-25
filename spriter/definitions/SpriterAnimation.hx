@@ -42,6 +42,8 @@ class SpriterAnimation
 	 * 
 	 */
 	var loop:Int = 0;
+	public var points:Array<SpatialInfo>;
+	public var boxes:Array<String>;
 	
 	public function new(fast:Fast) 
 	{
@@ -150,6 +152,8 @@ class SpriterAnimation
         }
 
         //var objectKeys:Array<TimelineKey>;
+		points = [];
+		boxes = [];
 		len = mainKey.objectRefs.length;
         for(o in 0...len)
         {
@@ -180,6 +184,8 @@ class SpriterAnimation
 			}else {
 				activePivots = new PivotInfo();
 				currentKey.paint(activePivots.pivotX, activePivots.pivotY);
+				points.push(currentKey.info);
+				//TODO pivotsBox
 			}
 			
 

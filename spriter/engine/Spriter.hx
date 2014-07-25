@@ -227,6 +227,15 @@ class Spriter
 		}
 	}
 	
+	public function getBoxes():Array<String>
+	{
+		return scml.entities[scml.currentEntity].animations[scml.currentAnimation].boxes;
+	}
+	public function getPoints():Array<SpatialInfo>
+	{
+		return scml.entities[scml.currentEntity].animations[scml.currentAnimation].points;
+	}
+	
 	public function resetTime():Void
 	{
 		timeMS = 0;
