@@ -1,6 +1,5 @@
 package spriter.definitions;
 import haxe.xml.Fast;
-import spriter.util.SpriterUtil;
 
 /**
  * ...

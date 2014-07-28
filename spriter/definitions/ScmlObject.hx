@@ -140,7 +140,7 @@ class ScmlObject implements IScml
         var currentEnt:SpriterEntity 		=	entities.get(currentEntity);
 		var currentAnim:SpriterAnimation	=	currentEnt.animations.get(currentAnimation);
 		spriterSpatialInfo = characterInfo;
-		currentAnim.setCurrentTime(newTime, library, this);
+		currentAnim.setCurrentTime(newTime, library, this, currentEnt);
     }		
 
     public function applyCharacterMap(name:String, reset:Bool):Bool

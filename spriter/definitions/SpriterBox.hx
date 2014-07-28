@@ -5,9 +5,8 @@ import haxe.xml.Fast;
  * ...
  * @author Loudo
  */
-class SpriterFile
+class SpriterBox
 {
-	public var id:Int;
 	public var name:String; 
     public var pivotX:Float;
     public var pivotY:Float;
@@ -17,21 +16,19 @@ class SpriterFile
 	public function new(fast:Fast = null) 
 	{
 		if(fast != null){
-			id = Std.parseInt(fast.att.id);
 			name = fast.att.name;
 			pivotX = fast.has.pivot_x ? Std.parseFloat(fast.att.pivot_x) : 0;
-			pivotY = fast.has.pivot_y ? Std.parseFloat(fast.att.pivot_y) : 1;
+			pivotY = fast.has.pivot_y ? Std.parseFloat(fast.att.pivot_y) : 0;
 			
-			width = fast.has.width ? Std.parseFloat(fast.att.width) : 0;
-			height = fast.has.height ? Std.parseFloat(fast.att.height) : 0;
+			width = fast.has.w ? Std.parseFloat(fast.att.w) : 0;
+			height = fast.has.h ? Std.parseFloat(fast.att.h) : 0;
 		}
 	}
 	
-	public function copy():SpriterFile
+	public function copy():SpriterBox
 	{
-		var copy:SpriterFile = new SpriterFile();
+		var copy:SpriterBox = new SpriterBox();
 		copy.name = name;
-		copy.id = id;
 		copy.pivotX = pivotX;
 		copy.pivotY = pivotY;
 		copy.width = width;

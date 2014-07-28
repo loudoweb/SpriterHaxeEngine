@@ -1,7 +1,8 @@
 package spriter.definitions;
 import haxe.xml.Fast;
+import spriter.definitions.Quadrilateral;
 import spriter.definitions.SpriterAnimation.LoopType;
-import spriter.definitions.ScmlObject.MetaDispatch;
+import spriter.definitions.SpriterTimeline.ObjectType;
 import spriter.interfaces.IScml;
 import spriter.library.AbstractLibrary;
 
@@ -35,7 +36,7 @@ class SpriterAnimation
 	 */
 	var loop:Int = 0;
 	public var points:Array<SpatialInfo>;
-	public var boxes:Array<String>;
+	public var boxes:Array<Quadrilateral>;
 	
 	public function new(fast:Fast) 
 	{
@@ -89,7 +90,7 @@ class SpriterAnimation
 		}
 	}
 	
-	public function setCurrentTime(newTime:Int, library:AbstractLibrary, root:IScml):Void
+	public function setCurrentTime(newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity):Void
     {
 		var currentTime:Int;
 		var tempLoop:Int;
@@ -100,7 +101,7 @@ class SpriterAnimation
 				loop = Std.int(newTime / length);
 				currentTime = newTime % length;
 				//update
-				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root);
+				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root, currentEntity);
 				if (root.metaDispatch == ONCE_PER_LOOP && tempLoop != loop) {
 					resetMetaDispatch();
 				}
@@ -111,14 +112,14 @@ class SpriterAnimation
 			case NO_LOOPING:
 				currentTime = Std.int(Math.min(newTime, length));
 				//update
-				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root);
+				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root, currentEntity);
 				//callback
 				if (currentTime == length)
 					root.onEndAnim();
         }
     }
 
-    public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:AbstractLibrary, root:IScml):Void
+    public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity):Void
     {
         var transformedBoneKeys:Array<SpatialInfo> = new Array<SpatialInfo>();
 		var currentKey:SpatialTimelineKey;
@@ -175,8 +176,16 @@ class SpriterAnimation
 				}
 			}else {
 				activePivots = new PivotInfo();
-				points.push(library.compute(spatialInfo, activePivots,0,0));
-				//TODO pivotsBox
+				activePivots = currentKey.paint(activePivots.pivotX, activePivots.pivotY);
+				var currentObjectKey:ObjectTimelineKey = cast(currentKey, ObjectTimelineKey);
+				
+				if (currentObjectKey.type == ObjectType.POINT)
+				{
+					points.push(library.compute(spatialInfo, activePivots,0,0));
+				}else {//BOX
+					var currentBox:SpriterBox = currentEntity.boxes_info.get(getTimelineName(currentRef.timeline));
+					boxes.push(library.computeRectCoordinates(spatialInfo, activePivots, currentBox.width, currentBox.height));
+				}
 			}
 			
 
@@ -289,26 +298,10 @@ class SpriterAnimation
         keyA.interpolate(keyB, keyBTime, newTime);
 		return keyA;
     }
-	/**
-	 * Test if update needed between keys.
-	 * TODO test if sometimes newTime never reach key.time.
-	 * @param	ref
-	 * @param	newTime
-	 * @return  if newTime != keyTime and curveType == instant, so update doesn't needed
-	 */
-	public function needToUpdate(ref:Ref, newTime:Int):Bool
+	
+	private function getTimelineName(id:Int):String
 	{
-		var timeline:SpriterTimeline = timelines[ref.timeline];
-        var keyA:TimelineKey = timeline.keys[ref.key];
-        
-        if(timeline.keys.length == 1 || keyA.curveType == INSTANT)
-        {
-            if ( keyA.time != newTime) {
-				return false;
-			}
-        }
-		return true;
-        
+		return timelines[id].name;
 	}
 	
 	private function resetMetaDispatch():Void

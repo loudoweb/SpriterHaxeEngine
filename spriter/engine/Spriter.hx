@@ -1,6 +1,7 @@
 package spriter.engine;
 import spriter.definitions.ScmlObject;
 import spriter.definitions.SpatialInfo;
+import spriter.definitions.Quadrilateral;
 import spriter.library.AbstractLibrary;
 import spriter.vars.Variable;
 
@@ -50,7 +51,7 @@ class Spriter
 	 * @param	reset to apply only the new character map, if not, you can have multiple character map at the same time
 	 * @return  true if the character map exist, false if doesn't exist
 	 */
-	public function applyCharacterMap(name:String, reset:Bool):Bool
+	inline public function applyCharacterMap(name:String, reset:Bool):Bool
 	{
 		return scml.applyCharacterMap(name, reset);
 	}
@@ -228,11 +229,11 @@ class Spriter
 		}
 	}
 	
-	public function getBoxes():Array<String>
+	inline public function getBoxes():Array<Quadrilateral>
 	{
 		return scml.entities[scml.currentEntity].animations[scml.currentAnimation].boxes;
 	}
-	public function getPoints():Array<SpatialInfo>
+	inline public function getPoints():Array<SpatialInfo>
 	{
 		return scml.entities[scml.currentEntity].animations[scml.currentAnimation].points;
 	}
@@ -245,12 +246,12 @@ class Spriter
 		}
 		return null;
 	}
-	public function getVariableFromId(id:Int):Variable<Dynamic>//TODO generic
+	inline public function getVariableFromId(id:Int):Variable<Dynamic>//TODO generic
 	{
 		return scml.entities[scml.currentEntity].variables[id];
 	}
 	
-	public function resetTime():Void
+	inline public function resetTime():Void
 	{
 		timeMS = 0;
 	}

@@ -28,7 +28,7 @@ class TilelayerLibrary extends AbstractLibrary
 	 * @param	dataPath .json
 	 * @param	atlasPath .png
 	 */
-	public function new(dataPath:String = '', atlasPath:String = '') 
+	public function new(dataPath:String = "", atlasPath:String = "") 
 	{
 		super(dataPath);
 		var sheetData = Assets.getText(dataPath);

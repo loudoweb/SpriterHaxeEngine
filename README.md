@@ -33,12 +33,20 @@ engine.getEntity('entityName').playAnim('run', myCallback);
 //apply the "gun" map of the entity
 engine.getEntity('entityName').applyCharacterMap('gun', true);
 
-
 //update on enter frame
 engine.update();
 
 //callback on end anim
 function myCallback(s:Spriter, entity:String, anim:String):Void
+
+//var and tag callback
+engine.getEntityAt(0).scml.tagCallback = function tagCallback(tag:String):Void{}
+engine.getEntityAt(0).scml.varChangeCallback function varCallback(variable:Variable<Dynamic>):Void{}
+
+//points and boxes
+var points:Array<SpatialInfo> = engine.getEntityAt(0).getPoints();
+var boxes:Array<Quadrilateral> = engine.getEntityAt(0).getBoxes();
+
 ```
 
 Spriter Haxe Engine Features
@@ -59,6 +67,10 @@ Spriter Haxe Engine Features
  - callback when animation ended
  - play, stack anim, pause
  - you can display duplicate of spriter entity and manipulate them separatly
+ - callback when variable changes
+ - callback when tag dispatches
+ - Points (usage example : to shot a bullet when gun fire)
+ - Boxes (usage example : hitbox)
 
 **Libraries**
  - Simple bitmap library (bitmaps handled with addChild)
@@ -79,10 +91,9 @@ TODO
  - add tilesheet stage 3d support : https://github.com/as3boyan/TilesheetStage3D/
  - add ash and haxepunk support
  - Optimized engine : draw call only when needed. So "instant" keys are not updated between keys.
- - test performance
  - animation callback optimization
  - check Garbage collector
- - add Variables, Tags, Points, Boxes
+ - binary scml
  
 Examples
 ------------

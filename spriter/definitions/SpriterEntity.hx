@@ -1,10 +1,9 @@
 package spriter.definitions;
 import haxe.xml.Fast;
-import spriter.interfaces.IScml;
 import spriter.vars.Variable;
+import spriter.vars.VariableFloat;
 import spriter.vars.VariableInt;
 import spriter.vars.VariableString;
-import spriter.vars.VariableFloat;
 
 /**
  * ...
@@ -18,6 +17,7 @@ class SpriterEntity
     public var characterMaps:Map<String,CharacterMap>;
     public var animations:Map<String,SpriterAnimation>;
 	public var variables:Array<Variable<Dynamic>>;
+	public var boxes_info:Map<String, SpriterBox>;
 
 	
 	public function new(fast:Fast) 
@@ -25,6 +25,7 @@ class SpriterEntity
 		characterMaps = new Map<String,CharacterMap>();
 		animations = new Map<String,SpriterAnimation>();
 		variables = new Array<Variable<Dynamic>>();
+		boxes_info = new Map<String, SpriterBox>();
 		
 		id = Std.parseInt(fast.att.id);
 		name = fast.att.name;
@@ -49,7 +50,10 @@ class SpriterEntity
 			
 		}
 		
-		var obj_info_box:Map<String, Dynamic> = new Map<String, Dynamic>();
+		for (oi in fast.nodes.obj_info)
+		{
+			boxes_info.set(oi.att.name, new SpriterBox(oi));
+		}
 		
 		
 		for (a in fast.nodes.animation)

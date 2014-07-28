@@ -48,12 +48,12 @@ class SpriterTimeline
 			case ObjectType.POINT:
 				for (k in fast.nodes.key)
 				{
-					keys.push(new ObjectTimelineKey(k));
+					keys.push(new ObjectTimelineKey(k, objectType));
 				}
 			case ObjectType.BOX:
 				for (k in fast.nodes.key)
 				{
-					keys.push(new ObjectTimelineKey(k));
+					keys.push(new ObjectTimelineKey(k, objectType));
 				}
 			default:
 				

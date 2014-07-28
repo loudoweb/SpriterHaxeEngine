@@ -2,7 +2,6 @@ package spriter.interfaces;
 import spriter.definitions.PivotInfo;
 import spriter.definitions.ScmlObject.MetaDispatch;
 import spriter.definitions.SpatialInfo;
-import spriter.vars.Variable;
 
 /**
  * @author Loudo

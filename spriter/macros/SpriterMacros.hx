@@ -210,4 +210,111 @@ class SpriterMacros
 		}
 		return xml;
 	}
+	macro public static function createGraal(pathToXml:Expr):Expr
+	{
+		var xml_path:String = "";
+		switch(pathToXml.expr){
+			case EConst(c): switch(c){
+				case CString(s): xml_path = s; 
+				default:{}
+			}
+			default:{}
+		}
+		
+		var xml:Xml = createGraalXML();
+		sys.io.File.saveContent(xml_path, xml.toString());
+		
+		return pathToXml;
+	}
+	static function createGraalXML():Xml
+	{
+		var character:String = "knight";
+		var perso:String = "chevalier_";
+		var people:String = "briton";
+		var peuple:String = "BRETON_";
+		
+		var width:Int = 480;
+		var height:Int = 360;
+		var fps:Int = 24;
+		var k:Int = 0;
+		var animations:Array<{name:String, frames:Int, offset:Int}> = 
+		[
+			{name:"walk", frames:26, offset:1316},
+			{name:"idle", frames:20, offset:0},
+			{name:"sword", frames:36, offset:214},
+		];
+		var tag:String;
+		var stepTime:Int =  Std.int(1000 / fps);
+		//var totalTime:Int = Std.int((frames / fps) * 1000);
+		var xml_s:String = '<?xml version="1.0" encoding="UTF-8"?>\n'+
+		'<spriter_data scml_version="1.0" generator="SpriterHaxeEngine" generator_version="b7">\n'+
+		'	<entity id="0" name="left">\n'+
+		'	</entity>\n' +
+		'	<entity id="1" name="right">\n'+
+		'	</entity>\n' +
+		'	<entity id="2" name="back">\n'+
+		'	</entity>\n' +
+		'	<entity id="3" name="front">\n'+
+		'	</entity>\n'+
+		'</spriter_data>\n';
+		
+		var folder:Xml;
+		var f:Int = 0;
+		var animationXML:Xml;
+		
+		var xml:Xml = Xml.parse(xml_s).firstElement();
+		for (el in xml.elements())
+		{
+			if (el.nodeName == "entity") {
+				k = 0;
+				var direction:String = el.get("name");
+				for (l in 0...animations.length) {
+					var anim: { name:String, frames:Int, offset:Int } = animations[l];
+					//folder
+					
+					tag = 	'	<folder id="'+f+'" name="'+anim.name + '/' + character + '/' + people+ '/' + direction+'">\n'+
+							'	</folder>\n';
+					folder = Xml.parse(tag).firstElement();
+					xml.addChild(folder);
+					f++;
+					
+					//animation
+					tag = '		<animation id="'+l+'" name="'+anim.name+'" length="'+Std.int((anim.frames / fps) * 1000)+'">\n'+
+						'			<mainline>\n'+
+						'			</mainline>\n'+
+						'			<timeline id="0" name="'+anim.name+'">\n'+
+						'			</timeline>\n'+
+						'		</animation>\n';
+					animationXML = Xml.parse(tag).firstElement();
+					el.addChild(animationXML);
+					var mainline:Xml = animationXML.firstElement();
+					var timeline:Xml = animationXML.elementsNamed("timeline").next();
+					var m:Int = 0;
+					for (i in 0...anim.frames)
+					{
+						if (i % 2 == 0) {
+							//folder
+							var fileNum:String = (i + anim.offset) < 10 ? "0"+(i + anim.offset) : ""+(i + anim.offset);
+							tag = '	<file id="' + m + '" name="' + anim.name + '/' + character + '/' + people + '/' + peuple + perso + direction +"_"+ fileNum + '.png" width="' + width + '" height="' + height + '" pivot_x="0" pivot_y="1"/>\n';
+							folder.addChild(Xml.parse(tag));
+							//mainline
+							tag = '	<key id="'+m+'" time="'+i*stepTime+'">\n'+
+							'		<object_ref id="0" timeline="0" key="'+m+'" z_index="0"/>\n'+
+							'	</key>\n';
+							mainline.addChild(Xml.parse(tag));
+							//timeline
+							tag = '	<key id="'+m+'" time="'+i*stepTime+'" spin="0" >\n'+
+							'		<object folder="' + folder.get("id") +'" file="' + m + '"/>\n' +
+							'	</key>\n';
+							timeline.addChild(Xml.parse(tag));
+							k++;
+							m++;
+						}
+					}
+				}
+				
+			}
+		}
+		return xml;
+	}
 }
