@@ -1,7 +1,7 @@
 package spriter.definitions;
 import haxe.xml.Fast;
 import spriter.definitions.SpriterAnimation.LoopType;
-import spriter.definitions.SpriterAnimation.MetaDispatch;
+import spriter.definitions.ScmlObject.MetaDispatch;
 import spriter.interfaces.IScml;
 import spriter.library.AbstractLibrary;
 
@@ -13,13 +13,6 @@ enum LoopType
 {
     LOOPING;
     NO_LOOPING;
-}
-
-enum MetaDispatch
-{
-	ONCE;
-	ONCE_PER_LOOP;
-	ALWAYS;
 }
  
 class SpriterAnimation
@@ -34,8 +27,7 @@ class SpriterAnimation
     public var mainlineKeys:Array<MainlineKey>;
     public var timelines:Array<SpriterTimeline>;
 	public var taglines:Array<TaglineKey>;
-	public var varlines:Array<VarlineKey>;
-	public var metaDispatch:MetaDispatch = ONCE_PER_LOOP;
+	public var varlines:Array<Varline>;
 	
 	/*
 	 * Custom definitions
@@ -88,9 +80,9 @@ class SpriterAnimation
 			if (fast.hasNode.varline)
 			{
 				varlines = [];
-				for (currVar in fast.node.varline.nodes.key)
+				for (currVar in fast.nodes.varline)
 				{
-					varlines.push(new VarlineKey(currVar));
+					varlines.push(new Varline(currVar));
 				}
 			}
 			
@@ -109,7 +101,7 @@ class SpriterAnimation
 				currentTime = newTime % length;
 				//update
 				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root);
-				if (metaDispatch == ONCE_PER_LOOP && tempLoop != loop) {
+				if (root.metaDispatch == ONCE_PER_LOOP && tempLoop != loop) {
 					resetMetaDispatch();
 				}
 				//callback only at the first loop and once
@@ -183,8 +175,7 @@ class SpriterAnimation
 				}
 			}else {
 				activePivots = new PivotInfo();
-				currentKey.paint(activePivots.pivotX, activePivots.pivotY);
-				points.push(currentKey.info);
+				points.push(library.compute(spatialInfo, activePivots,0,0));
 				//TODO pivotsBox
 			}
 			
@@ -207,15 +198,36 @@ class SpriterAnimation
 			for (tag in taglines) {
 				if (tag.time == mainKey.time)
 				{
-					if (metaDispatch == ALWAYS)
+					if (root.metaDispatch == ALWAYS)
 					{
-						trace("tag", tag.id);
-					}else if (metaDispatch == ONCE_PER_LOOP && mainKey.time != tag.lastDispatched) {
+						root.onTag(tag.id);
+					}else if (root.metaDispatch == ONCE_PER_LOOP && mainKey.time != tag.lastDispatched) {
 						tag.lastDispatched = mainKey.time;
-						trace("tag", tag.id);
-					}else if (metaDispatch == ONCE && !tag.dispatched) {
+						root.onTag(tag.id);
+					}else if (root.metaDispatch == ONCE && !tag.dispatched) {
 						tag.lastDispatched = mainKey.time;
-						trace("tag", tag.id);
+						root.onTag(tag.id);
+					}
+				}
+			}
+		}
+		if (varlines != null)
+		{
+			for (_var in varlines) {
+				for (keyVar in _var.keys)
+				{
+					if (keyVar.time == mainKey.time)
+					{
+						if (root.metaDispatch == ALWAYS)
+						{
+							root.onVar(_var.id, keyVar.value);
+						}else if (root.metaDispatch == ONCE_PER_LOOP && mainKey.time != keyVar.lastDispatched) {
+							keyVar.lastDispatched = mainKey.time;
+							root.onVar(_var.id, keyVar.value);
+						}else if (root.metaDispatch == ONCE && !keyVar.dispatched) {
+							keyVar.lastDispatched = mainKey.time;
+							root.onVar(_var.id, keyVar.value);
+						}
 					}
 				}
 			}

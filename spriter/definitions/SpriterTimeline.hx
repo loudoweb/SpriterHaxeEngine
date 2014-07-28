@@ -50,6 +50,11 @@ class SpriterTimeline
 				{
 					keys.push(new ObjectTimelineKey(k));
 				}
+			case ObjectType.BOX:
+				for (k in fast.nodes.key)
+				{
+					keys.push(new ObjectTimelineKey(k));
+				}
 			default:
 				
 		}

@@ -2,6 +2,7 @@ package spriter.engine;
 import spriter.definitions.ScmlObject;
 import spriter.definitions.SpatialInfo;
 import spriter.library.AbstractLibrary;
+import spriter.vars.Variable;
 
 /**
  * ...
@@ -234,6 +235,19 @@ class Spriter
 	public function getPoints():Array<SpatialInfo>
 	{
 		return scml.entities[scml.currentEntity].animations[scml.currentAnimation].points;
+	}
+	public function getVariable(name:String):Variable<Dynamic>//TODO generic
+	{
+		for (currVar in scml.entities[scml.currentEntity].variables)
+		{
+			if (currVar.name == name)
+				return currVar;
+		}
+		return null;
+	}
+	public function getVariableFromId(id:Int):Variable<Dynamic>//TODO generic
+	{
+		return scml.entities[scml.currentEntity].variables[id];
 	}
 	
 	public function resetTime():Void

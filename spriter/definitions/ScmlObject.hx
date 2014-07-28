@@ -3,11 +3,18 @@ package spriter.definitions;
 import haxe.xml.Fast;
 import spriter.interfaces.IScml;
 import spriter.library.AbstractLibrary;
+import spriter.vars.Variable;
 
 /**
  * ...
  * @author Loudo
  */
+enum MetaDispatch
+{
+	ONCE;
+	ONCE_PER_LOOP;
+	ALWAYS;
+}
 class ScmlObject implements IScml
 {
 
@@ -26,13 +33,22 @@ class ScmlObject implements IScml
 	public var spriterSpatialInfo:SpatialInfo;
 	
 	/**
-	 * Callback at called at the end of the anim
+	 * Callback called at the end of the anim
 	 */
 	public var endAnimCallback:Void->Void;
 	/**
 	 * Auto Remove the callback at the end of the anim
 	 */
 	public var endAnimRemoval:Bool = true;
+	/**
+	 * Callback called when variable value changes
+	 */
+	public var varChangeCallback:Variable<Dynamic>->Void;
+	/**
+	 * Callback called when tag dispatched
+	 */
+	public var tagCallback:String->Void;
+	public var metaDispatch:MetaDispatch = ONCE_PER_LOOP;
 		
 	public function new(source:Xml = null) 
 	{
@@ -100,7 +116,23 @@ class ScmlObject implements IScml
 				endAnimCallback = null;
 			tempCallback();
 		}
-		
+	}
+	public function onTag(tag:Int):Void
+	{
+		if (tagCallback != null) {
+			tagCallback(tags[tag]);
+		}
+	}
+	public function onVar(id:Int, value:String):Void
+	{
+		var variable:Variable<Dynamic> = entities[currentEntity].variables[id];
+		//callback only if var changes
+		if (variable.set(value))
+		{
+			if (varChangeCallback != null) {
+				varChangeCallback(variable);
+			}
+		}
 	}
 	//interface IScml end
     public function setCurrentTime(newTime:Int, library:AbstractLibrary, characterInfo:SpatialInfo):Void
@@ -205,7 +237,8 @@ class ScmlObject implements IScml
 		newSCML.folders = copyFolders();
 		newSCML.activeCharacterMap = copyFolders();
 		newSCML.entities = entities;//TODO copy ?
-
+		newSCML.tags = tags;
+		
 		newSCML.currentEntity 	= Std.string(currentEntity); 
 		newSCML.currentAnimation  = Std.string(currentAnimation); 
 		newSCML.currentTime = 0; 
@@ -217,5 +250,6 @@ class ScmlObject implements IScml
 		folders = null;
 		activeCharacterMap = null;
 		entities = null;
+		tags = null;
 	}
 }
