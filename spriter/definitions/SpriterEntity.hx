@@ -35,19 +35,19 @@ class SpriterEntity
 			characterMaps.set(cm.att.name, new CharacterMap(cm));
 		}
 		
-		for (v in fast.node.var_defs.elements)
-		{
-			switch(v.att.type)
+		if(fast.hasNode.var_defs){
+			for (v in fast.node.var_defs.elements)
 			{
-				case "int":
-					variables.push(new VariableInt(v.att.name, Std.parseInt(v.att.resolve("default"))));
-				case "string":
-					variables.push(new VariableString(v.att.name, Std.string(v.att.resolve("default"))));
-				case "float":
-					variables.push(new VariableFloat(v.att.name, Std.parseFloat(v.att.resolve("default"))));
+				switch(v.att.type)
+				{
+					case "int":
+						variables.push(new VariableInt(v.att.name, Std.parseInt(v.att.resolve("default"))));
+					case "string":
+						variables.push(new VariableString(v.att.name, Std.string(v.att.resolve("default"))));
+					case "float":
+						variables.push(new VariableFloat(v.att.name, Std.parseFloat(v.att.resolve("default"))));
+				}
 			}
-			
-			
 		}
 		
 		for (oi in fast.nodes.obj_info)
