@@ -86,6 +86,11 @@ class SpriterEngine
 	 */
 	public var fixedTick:Bool = true;
 	
+	/*
+	 * If you want to clear and render the library outside of SpriterEngine, please set to false.
+	 */
+	public var handleLibraryClearAndRender:Bool = true;
+	
 	public function new(scml_str:String, library:AbstractLibrary, graphics:Sprite, frameRate:Int = 60) 
 	{
 		_spriters = new Array<Spriter>();
@@ -245,7 +250,8 @@ class SpriterEngine
 				computeTime();
 			}
 			
-			_lib.clear();//TODO handle different for other platform?
+			if(handleLibraryClearAndRender)
+				_lib.clear();//TODO handle different for other platform?
 			
 			var numSpriters:Int = _spriters.length;
 			if(numSpriters > 0){
@@ -255,7 +261,8 @@ class SpriterEngine
 					spriter = _spriters[i];
 					spriter.advanceTime(_elapsed);
 				}
-				_lib.render();
+				if(handleLibraryClearAndRender)
+					_lib.render();
 			}
 		}
 	}

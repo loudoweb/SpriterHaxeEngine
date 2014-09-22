@@ -1,5 +1,6 @@
 package spriter.definitions;
 import haxe.xml.Fast;
+import spriter.engine.SpriterEngineParam;
 
 /**
  * ...
@@ -29,6 +30,21 @@ class MainlineKey
 		{
 			objectRefs.push(new Ref(or));
 		}
+		/*sort objects by z_index
+		 *On Spriter, when you change the z-index of an object, it will change the xml tag position and the id
+		 *so z_index wasn't event used on SpriterHaxeEngine, it was the objet order that determined the z order
+		 *If you have some external tool and change only the z_index attribute, it should works now...
+		 * The following sorting is used only on demande because it extends the parse time.
+		 **/
+		if(SpriterEngineParam.NEED_ZORDER_REORDERING)
+			objectRefs.sort(zOrdering);
+	}
+	private function zOrdering(ref1:Ref, ref2:Ref):Int
+	{
+		if (ref1.z_index < ref2.z_index)
+			return -1;
+		return 1;
+		
 	}
 	
 }
