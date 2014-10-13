@@ -1,10 +1,8 @@
 package spriter.library;
 
 import flixel.FlxSprite;
-import flixel.group.FlxTypedSpriteGroup;
-import flixel.util.loaders.SparrowData;
-import flixel.util.loaders.TexturePackerData;
-import flixel.util.loaders.TexturePackerXMLData;
+import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.group.FlxGroup;
 import openfl.Assets;
 import spriter.definitions.PivotInfo;
 import spriter.definitions.SpatialInfo;
@@ -18,11 +16,11 @@ import spriter.util.SpriterUtil;
  */
 class FlixelLibrary extends AbstractLibrary
 {
-	private var _flxGroup:FlxTypedSpriteGroup<FlxSprite>;
+	private var _flxGroup:FlxTypedGroup<FlxSprite>;
 	
 	private var _sprites:Map<String, Array<FlxSprite>>;
 	
-	private var _atlasData:TexturePackerData;
+	private var _atlasFrames:FlxAtlasFrames;
 	
 	/**
 	 * Flixel lib constructor
@@ -32,7 +30,7 @@ class FlixelLibrary extends AbstractLibrary
 	 * 
 	 * Usage examples:
 	 * 1) without atlases
-	 * var spriterGroup:FlxTypedSpriteGroup<FlxSprite> = new FlxTypedSpriteGroup<FlxSprite>();
+	 * var spriterGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
 	 * var lib:FlixelLibrary = new FlixelLibrary(spriterGroup, 'assets/sprites/brawler/');
 	 * engine = new SpriterEngine(Assets.getText('assets/sprites/brawler/brawler.scml'), lib, null);
 	 * var len:Int = 1;
@@ -43,10 +41,10 @@ class FlixelLibrary extends AbstractLibrary
 	 * add(spriterGroup);
 	 *
 	 * 2) with atlases
-	 * var spriterGroup:FlxTypedSpriteGroup<FlxSprite> = new FlxTypedSpriteGroup<FlxSprite>();
-	 * var data:SparrowData = new SparrowData("assets/ugly/ugly.xml", "assets/ugly/ugly.png");
-	 * var lib:FlixelLibrary = new FlixelLibrary(spriterGroup, null, data);
-	 * engine = new SpriterEngine(Assets.getText('assets/sprites/brawler/brawler.scml'), lib, null);
+	 * var spriterGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
+	 * var atlasFrames:FlxAtlasFrames = FlxAtlasFrames.fromSparrow("assets/ugly/ugly.png", "assets/ugly/ugly.xml");
+	 * var lib:FlixelLibrary = new FlixelLibrary(spriterGroup, null, atlasFrames);
+	 * engine = new SpriterEngine(Assets.getText('assets/ugly/ugly.scml'), lib, null);
 	 * var len:Int = 1;
 	 * for (i in 0...len) {
 	 *  	engine.addEntity('lib_' + Std.int(i+1), 100 + 50 * (i % 10), 100 + 50 * (Std.int(i / 10) % 6));
@@ -55,31 +53,31 @@ class FlixelLibrary extends AbstractLibrary
 	 * add(spriterGroup);
 	 * 
 	 * 
-	 * and don't forget to call engine.update(); at the state update() method
+	 * and don't forget to call engine.update(Std.int(1000 * elapsed)); at the state update() method
 	 */
-	public function new(group:FlxTypedSpriteGroup<FlxSprite>, basePath:String = null, atlasData:TexturePackerData = null) 
+	public function new(group:FlxTypedGroup<FlxSprite>, basePath:String = null, atlasFrames:FlxAtlasFrames = null) 
 	{
 		super(basePath);
 		
 		_flxGroup = group;
 		_sprites = new Map<String, Array<FlxSprite>>();
-		_atlasData = atlasData;
+		_atlasFrames = atlasFrames;
 	}
 	
 	override public function getFile(name:String):Dynamic
 	{
-		if (_atlasData != null)
+		if (_atlasFrames != null)
 		{
 			var sprite:FlxSprite = null;
 			
-			if (_sprites.exists(_atlasData.assetName) && _sprites.get(_atlasData.assetName).length > 0)
+			if (_sprites.exists(_atlasFrames.parent.key) && _sprites.get(_atlasFrames.parent.key).length > 0)
 			{
-				sprite = _sprites.get(_atlasData.assetName).shift();
+				sprite = _sprites.get(_atlasFrames.parent.key).shift();
 			}
 			else
 			{
 				sprite = new FlxSprite();
-				sprite.loadGraphicFromTexture(_atlasData);
+				sprite.frames = _atlasFrames;
 			}
 			
 			sprite.animation.frameName = name;
@@ -108,7 +106,7 @@ class FlixelLibrary extends AbstractLibrary
 			if (sprite == null) 
 				continue;
 			
-			var key:String = sprite.cachedGraphics.key;
+			var key:String = sprite.graphic.key;
 			
 			if (!_sprites.exists(key))
 			{
@@ -165,10 +163,10 @@ class FlixelLibrary extends AbstractLibrary
 		
 		_sprites = null;
 		
-		if (_atlasData != null)
+		if (_atlasFrames != null)
 		{
-			_atlasData.destroy();
-			_atlasData = null;
+			_atlasFrames.destroy();
+			_atlasFrames = null;
 		}
 	}	
 }
