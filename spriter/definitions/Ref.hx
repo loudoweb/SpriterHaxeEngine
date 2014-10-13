@@ -19,7 +19,7 @@ class Ref
 		parent = fast.has.parent ? Std.parseInt(fast.att.parent) : -1;
 		timeline = Std.parseInt(fast.att.timeline);
 		key = Std.parseInt(fast.att.key);
-		z_index = Std.parseInt(fast.att.z_index);
+		z_index = fast.has.z_index ? Std.parseInt(fast.att.z_index) : 0;
 	}
 	
 }

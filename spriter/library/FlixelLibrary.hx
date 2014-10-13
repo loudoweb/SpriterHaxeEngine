@@ -136,12 +136,9 @@ class FlixelLibrary extends AbstractLibrary
 		
 		_flxGroup.add(sprite);
 	}
-	override public function setRoot(root:Dynamic):Void 
-	{
-	}
-	override public function render():Void
-	{		
-	}
+	override public function setRoot(root:Dynamic):Void {  }
+	
+	override public function render():Void {  }
 	
 	override public function destroy():Void
 	{
@@ -173,6 +170,5 @@ class FlixelLibrary extends AbstractLibrary
 			_atlasData.destroy();
 			_atlasData = null;
 		}
-	}
-	
+	}	
 }
