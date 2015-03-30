@@ -56,12 +56,12 @@ class TimelineKey
 
     public function getTWithNextKey(nextKey:TimelineKey, nextKeyTime:Int, currentTime:Float):Float
     {
-        if(curveType == INSTANT || time == nextKey.time)
+        if(curveType == INSTANT || time == nextKeyTime)
         {
             return 0;
         }
         
-        var t:Float = (currentTime - time) / (nextKey.time - time);
+        var t:Float = (currentTime - time) / (nextKeyTime - time);
 
         if(curveType == LINEAR)
         {

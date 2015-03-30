@@ -289,7 +289,7 @@ class SpriterAnimation
   
         var keyB:TimelineKey = timeline.keys[nextKeyIndex].copy();
         var keyBTime:Int = keyB.time;
-
+		//this line is for interpolation between last key and first key when looping //TOCHECK when backward animation
         if(keyBTime < keyA.time)
         {
             keyBTime = keyBTime+length;
