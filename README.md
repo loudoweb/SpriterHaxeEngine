@@ -94,6 +94,8 @@ TODO
  - animation callback optimization
  - check Garbage collector
  - binary scml
+ - use multiple scml in the engine
+ - use multiple atlas in the engine (and merge atlas if needed)
  
 Examples
 ------------
@@ -107,7 +109,6 @@ Additional information
  
 Known issues
 ------------
- - interpolation are not enough smooth at the end of a looping animation (need to check if the interpolation with the first frame is ok)
  - [html5] some issues on html5 depending on the backend used and the Library used.
  - [neko] if you have trouble with TileLayerLibrary, please update tilelayer with : https://github.com/matthewswallace/openfl-tilelayer/pull/5
  
