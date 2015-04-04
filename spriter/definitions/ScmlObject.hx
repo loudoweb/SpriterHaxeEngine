@@ -21,6 +21,10 @@ class ScmlObject implements IScml
 	public var folders:Array<SpriterFolder>;
 	public var activeCharacterMap:Array<SpriterFolder>;
 	public var entities:Map<String, SpriterEntity>;
+	/**
+	 * Get the names of all entities in the scml file
+	 */
+	public var entitiesName:Array<String>;
 	public var tags:Array<String>;
 
     public var currentEntity:String 	= ""; 
@@ -29,9 +33,7 @@ class ScmlObject implements IScml
     public var currentTime:Float; 
 	
 	public var spriterName:String;
-	
-	public var spriterSpatialInfo:SpatialInfo;
-	
+		
 	/**
 	 * Callback called at the end of the anim
 	 */
@@ -55,6 +57,7 @@ class ScmlObject implements IScml
 		if(source != null){
 			folders = new Array<SpriterFolder>();
 			entities = new Map<String,SpriterEntity>();
+			entitiesName = [];
 			
 			var fast = new Fast(source.firstElement());
 			
@@ -70,6 +73,7 @@ class ScmlObject implements IScml
 				else if(el.name == "entity")
 				{
 					entities.set(el.att.name, new SpriterEntity(el));
+					entitiesName.push(el.att.name);
 					if (el.att.id == "0") {
 						currentEntity = el.att.name;
 						currentAnimation = el.node.animation.att.name;
@@ -139,9 +143,17 @@ class ScmlObject implements IScml
     {
         var currentEnt:SpriterEntity 		=	entities.get(currentEntity);
 		var currentAnim:SpriterAnimation	=	currentEnt.animations.get(currentAnimation);
-		spriterSpatialInfo = characterInfo;
-		currentAnim.setCurrentTime(newTime, library, this, currentEnt);
-    }		
+		currentAnim.setCurrentTime(newTime, library, this, currentEnt, characterInfo);
+    }
+	public function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo):Void
+	{
+		var entityName:String = entitiesName[entity];
+		var currentEnt:SpriterEntity 		=	entities.get(entityName);
+		var animationName:String = currentEnt.animationsName[animation];
+		var currentAnim:SpriterAnimation	=	currentEnt.animations.get(animationName);
+		var newTime:Int = Std.int(t * currentAnim.length);
+		currentAnim.setCurrentTime(newTime, library, this, currentEnt, spatialInfo);
+	}
 
     public function applyCharacterMap(name:String, reset:Bool):Bool
     {
@@ -175,18 +187,6 @@ class ScmlObject implements IScml
 		}
     }
 	/**
-	 * Get the names of all entities in the scml file
-	 */
-	public function getEntitiesName():Array<String>
-	{
-		var returnEntities:Array<String> = [];
-		for (key in entities.keys())
-		{
-			returnEntities.push(key);
-		}
-		return returnEntities;
-	}
-	/**
 	 * Get the names of all animations in the scml file
 	 * @param	entity you have to speficy an entity where we can search the animations.
 	 */
@@ -194,12 +194,7 @@ class ScmlObject implements IScml
 	{
 		if (entities.exists(entity)) {
 			var entity:SpriterEntity = entities.get(entity);
-			var returnAnimations:Array<String> = [];
-			for (key in entity.animations.keys())
-			{
-				returnAnimations.push(key);
-			}
-			return returnAnimations;
+			return entity.animationsName;
 		}
 		return null;
 	}
@@ -237,6 +232,7 @@ class ScmlObject implements IScml
 		newSCML.folders = copyFolders();
 		newSCML.activeCharacterMap = copyFolders();
 		newSCML.entities = entities;//TODO copy ?
+		newSCML.entitiesName = entitiesName;
 		newSCML.tags = tags;
 		
 		newSCML.currentEntity 	= Std.string(currentEntity); 
@@ -250,6 +246,7 @@ class ScmlObject implements IScml
 		folders = null;
 		activeCharacterMap = null;
 		entities = null;
+		entitiesName = null;
 		tags = null;
 	}
 }

@@ -16,6 +16,7 @@ class SpriterEntity
 	public var name:String;
     public var characterMaps:Map<String,CharacterMap>;
     public var animations:Map<String,SpriterAnimation>;
+	public var animationsName:Array<String>;
 	public var variables:Array<Variable<Dynamic>>;
 	public var boxes_info:Map<String, SpriterBox>;
 
@@ -24,6 +25,7 @@ class SpriterEntity
 	{
 		characterMaps = new Map<String,CharacterMap>();
 		animations = new Map<String,SpriterAnimation>();
+		animationsName = [];
 		variables = new Array<Variable<Dynamic>>();
 		boxes_info = new Map<String, SpriterBox>();
 		
@@ -58,7 +60,8 @@ class SpriterEntity
 		
 		for (a in fast.nodes.animation)
 		{
-			animations.set(a.att.name,new SpriterAnimation(a));
+			animations.set(a.att.name, new SpriterAnimation(a));
+			animationsName.push(a.att.name);
 		}
 		/*
 		<obj_info name="box_000" type="box" w="65" h="53" pivot_x="0" pivot_y="0"/>

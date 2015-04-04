@@ -2,6 +2,7 @@ package spriter.interfaces;
 import spriter.definitions.PivotInfo;
 import spriter.definitions.ScmlObject.MetaDispatch;
 import spriter.definitions.SpatialInfo;
+import spriter.library.AbstractLibrary;
 
 /**
  * @author Loudo
@@ -9,7 +10,6 @@ import spriter.definitions.SpatialInfo;
 
 interface IScml 
 {
-	var spriterSpatialInfo:SpatialInfo;
 	var spriterName:String;
 	var metaDispatch:MetaDispatch;
 	function getPivots(folder:Int, file:Int):PivotInfo;
@@ -17,4 +17,5 @@ interface IScml
 	function onEndAnim():Void;
 	function onTag(tag:Int):Void;
 	function onVar(id:Int, value:String):Void;
+	function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo):Void;
 }

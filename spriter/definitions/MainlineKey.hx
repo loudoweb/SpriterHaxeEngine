@@ -32,9 +32,9 @@ class MainlineKey
 		}
 		/*sort objects by z_index
 		 *On Spriter, when you change the z-index of an object, it will change the xml tag position and the id
-		 *so z_index wasn't event used on SpriterHaxeEngine, it was the objet order that determined the z order
+		 *so z_index wasn't even used on SpriterHaxeEngine, it was the objet order that determined the z order
 		 *If you have some external tool and change only the z_index attribute, it should works now...
-		 * The following sorting is used only on demande because it extends the parse time.
+		 * The following sorting is used only on demand because it extends the parse time.
 		 **/
 		if(SpriterEngineParam.NEED_ZORDER_REORDERING)
 			objectRefs.sort(zOrdering);

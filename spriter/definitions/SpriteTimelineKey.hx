@@ -1,5 +1,6 @@
 package spriter.definitions;
 import haxe.xml.Fast;
+import spriter.definitions.SpriterTimeline.ObjectType;
 
 /**
  * ...
@@ -12,7 +13,7 @@ class SpriteTimelineKey extends ObjectTimelineKey
 	
 	public function new(fast:Fast = null) 
 	{
-		super(fast);
+		super(fast, ObjectType.SPRITE);
 		
 		if(fast != null){
 		

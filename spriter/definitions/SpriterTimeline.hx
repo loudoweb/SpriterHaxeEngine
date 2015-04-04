@@ -55,6 +55,11 @@ class SpriterTimeline
 				{
 					keys.push(new ObjectTimelineKey(k, objectType));
 				}
+			case ObjectType.ENTITY:
+				for (k in fast.nodes.key)
+				{
+					keys.push(new SubEntityTimelineKey(k));
+				}
 			default:
 				
 		}

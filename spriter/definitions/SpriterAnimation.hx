@@ -90,7 +90,7 @@ class SpriterAnimation
 		}
 	}
 	
-	public function setCurrentTime(newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity):Void
+	public function setCurrentTime(newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
 		var currentTime:Int;
 		var tempLoop:Int;
@@ -101,7 +101,7 @@ class SpriterAnimation
 				loop = Std.int(newTime / length);
 				currentTime = newTime % length;
 				//update
-				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root, currentEntity);
+				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root, currentEntity, parentSpatialInfo);
 				if (root.metaDispatch == ONCE_PER_LOOP && tempLoop != loop) {
 					resetMetaDispatch();
 				}
@@ -112,14 +112,14 @@ class SpriterAnimation
 			case NO_LOOPING:
 				currentTime = Std.int(Math.min(newTime, length));
 				//update
-				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root, currentEntity);
+				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root, currentEntity, parentSpatialInfo);
 				//callback
 				if (currentTime == length)
 					root.onEndAnim();
         }
     }
 
-    public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity):Void
+    public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
         var transformedBoneKeys:Array<SpatialInfo> = new Array<SpatialInfo>();
 		var currentKey:SpatialTimelineKey;
@@ -137,7 +137,7 @@ class SpriterAnimation
             }
 			else 
 			{
-				spatialInfo = root.spriterSpatialInfo;
+				spatialInfo = parentSpatialInfo;
 			}
 
             spatialInfo = currentKey.info.unmapFromParent(spatialInfo);
@@ -159,7 +159,7 @@ class SpriterAnimation
             }
             else
             {
-                spatialInfo = root.spriterSpatialInfo;
+                spatialInfo = parentSpatialInfo;
             }
 			
 		    //currentKey.info = currentKey.info.unmapFromParent(parentInfo);//TOFIX and remove next line ?
@@ -174,6 +174,9 @@ class SpriterAnimation
 				if (currentKeyName != null) {//hidden object test (via mapping)
 					library.addGraphic(root.spriterName, currentRef.timeline, currentRef.key, currentKeyName, spatialInfo, activePivots);
 				}
+			}else if (Std.is(currentKey, SubEntityTimelineKey)){
+				var currentSubKey:SubEntityTimelineKey = cast(currentKey, SubEntityTimelineKey);
+				root.setSubEntityCurrentTime(library, currentSubKey.t, currentSubKey.entity, currentSubKey.animation, spatialInfo);
 			}else {
 				activePivots = new PivotInfo();
 				activePivots = currentKey.paint(activePivots.pivotX, activePivots.pivotY);
