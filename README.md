@@ -71,12 +71,14 @@ Spriter Haxe Engine Features
  - callback when tag dispatches
  - Points (usage example : to shot a bullet when gun fire)
  - Boxes (usage example : hitbox)
+ - sub entities
 
 **Libraries**
- - Simple bitmap library (bitmaps handled with addChild)
- - BitmapData library (copypixels)
- - Tilelayer library (drawTiles)(dependency : https://github.com/matthewswallace/openfl-tilelayer).
- - Flixel Library (atlas support or bitmaps handled with addChild)
+ - Simple bitmap library (bitmaps handled with addChild, dependency : openfl)
+ - BitmapData library (copypixels, dependency : openfl)
+ - Tilelayer library (drawTiles using only one tilesheet)(dependency : https://github.com/elsassph/openfl-tilelayer and openfl).
+ - DrawTiles library (using many tilesheets)(dependency : https://github.com/elsassph/openfl-tilelayer and openfl).
+ - Flixel Library (atlas support or bitmaps handled with addChild, , dependency : flixel) by Zaphod
  - override the AbstractLibrary to provide a new library
 
 **Cross-platform**
@@ -90,12 +92,12 @@ TODO
 ----
  - add tilesheet stage 3d support : https://github.com/as3boyan/TilesheetStage3D/
  - add ash and haxepunk support
+ - add Flambe support (waiting for pull request, see here https://github.com/quinnhoener/SpriterHaxeEngine)
  - Optimized engine : draw call only when needed. So "instant" keys are not updated between keys.
  - animation callback optimization
  - check Garbage collector
  - binary scml
  - use multiple scml in the engine
- - use multiple atlas in the engine (and merge atlas if needed)
  
 Examples
 ------------
@@ -103,12 +105,12 @@ Examples
  
 Additional information
 ------------
- - compatible with Spriter b8
+ - compatible with Spriter r3
  - With Tilelayer library, don't use openfl-bitfive for html5 target.
  
  
 Known issues
 ------------
  - [html5] some issues on html5 depending on the backend used and the Library used.
- - [neko] if you have trouble with TileLayerLibrary, please update tilelayer with : https://github.com/matthewswallace/openfl-tilelayer/pull/5
+ - Please use the best rendering method according to your target.
  
