@@ -78,8 +78,14 @@ class DrawListLibrary extends AbstractLibrary
 	{
 		#if !flash
 		view.graphics.clear();
-		currentDrawListIndex = 0;
 		#end
+		lastTilesheetUsed = -1;
+		currentDrawListIndex = 0;
+		for (drawList in layerDrawingList)
+		{
+			drawList.destroy();
+		}
+		layerDrawingList.splice(0, layerDrawingList.length); // compact buffer
 	}
 	/**
 	 * Call render() every frame to render the graphic
@@ -145,7 +151,6 @@ class DrawListLibrary extends AbstractLibrary
 		
 		var list = currentDrawList.list;
 		var fields = currentDrawList.fields;
-		trace(fields);
 		var offsetTransform = currentDrawList.offsetTransform;
 		var offsetRGB = currentDrawList.offsetRGB;
 		var offsetAlpha = currentDrawList.offsetAlpha;
