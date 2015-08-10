@@ -92,7 +92,7 @@ class DrawListLibrary extends AbstractLibrary
 	 */
 	override public function render():Void
 	{
-		#if debug
+		#if debugDrawCalls
 		trace('${layerDrawingList.length} of $maxDrawCalls drawCalls');
 		#end
 		#if !flash
@@ -104,7 +104,7 @@ class DrawListLibrary extends AbstractLibrary
 		{
 			tilesheetLibrary[drawList.tilesheet].drawTiles(view.graphics, drawList.list, useSmoothing, drawList.flags);
 		}
-		#else
+		#else debugDrawCalls
 		trace("can't render on flash target");
 		#end
 	}
