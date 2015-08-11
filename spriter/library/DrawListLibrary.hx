@@ -104,7 +104,7 @@ class DrawListLibrary extends AbstractLibrary
 		{
 			tilesheetLibrary[drawList.tilesheet].drawTiles(view.graphics, drawList.list, useSmoothing, drawList.flags);
 		}
-		#else debugDrawCalls
+		#elseif debugDrawCalls
 		trace("can't render on flash target");
 		#end
 	}
