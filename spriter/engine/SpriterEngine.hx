@@ -34,13 +34,9 @@ class SpriterEngine
 	 */
 	public var scml(default,null):ScmlObject;
 	/**
-	 * This is the lib used to retrieve a graphic and display the Spriter on screen.
+	 * Used to retrieve a graphic and add it to the custom rendering system.
 	 */
 	var _lib:AbstractLibrary;
-	/**
-	 * Main Graphic Sprite where all the Spriter are displayed.
-	 */
-	var _graphics:Sprite;
 	/*
 	 * #############################################
 	 * Time
@@ -91,15 +87,13 @@ class SpriterEngine
 	 */
 	public var handleLibraryClearAndRender:Bool = true;
 	
-	public function new(scml_str:String, library:AbstractLibrary, graphics:Sprite, frameRate:Int = 60) 
+	public function new(scml_str:String, library:AbstractLibrary, frameRate:Int = 60) 
 	{
 		_spriters = new Array<Spriter>();
 		_spritersNamed = new Map<String ,Spriter>();
 		
 		scml = new ScmlObject(Xml.parse(scml_str));
 		_lib = library;
-		_graphics = graphics;
-		_lib.setRoot(_graphics);
 		this.framerate = frameRate;
 		_lastTime = Lib.getTimer();
 	}

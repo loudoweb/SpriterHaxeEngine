@@ -172,7 +172,7 @@ class SpriterAnimation
 				//render from library
 				var currentKeyName:String = root.getFileName(currentSpriteKey.folder, currentSpriteKey.file);
 				if (currentKeyName != null) {//hidden object test (via mapping)
-					library.addGraphic(root.spriterName, currentRef.timeline, currentRef.key, currentKeyName, spatialInfo, activePivots);
+					library.addGraphic(currentKeyName, spatialInfo, activePivots);
 				}
 			}else if (Std.is(currentKey, SubEntityTimelineKey)){
 				var currentSubKey:SubEntityTimelineKey = cast(currentKey, SubEntityTimelineKey);

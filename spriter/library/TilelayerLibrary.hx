@@ -11,51 +11,52 @@ import spriter.definitions.SpatialInfo;
 import spriter.util.SpriterUtil;
 
 /**
- * ...
+ * Advanced OpenFL renderer using Texture Atlas thanks to Tilelayer (https://github.com/elsassph/openfl-tilelayer)
  * @author Loudo
  */
 class TilelayerLibrary extends AbstractLibrary
 {
-	private var _root:Sprite;
-	
-	private var _layer:TileLayer;
-	
-	private var _group:TileGroup;
+	/**
+	 * Tilelayer used for rendering
+	 */
+	var _layer:TileLayer;
 	
 	/**
-	 * Additional library for Spriter. It uses haxelib tilelayer.
-	 * 
-	 * @param	dataPath .json
-	 * @param	atlasPath .png
+	 * Sprite where we render
 	 */
-	public function new(dataPath:String = "", atlasPath:String = "") 
+	var _canvas:Sprite;
+	
+	var _currentSpatialResult:SpatialInfo;
+	
+	/**
+	 * Advanced OpenFL renderer using Texture Atlas thanks to Tilelayer (https://github.com/elsassph/openfl-tilelayer)
+	 * 
+	 * @param	dataPath .xml of the atlas
+	 * @param	atlasPath .png of the atlas
+	 * @param	canvas rendering Sprite
+	 */
+	public function new(dataPath:String = "", atlasPath:String = "", canvas:Sprite) 
 	{
 		super(dataPath);
+		_canvas = canvas;
+		
 		var sheetData = Assets.getText(dataPath);
 		var tilesheet = new SparrowTilesheet(Assets.getBitmapData(atlasPath), sheetData);
 		_layer = new TileLayer(tilesheet, true);
-		
-		/*_group = new TileGroup(_layer);
-		_layer.addChild(_group);*/
-	}
-	
-	override public function setRoot(root:Sprite):Void {
-		_root = root;
-		_root.addChild(_layer.view); // layer is NOT a DisplayObject
+		_canvas.addChild(_layer.view); // layer is NOT a DisplayObject
 	}
 	
 	override public function getFile(name:String):Dynamic
 	{
-		var sprite:TileSprite = new TileSprite(_layer, name);
-		return sprite;
+		return new TileSprite(_layer, name);
 	}
 	
 	override public function clear():Void
 	{
-		_layer.removeAllChildren();
+		_layer.removeAllChildren();//TODO destroy ? pool ?
 	}
 	
-	override public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
+	override public function addGraphic(name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
 		
 		var sprite:TileSprite = getFile(name);
@@ -112,8 +113,8 @@ class TilelayerLibrary extends AbstractLibrary
 		clear();
 		if (_layer.view != null && _layer.view.parent != null)
 			_layer.view.parent.removeChild(_layer.view);
-		_group = null;
 		_layer = null;
+		_canvas = null;
 	}
 	
 	

@@ -63,9 +63,6 @@ class DrawListLibrary extends AbstractLibrary
 		layerDrawingList = [];
 		tilesheetLibrary = tilesheets;
 	}
-	override public function setRoot(root:Sprite):Void {
-		
-	}
 	
 	override public function getFile(name:String):Dynamic
 	{
@@ -104,12 +101,12 @@ class DrawListLibrary extends AbstractLibrary
 		{
 			tilesheetLibrary[drawList.tilesheet].drawTiles(view.graphics, drawList.list, useSmoothing, drawList.flags);
 		}
-		#else debugDrawCalls
+		#elseif debugDrawCalls
 		trace("can't render on flash target");
 		#end
 	}
 	
-	override public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
+	override public function addGraphic(name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
 		//get file indice and size
 		var imageIndices:Array<Int>;
@@ -124,7 +121,7 @@ class DrawListLibrary extends AbstractLibrary
 		var tilesheetIndex:Int = 0;
 		for (sheet in tilesheetLibrary)
 		{
-			imageIndices = sheet.getAnim(name);
+			imageIndices = sheet.getAnim(name);//TODO should we store from which sheets the tile comes from?
 			if (imageIndices.length > 0) {
 				imageIndex = imageIndices[0];
 				size = sheet.getSize(imageIndex);
@@ -207,6 +204,19 @@ class DrawListLibrary extends AbstractLibrary
 		return new SpatialInfo(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
 	}
 	
+	override public function destroy():Void 
+	{
+		clear();
+		view = null;
+		layerDrawingList = null;
+		tilesheetLibrary = null;//TODO proper destroy function for tilesheet?
+		if (currentDrawList != null)
+		{
+			currentDrawList.destroy();
+			currentDrawList = null;
+		}
+	}
+	
 	public function addDrawList(list:DrawList):Void
 	{
 		layerDrawingList.push(list);
@@ -214,6 +224,7 @@ class DrawListLibrary extends AbstractLibrary
 }
 /**
  * Modified DrawList from Tilelayer which allows to compare the current tilesheet used.
+ * TODO pool
  * @author loudo (Ludovic Bas)
  * @author forked from TileLayer by Philippe / http://philippe.elsass.me
  */

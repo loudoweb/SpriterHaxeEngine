@@ -24,11 +24,6 @@ class AbstractLibrary
 		_basePath = basePath;
 	}
 	
-	public function setRoot(root:Dynamic):Void 
-	{
-		throw ("must be overrided");
-	}
-	
 	/**
 	 * 
 	 * @param	name of the image
@@ -45,7 +40,7 @@ class AbstractLibrary
 		throw ("must be overrided");
 	}
 	
-	public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
+	public function addGraphic(name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
 		throw ("must be overrided");
 	}
@@ -65,7 +60,7 @@ class AbstractLibrary
 		
 		var x2 = (preX - pivotX) * c - (preY - pivotY) * s + pivotX;
         var y2 = (preX - pivotX) * s + (preY - pivotY) * c + pivotY;
-		return new SpatialInfo(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
+		return new SpatialInfo(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);//TODO pool?
 	}
 	
 	public function computeRectCoordinates(info:SpatialInfo, pivots:PivotInfo, width:Float, height:Float):Quadrilateral
@@ -106,7 +101,7 @@ class AbstractLibrary
 		x1 = (x1 - pivotX) * c - (y1 - pivotY) * s + pivotX;
 		y1 = (x1 - pivotX) * s + (y1 - pivotY) * c + pivotY;
 		
-		return new Quadrilateral(new Point(x1, y1), new Point(x2, y2), new Point(x3, y3), new Point(x4, y4));
+		return new Quadrilateral(new Point(x1, y1), new Point(x2, y2), new Point(x3, y3), new Point(x4, y4));//TODO pool?
 	}
 	
 	public function render():Void

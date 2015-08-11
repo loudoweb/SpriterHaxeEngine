@@ -8,33 +8,31 @@ import spriter.definitions.SpatialInfo;
 import spriter.util.SpriterUtil;
 
 /**
- * ...
+ * Simple OpenFL renderer using Bitmap and dislayList.
+ * Use for quick test purpose. Not recommended for production.
+ * TODO optimization: cache Bitmap and such things
  * @author Loudo
  */
 class SpriterLibrary extends AbstractLibrary
 {
-	private var _root:Sprite;
+	/**
+	 * Sprite where we add childs (Bitmap)
+	 */
+	var _canvas:Sprite;
+	
+	var _currentBitmap:Bitmap;
+	var _currentSpatialResult:SpatialInfo;
+	
 	
 	/**
-	 * One instance per group
+	 * Simple OpenFL renderer using Bitmap and dislayList.
+	 * @param	basePath path used to find the BitmapData using Assets.getBitmapData();
+	 * @param	canvas Sprite where we add childs (Bitmap)
 	 */
-	private var _assets:Map<String, Bitmap>;
-	private var _groups:Map<String, Map<String, Bitmap>>;
-	
-	
-	/**
-	 * 
-	 * @param	_basePath 
-	 */
-	public function new(basePath :String) 
+	public function new(basePath:String, canvas:Sprite) 
 	{
-		_basePath = basePath;
-		_groups = new Map < String, Map < String, Bitmap >> ();
+		_canvas = canvas;
 		super(basePath);
-	}
-	
-	override public function setRoot(root:Dynamic):Void {
-		_root = cast root;
 	}
 	
 	/**
@@ -49,57 +47,40 @@ class SpriterLibrary extends AbstractLibrary
 	
 	override public function clear():Void
 	{
-		//TODO optimization : clear only image that can not be reuse or something
-		var i:Int = _root.numChildren;
+		var i:Int = _canvas.numChildren;
 		while (--i >= 0)
 		{
-			_root.removeChildAt(i);
+			_canvas.removeChildAt(i);
 			
 		}
 		
 	}
 	
-	override public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
+	override public function addGraphic(name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
-		var idImage:String = timeline + ':' + key + ':' + name;
+
+		_currentBitmap = new Bitmap (getFile(name), PixelSnapping.AUTO, true);
 		
-		var bitmap:Bitmap;
-		if (_groups.exists(group) && group == "okugutf") {
-			_assets = _groups.get(group);
-			if(_assets.exists(idImage)){
-				bitmap = _assets.get(idImage);
-			}else {
-				bitmap = new Bitmap (getFile(name), PixelSnapping.AUTO, true);
-				_assets.set(idImage, bitmap);
-				_groups.set(group, _assets);
-			}
-		}else {
-			_assets = new Map<String, Bitmap>();
-			bitmap = new Bitmap (getFile(name), PixelSnapping.AUTO, true);
-			_assets.set(idImage, bitmap);
-			_groups.set(group, _assets);
-		}
-		
-		var spatialResult:SpatialInfo = compute(info, pivots, bitmap.bitmapData.width, bitmap.bitmapData.height);
-		bitmap.x = spatialResult.x;
-		bitmap.y = spatialResult.y;
-		bitmap.scaleX = spatialResult.scaleX;
-		bitmap.scaleY = spatialResult.scaleY;
-		bitmap.rotation = SpriterUtil.fixRotation(spatialResult.angle);
-		bitmap.alpha = Math.abs(spatialResult.a);
-		_root.addChild(bitmap);
+		_currentSpatialResult = compute(info, pivots, _currentBitmap.bitmapData.width, _currentBitmap.bitmapData.height);
+		_currentBitmap.x = _currentSpatialResult.x;
+		_currentBitmap.y = _currentSpatialResult.y;
+		_currentBitmap.scaleX = _currentSpatialResult.scaleX;
+		_currentBitmap.scaleY = _currentSpatialResult.scaleY;
+		_currentBitmap.rotation = SpriterUtil.fixRotation(_currentSpatialResult.angle);
+		_currentBitmap.alpha = Math.abs(_currentSpatialResult.a);
+		_canvas.addChild(_currentBitmap);
 	}
 	
 	override public function render():Void
 	{
-		
+		//we use display list so we use addChild in addGraphic()
 	}
 	
 	override public function destroy():Void
 	{
 		clear();
-		_assets = null;
-		_groups = null;
+		_currentBitmap = null;
+		_currentSpatialResult = null;
 	}
 	
 }

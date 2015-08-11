@@ -10,17 +10,20 @@ import spriter.util.ColorUtils;
 import spriter.util.SpriterUtil;
 
 /**
- * ...
+ * Simple OpenFL renderer using BitmapData and BitmapData.copypixels().
  * @author Loudo
  */
 class BitmapLibrary extends AbstractLibrary
 {
 	
 	var _canvas : BitmapData;
+	
     var _point : Point;
     var _matrix : Matrix;
 	var _alphaTransform:ColorTransform;
+	var _currentBd:BitmapData;
 	var _alphaBd:BitmapData;
+	var _currentSpatialResult:SpatialInfo;
 	
 	public function new(basePath:String, canvas : BitmapData) 
 	{
@@ -39,32 +42,29 @@ class BitmapLibrary extends AbstractLibrary
         _canvas.fillRect(_canvas.rect, 0x00ffffff);
 		_canvas.lock();
     }
-	override public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
+	override public function addGraphic(name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
-		var bmp : BitmapData = cast getFile(name);
+		_currentBd = cast getFile(name);
 		
-		var spatialResult:SpatialInfo = compute(info, pivots, bmp.width, bmp.height);
+		_currentSpatialResult = compute(info, pivots, _currentBd.width, _currentBd.height);
 		
 		
-		if(spatialResult.angle == 0 && spatialResult.scaleX == 1 && spatialResult.scaleY == 1)
+		if(_currentSpatialResult.angle == 0 && _currentSpatialResult.scaleX == 1 && _currentSpatialResult.scaleY == 1)
         {
-            _point.x = spatialResult.x;
-            _point.y = spatialResult.y;
-			_alphaBd = new BitmapData(bmp.width, bmp.height, true, ColorUtils.multiplyAlpha(Math.abs(spatialResult.a)));
-            _canvas.copyPixels(bmp, bmp.rect, _point,_alphaBd, _point,true);
+            _point.x = _currentSpatialResult.x;
+            _point.y = _currentSpatialResult.y;
+			_alphaBd = new BitmapData(_currentBd.width, _currentBd.height, true, ColorUtils.multiplyAlpha(Math.abs(_currentSpatialResult.a)));
+            _canvas.copyPixels(_currentBd, _currentBd.rect, _point,_alphaBd, _point,true);
         }
         else
         {
             _matrix.identity();
-            _matrix.scale(spatialResult.scaleX, spatialResult.scaleY);
-            _matrix.rotate(SpriterUtil.toRadians(SpriterUtil.fixRotation(spatialResult.angle)));
-            _matrix.translate(spatialResult.x, spatialResult.y);
-			_alphaTransform.alphaMultiplier = Math.abs(spatialResult.a);
-            _canvas.draw(bmp, _matrix, _alphaTransform, null, null, true);
+            _matrix.scale(_currentSpatialResult.scaleX, _currentSpatialResult.scaleY);
+            _matrix.rotate(SpriterUtil.toRadians(SpriterUtil.fixRotation(_currentSpatialResult.angle)));
+            _matrix.translate(_currentSpatialResult.x, _currentSpatialResult.y);
+			_alphaTransform.alphaMultiplier = Math.abs(_currentSpatialResult.a);
+            _canvas.draw(_currentBd, _matrix, _alphaTransform, null, null, true);
         }
-	}
-	override public function setRoot(root:Dynamic):Void 
-	{
 	}
 	override public function render():Void
 	{	
@@ -76,7 +76,14 @@ class BitmapLibrary extends AbstractLibrary
 		_alphaTransform = null;
 		 _point = null;
         _matrix = null;
+		_currentSpatialResult = null;
+		_currentBd.dispose();
+		_currentBd = null;
+		_alphaBd.dispose();
+		_alphaBd = null;
 		render();//to unlock canvas and make it available
+		_canvas.dispose();
+		_canvas = null;
 	}
 	
 }
