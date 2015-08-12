@@ -1,5 +1,6 @@
 package spriter.definitions;
 
+import haxe.Unserializer;
 import haxe.xml.Fast;
 import spriter.interfaces.IScml;
 import spriter.library.AbstractLibrary;
@@ -252,5 +253,18 @@ class ScmlObject implements IScml
 		endAnimCallback = null;
 		tagCallback = null;
 		varChangeCallback = null;
+	}
+	
+	public static function unserialize(bin:String):ScmlObject
+	{
+		var serializer:Unserializer = new Unserializer(bin);
+		var scml:ScmlObject = cast serializer.unserialize();
+		return scml;
+	}
+	public static function unserializePack(bin:String):Map<String, ScmlObject>
+	{
+		var serializer:Unserializer = new Unserializer(bin);
+		var map:Map<String, ScmlObject> = cast serializer.unserialize();
+		return map;
 	}
 }

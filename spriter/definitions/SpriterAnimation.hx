@@ -125,7 +125,7 @@ class SpriterAnimation
 		var currentKey:SpatialTimelineKey;
 		
 		var	currentRef:Ref;
-		var spatialInfo:SpatialInfo;
+		var spatialInfo:SpatialInfo = null;
 		var len:Int = mainKey.boneRefs.length;
         for (b in 0...len)
         {
@@ -244,8 +244,9 @@ class SpriterAnimation
 				}
 			}
 		}
-		//clean nup
-		spatialInfo.put();//back to pool
+		//clean up
+		if(spatialInfo != null)
+			spatialInfo.put();//back to pool
 		spatialInfo = null;
 		len = transformedBoneKeys.length;
         for(p in 0...len)

@@ -220,16 +220,13 @@ class SpriterMacros
 		}
 		return xml;
 	}
-	macro public static function cacheSCML(scmlFolderPath:String, output:String) 
+	macro public static function cacheSCML(scmlPath:String, output:String) 
 	{
-		#if !flash
-		trace('checking scml files in : ' + scmlFolderPath);
-		
-		var files:Array<String> = FileSystem.readDirectory(scmlFolderPath);
-		var result:String = createCache(scmlFolderPath, files);
+		#if !flash		
+		var file = sys.io.File.getContent(scmlPath);
+		var result:String = createCache(file);
 		if (result != "") {
-			trace('saving cache scml files in : ' + output);
-			//sys.io.File.saveContent(output, result);
+			trace('saving cache scml file in : ' + output);
 			var fo:FileOutput = sys.io.File.write(output, true);
 			fo.writeString(result);
 			fo.close();
@@ -238,17 +235,42 @@ class SpriterMacros
 		return macro null;
 	}
 	#if !flash
-	static function createCache(path:String, files:Array<String>):String
+	static function createCache(file:String):String
 	{
+		var serializer:Serializer = new Serializer();
+		serializer.serialize(new ScmlObject(Xml.parse(file)));
+		return serializer.toString();
+	}
+	#end
+	macro public static function cacheFolderSCML(scmlFolderPath:String, output:String) 
+	{
+		#if !flash
+		trace('checking scml files in : ' + scmlFolderPath);
+		
+		var files:Array<String> = FileSystem.readDirectory(scmlFolderPath);
+		var result:String = createCacheFromFolder(scmlFolderPath, files);
+		if (result != "") {
+			trace('saving cache scml files in : ' + output);
+			var fo:FileOutput = sys.io.File.write(output, true);
+			fo.writeString(result);
+			fo.close();
+		}
+		#end
+		return macro null;
+	}
+	#if !flash
+	static function createCacheFromFolder(path:String, files:Array<String>):String
+	{
+		var map:Map<String, ScmlObject> = new Map<String, ScmlObject>();
 		var serializer:Serializer = new Serializer();
 		for (file in files) {
 			if (file.indexOf(".scml") != -1)
 			{
 				var xml_s = sys.io.File.getContent(path + file);
-				serializer.serialize(new ScmlObject(Xml.parse(xml_s)));
-				break;//TODO temp
+				map.set(file.substr(0, file.length - 5), new ScmlObject(Xml.parse(xml_s)));
 			}
 		}
+		serializer.serialize(map);
 		return serializer.toString();
 	}
 	#end
