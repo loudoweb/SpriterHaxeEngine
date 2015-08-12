@@ -62,18 +62,18 @@ class TilelayerLibrary extends AbstractLibrary
 		var sprite:TileSprite = getFile(name);
 		_layer.addChild(sprite);
 		
-		var spatialResult:SpatialInfo = compute(info, pivots, sprite.width, sprite.height);
+		_currentSpatialResult = compute(info, pivots, sprite.width, sprite.height);
 		
 		
 		//sprite.offset = getPivotsRelativeToCenter(info, pivots, sprite.width, sprite.height);//TOFIX tilelayer seems buggy
-		sprite.x =  spatialResult.x;
-		sprite.y =  spatialResult.y;
-		sprite.rotation = SpriterUtil.toRadians(SpriterUtil.fixRotation(spatialResult.angle));
-		sprite.scaleX = spatialResult.scaleX;
-		sprite.scaleY = spatialResult.scaleY;
-		sprite.alpha = spatialResult.a;
+		sprite.x =  _currentSpatialResult.x;
+		sprite.y =  _currentSpatialResult.y;
+		sprite.rotation = SpriterUtil.toRadians(SpriterUtil.fixRotation(_currentSpatialResult.angle));
+		sprite.scaleX = _currentSpatialResult.scaleX;
+		sprite.scaleY = _currentSpatialResult.scaleY;
+		sprite.alpha = _currentSpatialResult.a;
 		
-		sprite.visible = true;
+		_currentSpatialResult.put();//back to pool
 	}
 	
 	private function getPivotsRelativeToCenter(info:SpatialInfo, pivots:PivotInfo, width:Float, height:Float):Point
@@ -100,7 +100,7 @@ class TilelayerLibrary extends AbstractLibrary
 		var x2 = (preX - pivotX) * c - (preY - pivotY) * s + pivotX;
         var y2 = (preX - pivotX) * s + (preY - pivotY) * c + pivotY;
 		
-		return new SpatialInfo(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
+		return SpatialInfo.get(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
 	}
 	
 	override public function render():Void

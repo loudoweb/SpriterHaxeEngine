@@ -226,7 +226,7 @@ class ScmlObject implements IScml
 		return newFolders;
 	}
 	
-	public function copy():ScmlObject
+	public function copy(?id:String):ScmlObject
 	{
 		var newSCML:ScmlObject = new ScmlObject();
 		newSCML.folders = copyFolders();
@@ -238,6 +238,7 @@ class ScmlObject implements IScml
 		newSCML.currentEntity 	= Std.string(currentEntity); 
 		newSCML.currentAnimation  = Std.string(currentAnimation); 
 		newSCML.currentTime = 0; 
+		newSCML.spriterName = id;
 		return newSCML;
 	}
 	
@@ -248,5 +249,8 @@ class ScmlObject implements IScml
 		entities = null;
 		entitiesName = null;
 		tags = null;
+		endAnimCallback = null;
+		tagCallback = null;
+		varChangeCallback = null;
 	}
 }

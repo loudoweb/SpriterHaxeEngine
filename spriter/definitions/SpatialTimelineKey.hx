@@ -31,7 +31,7 @@ class SpatialTimelineKey extends TimelineKey
 			var scale_y = fast.has.scale_y ? Std.parseFloat(fast.att.scale_y) : 1;
 			var alpha = fast.has.a ? Std.parseFloat(fast.att.a) : 1;
 			
-			info = new SpatialInfo(x, y, angle, scale_x, scale_y, alpha, spin);
+			info = new SpatialInfo(x, y, angle, scale_x, scale_y, alpha, spin);//we don't get from pool here because a macro use this constructor :/
 		}
 	}
 	
@@ -43,7 +43,7 @@ class SpatialTimelineKey extends TimelineKey
 
 	override public function clone (clone:TimelineKey):TimelineKey
 	{
-		super.clone(clone);
+		super.clone(clone);//TODO instead of cloning we should only manipulate SpatialInfo from linearSpatialInfo();
 
 		var	c:SpatialTimelineKey = cast clone;
 		c.info = info.copy();
@@ -71,6 +71,11 @@ class SpatialTimelineKey extends TimelineKey
 	public function paint(pivotX:Float, pivotY:Float):PivotInfo
 	{
 		return new PivotInfo(pivotX,pivotY);
+	}
+	public function destroy():Void
+	{
+		info.put();//add too pool
+		info = null;
 	}
 	
 }

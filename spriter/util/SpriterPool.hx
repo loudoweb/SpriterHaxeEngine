@@ -1,0 +1,84 @@
+package spriter.util;
+import spriter.interfaces.ISpriterDestroyable;
+
+/**
+ * ...
+ * @author Loudo
+ * @author flixel
+ */
+ /*
+#if flixel
+typedef TSpriterPool<T> = flixel.util.FlxPool<T>;
+#elseif openfl
+typedef TSpriterPool<T> = SpriterPool<T>
+#elseif flambe
+
+#end
+*/
+
+/**
+ * A generic container that facilitates pooling and recycling of objects.
+ * WARNING: Pooled objects must have parameterless constructors: function new()
+ */
+class SpriterPool<T:ISpriterDestroyable>
+{
+	private var _pool:Array<T>;
+	private var _class:Class<T>;
+	
+	public var length(get, never):Int;
+	
+	public function new(classObj:Class<T>) 
+	{
+		_pool = [];
+		_class = classObj;
+	}
+	
+	public function get():T
+	{
+		var obj:T = _pool.pop();
+		if (obj == null) 
+		{
+			obj = Type.createInstance(_class, []);
+		}
+		return obj;
+	}
+	
+	public function put(obj:T):Void
+	{
+		// we don't want to have the same object in pool twice
+		if (obj != null && _pool.indexOf(obj) < 0)
+		{
+			obj.destroy();
+			_pool.push(obj);
+		}
+	}
+	
+	public function putUnsafe(obj:T):Void
+	{
+		if (obj != null)
+		{
+			obj.destroy();
+			_pool.push(obj);
+		}
+	}
+	
+	public function preAllocate(numObjects:Int):Void
+	{
+		for (i in 0...numObjects)
+		{
+			_pool.push(Type.createInstance(_class, []));
+		}
+	}
+	
+	public function clear():Array<T>
+	{
+		var oldPool = _pool;
+		_pool = [];
+		return oldPool;
+	}
+	
+	private inline function get_length():Int
+	{
+		return _pool.length;
+	}
+}

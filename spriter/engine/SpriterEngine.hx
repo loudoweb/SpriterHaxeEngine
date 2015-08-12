@@ -125,26 +125,17 @@ class SpriterEngine
 	 * @param	x
 	 * @param	y
 	 * @param	?index if null same result as addChild, else same result as addChildAt(index). Spriters at and after the replaced index move up. You can use index out of range but negative means 0.
-	 * @param	copySCML if false, you can use a same SCML for multiple Spriter entity, allow you to have 
 	 * @param	autoRemoval if true, the Spriter will be removed after the animation is ended
 	 * @return  the Spriter created
 	 */
-	public function addEntity(id:String, x:Float = 0, y:Float = 0, ?index:Null<Int>, autoRemoval:Bool = false, copySCML:Bool = true):Spriter 
+	public function addEntity(id:String, x:Float = 0, y:Float = 0, ?index:Null<Int>, autoRemoval:Bool = false):Spriter 
 	{
 
 		//create spatial info for the current Spriter
-		var info:SpatialInfo = new SpatialInfo(x, -y);//-y because use inverted y coordinates
+		var info:SpatialInfo = SpatialInfo.get(x, -y);//-y because use inverted y coordinates
 		
-		//select scmlObject
-		var currentSCML:ScmlObject;
-		if (copySCML) {
-			currentSCML 	  		=  scml.copy();
-			currentSCML.spriterName = id;
-		}else {
-			currentSCML = scml;
-		}
 		//create the Spriter
-		var spriter:Spriter = new Spriter(id, currentSCML, _lib, info);
+		var spriter:Spriter = new Spriter(id, scml.copy(id), _lib, info);
 		if (autoRemoval) {
 			spriter.playAnim(removeSpriterEntity, true);
 		}

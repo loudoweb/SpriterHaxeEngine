@@ -1,11 +1,13 @@
 package spriter.definitions;
+import spriter.interfaces.ISpriterPooled;
+import spriter.util.SpriterPool;
 import spriter.util.SpriterUtil;
 
 /**
  * ...
  * @author Loudo
  */
-class SpatialInfo
+class SpatialInfo implements ISpriterPooled 
 {
 	public var x:Float=0; 
     public var y:Float=0; 
@@ -16,7 +18,25 @@ class SpatialInfo
 	 * Alpha
 	 */
     public var a:Float=1;
-    public var spin:Int=1;
+    public var spin:Int = 1;
+	
+	private static var _pool = new SpriterPool<SpatialInfo>(SpatialInfo);
+	private var _inPool:Bool = false;
+	
+	/**
+	 * Recycle or create a new SpatialInfo. 
+	 * Be sure to put() them back into the pool after you're done with them!
+	 * 
+	 * @param	X		The X-coordinate of the point in space.
+	 * @param	Y		The Y-coordinate of the point in space.
+	 * @return	This point.
+	 */
+	public static inline function get(x:Float = 0, y:Float = 0, angle:Float = 0, scaleX:Float = 1, scaleY:Float = 1, a:Float = 1, spin:Int = 1):SpatialInfo
+	{
+		var pooledInfo = _pool.get().init(x, y, angle, scaleX, scaleY, a, spin);
+		pooledInfo._inPool = false;
+		return pooledInfo;
+	}
 	
 	public function new(x:Float = 0, y:Float = 0, angle:Float = 0, scaleX:Float = 1, scaleY:Float = 1, a:Float = 1, spin:Int = 1) 
 	{
@@ -27,6 +47,32 @@ class SpatialInfo
 		this.scaleY = scaleY; 
 		this.a = a;
 		this.spin = spin;
+	}
+	
+	public function init(x:Float = 0, y:Float = 0, angle:Float = 0, scaleX:Float = 1, scaleY:Float = 1, a:Float = 1, spin:Int = 1):SpatialInfo
+	{
+		this.x = x; 
+		this.y = y; 
+		this.angle = angle;
+		this.scaleX = scaleX; 
+		this.scaleY = scaleY; 
+		this.a = a;
+		this.spin = spin;
+		return this;
+	}
+	
+	public function setPos(x:Float = 0, y:Float = 0):SpatialInfo
+	{
+		this.x = x; 
+		this.y = y; 
+		return this;
+	}
+	
+	public function setScale(scale:Float):SpatialInfo
+	{
+		this.scaleX = scale; 
+		this.scaleY = scale;
+		return this;
 	}
 	
 	public function unmapFromParent(parentInfo:SpatialInfo):SpatialInfo
@@ -55,13 +101,12 @@ class SpatialInfo
 			unmapped_y = parentInfo.y;
 		}
 		
-		return new SpatialInfo(unmapped_x, unmapped_y, unmapped_angle, unmapped_scaleX, unmapped_scaleY, unmapped_alpha, spin);
+		return SpatialInfo.get(unmapped_x, unmapped_y, unmapped_angle, unmapped_scaleX, unmapped_scaleY, unmapped_alpha, spin);
     }
 	
 	public function copy():SpatialInfo
 	{
-		var c:SpatialInfo = new SpatialInfo(x, y, angle, scaleX, scaleY, a, spin);
-		return c;
+		return SpatialInfo.get(x, y, angle, scaleX, scaleY, a, spin);
 	}
 	
 	/*public function linear(infoA:SpatialInfo, infoB:SpatialInfo, spin:Int, t:Float):SpatialInfo
@@ -74,5 +119,20 @@ class SpatialInfo
 		resultInfo.scaleY = linear(infoA.scaleY,infoB.scaleY,t); 
 		resultInfo.a = linear(infoA.a,infoB.a,t); 
 	}*/
+	/**
+	 * Add this SpatialInfo to the recycling pool.
+	 */
+	public function put():Void
+	{
+		if (!_inPool)
+		{
+			_inPool = true;
+			_pool.putUnsafe(this);
+		}
+	}
+	public function destroy():Void
+	{
+		
+	}
 	
 }

@@ -255,12 +255,24 @@ class Spriter
 	{
 		timeMS = 0;
 	}
+	/**
+	 * Set positions of the Spriter
+	 * @param	x
+	 * @param	y (spriter uses inverted y, so it will automatically inverted in this function)
+	 */
+	public function set(x:Float, y:Float):Void
+	{
+		//-y because use inverted y coordinates
+		info.setPos(x, -y);
+	}
 	
 	public function destroy():Void
 	{
 		scml.destroy();
+		info.put();
 		info = null;
 		//don't destroy library here since library is shared between all Spriter in the engine
+		library = null;
 	}
 	
 }

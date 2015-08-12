@@ -145,7 +145,7 @@ class SpriterAnimation
         }
 
         //var objectKeys:Array<TimelineKey>;
-		points = [];
+		points = [];//TODO back to pool?
 		boxes = [];
 		len = mainKey.objectRefs.length;
         for(o in 0...len)
@@ -243,6 +243,16 @@ class SpriterAnimation
 					}
 				}
 			}
+		}
+		//clean nup
+		spatialInfo.put();//back to pool
+		spatialInfo = null;
+		len = transformedBoneKeys.length;
+        for(p in 0...len)
+        {
+			spatialInfo = transformedBoneKeys[p];
+			spatialInfo.put();//back to pool
+			spatialInfo = null;
 		}
     }
 
