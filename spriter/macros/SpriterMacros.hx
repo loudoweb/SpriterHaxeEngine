@@ -1,5 +1,14 @@
 package spriter.macros;
+import haxe.io.Bytes;
+import haxe.io.Output;
 import haxe.macro.Expr;
+import haxe.Serializer;
+import org.msgpack.MsgPack;
+import spriter.definitions.ScmlObject;
+#if !flash
+import sys.FileSystem;
+import sys.io.FileOutput;
+#end
 
 /**
  * ...
@@ -9,8 +18,9 @@ class SpriterMacros
 {
 	/**
 	 * Check texture packer atlas to add .png at the end of files.
-	 * Because Spriter's SCML use file name with .png at the end and Texture Packer not.
+	 * Because Spriter's SCML use file name with .png at the end and Sparrow atlas not.
 	 * So it will correct this for you.
+	 * You can use other atlas file instead : Spriter, spriterhaxeengine (https://github.com/loudoweb/SpriterHaxeEngine/tree/master/texturePackerExporter/spriterhaxeengine)
 	 * Data format : Sparrow, Starling only
 	 * @param	pathToXml
 	 * @return  pathToXml
@@ -210,4 +220,36 @@ class SpriterMacros
 		}
 		return xml;
 	}
+	macro public static function cacheSCML(scmlFolderPath:String, output:String) 
+	{
+		#if !flash
+		trace('checking scml files in : ' + scmlFolderPath);
+		
+		var files:Array<String> = FileSystem.readDirectory(scmlFolderPath);
+		var result:String = createCache(scmlFolderPath, files);
+		if (result != "") {
+			trace('saving cache scml files in : ' + output);
+			//sys.io.File.saveContent(output, result);
+			var fo:FileOutput = sys.io.File.write(output, true);
+			fo.writeString(result);
+			fo.close();
+		}
+		#end
+		return macro null;
+	}
+	#if !flash
+	static function createCache(path:String, files:Array<String>):String
+	{
+		var serializer:Serializer = new Serializer();
+		for (file in files) {
+			if (file.indexOf(".scml") != -1)
+			{
+				var xml_s = sys.io.File.getContent(path + file);
+				serializer.serialize(new ScmlObject(Xml.parse(xml_s)));
+				break;//TODO temp
+			}
+		}
+		return serializer.toString();
+	}
+	#end
 }

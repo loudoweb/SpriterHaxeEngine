@@ -64,7 +64,7 @@ class SpriterEngine
 	 */
 	var _elapsed:Int;
 	/**
-	 * Framerate locked to avoid frameskip. Used with variable tick.
+	 * Framerate locked to avoid frameskip. Used with variable tick (= fixedTick=false).
 	 * @default 100 (10 fps)
 	 * @see fixedTick
 	 */
@@ -79,22 +79,44 @@ class SpriterEngine
 	var _totalTicks:Int = 0;
 	/**
 	 * Fixed or variable tick.
+	 * @default true
 	 */
 	public var fixedTick:Bool = true;
 	
 	/*
 	 * If you want to clear and render the library outside of SpriterEngine, please set to false.
+	 * @default true
 	 */
 	public var handleLibraryClearAndRender:Bool = true;
 	
-	public function new(scml_str:String, library:AbstractLibrary, frameRate:Int = 60) 
+	/**
+	 * 
+	 * @param	scml_toParse	String to parse as xml to create the scmlObject
+	 * @param	scml_parsed		ScmlObject already created that you can passed instead of the scml_toParse paremeter
+	 * @param	library			AbstractLibrary
+	 * @param	fixedTick		Bool, default true. Means that when you call update(),
+	 * @param	frameRate		Int framerate used by fixedTick, default framerate 60
+	 * @param	handleRender	Bool, default true. Means that this engine will handle the rendering from AbstractLibrary for you. You can handle by yourself by setting it to false.
+	 */
+	public function new(?scml_toParse:String, ?scml_parsed:ScmlObject, library:AbstractLibrary, fixedTick:Bool = true, frameRate:Int = 60, handleRender:Bool = true) 
 	{
 		_spriters = new Array<Spriter>();
 		_spritersNamed = new Map<String ,Spriter>();
 		
-		scml = new ScmlObject(Xml.parse(scml_str));
+		if(scml_toParse != null && scml_toParse != "")
+		{
+			scml = new ScmlObject(Xml.parse(scml_toParse));
+		}
+		else if (scml_parsed != null)
+		{
+			scml = scml_parsed;
+		}else {
+			throw 'You should passed either scml_ToParse:String (%scml_toParse) or scml_parsed:ScmlObject (%scml_parsed) in the constructor';
+		}
 		_lib = library;
+		this.fixedTick = fixedTick;
 		this.framerate = frameRate;
+		this.handleLibraryClearAndRender = handleRender;
 		_lastTime = Lib.getTimer();
 	}
 	/**
