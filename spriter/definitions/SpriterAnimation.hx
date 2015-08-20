@@ -41,9 +41,11 @@ class SpriterAnimation
 	
 	public function new(fast:Fast) 
 	{
-		mainlineKeys = new Array<MainlineKey>();
-		timelines = new Array<SpriterTimeline>();
-		_transformedBoneKeys = new Array<SpatialInfo>();
+		mainlineKeys = [];
+		timelines = [];
+		_transformedBoneKeys = [];
+		points = [];
+		boxes = [];
 		
 		
 		id = Std.parseInt(fast.att.id);
@@ -146,8 +148,10 @@ class SpriterAnimation
         }
 
         //var objectKeys:Array<TimelineKey>;
-		points = [];//TODO back to pool?
-		boxes = [];
+		if (points.length > 0)
+			points.splice(0, points.length);//instead of creating an array each time, clear it
+		if (boxes.length > 0)
+			boxes.splice(0, boxes.length);//instead of creating an array each time, clear it
 		len = mainKey.objectRefs.length;
         for(o in 0...len)
         {
