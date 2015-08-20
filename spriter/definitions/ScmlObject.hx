@@ -101,7 +101,7 @@ class ScmlObject implements IScml
 		if(currentFile != null){
 			return new PivotInfo(currentFile.pivotX, currentFile.pivotY);
 		}else {
-			return new PivotInfo();
+			return null;
 		}
 	}
 	public function getFileName(folder:Int, file:Int):String

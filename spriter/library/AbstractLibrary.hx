@@ -60,7 +60,7 @@ class AbstractLibrary
 		
 		var x2 = (preX - pivotX) * c - (preY - pivotY) * s + pivotX;
         var y2 = (preX - pivotX) * s + (preY - pivotY) * c + pivotY;
-		return SpatialInfo.get(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);//TODO pool?
+		return new SpatialInfo(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);//TODO pool?
 	}
 	
 	public function computeRectCoordinates(info:SpatialInfo, pivots:PivotInfo, width:Float, height:Float):Quadrilateral

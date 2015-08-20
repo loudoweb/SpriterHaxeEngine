@@ -73,7 +73,7 @@ class TilelayerLibrary extends AbstractLibrary
 		sprite.scaleY = _currentSpatialResult.scaleY;
 		sprite.alpha = _currentSpatialResult.a;
 		
-		_currentSpatialResult.put();//back to pool
+		//_currentSpatialResult.put();//back to pool
 	}
 	
 	private function getPivotsRelativeToCenter(info:SpatialInfo, pivots:PivotInfo, width:Float, height:Float):Point
@@ -100,7 +100,7 @@ class TilelayerLibrary extends AbstractLibrary
 		var x2 = (preX - pivotX) * c - (preY - pivotY) * s + pivotX;
         var y2 = (preX - pivotX) * s + (preY - pivotY) * c + pivotY;
 		
-		return SpatialInfo.get(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
+		return new SpatialInfo(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
 	}
 	
 	override public function render():Void

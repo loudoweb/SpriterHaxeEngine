@@ -101,12 +101,12 @@ class SpatialInfo implements ISpriterPooled
 			unmapped_y = parentInfo.y;
 		}
 		
-		return SpatialInfo.get(unmapped_x, unmapped_y, unmapped_angle, unmapped_scaleX, unmapped_scaleY, unmapped_alpha, spin);
+		return new SpatialInfo(unmapped_x, unmapped_y, unmapped_angle, unmapped_scaleX, unmapped_scaleY, unmapped_alpha, spin);
     }
 	
 	public function copy():SpatialInfo
 	{
-		return SpatialInfo.get(x, y, angle, scaleX, scaleY, a, spin);
+		return new SpatialInfo(x, y, angle, scaleX, scaleY, a, spin);
 	}
 	
 	/*public function linear(infoA:SpatialInfo, infoB:SpatialInfo, spin:Int, t:Float):SpatialInfo

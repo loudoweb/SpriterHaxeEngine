@@ -68,13 +68,13 @@ class SpatialTimelineKey extends TimelineKey
 		info.a = linear (infoA.a, infoB.a, t);
 	}
 	
-	public function paint(pivotX:Float, pivotY:Float):PivotInfo
+	public function paint(defaultPivots:PivotInfo):PivotInfo
 	{
-		return new PivotInfo(pivotX,pivotY);
+		return defaultPivots;
 	}
 	public function destroy():Void
 	{
-		info.put();//add too pool
+		//info.put();//add too pool
 		info = null;
 	}
 	

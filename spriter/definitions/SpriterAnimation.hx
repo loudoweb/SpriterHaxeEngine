@@ -29,6 +29,7 @@ class SpriterAnimation
     public var timelines:Array<SpriterTimeline>;
 	public var taglines:Array<TaglineKey>;
 	public var varlines:Array<Varline>;
+	var _transformedBoneKeys:Array<SpatialInfo>;
 	
 	/*
 	 * Custom definitions
@@ -42,6 +43,7 @@ class SpriterAnimation
 	{
 		mainlineKeys = new Array<MainlineKey>();
 		timelines = new Array<SpriterTimeline>();
+		_transformedBoneKeys = new Array<SpatialInfo>();
 		
 		
 		id = Std.parseInt(fast.att.id);
@@ -121,7 +123,6 @@ class SpriterAnimation
 
     public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
-        var transformedBoneKeys:Array<SpatialInfo> = new Array<SpatialInfo>();
 		var currentKey:SpatialTimelineKey;
 		
 		var	currentRef:Ref;
@@ -133,7 +134,7 @@ class SpriterAnimation
 			currentKey = cast keyFromRef(currentRef, newTime);
             if (currentRef.parent >= 0)
 			{
-                spatialInfo = transformedBoneKeys[currentRef.parent];
+                spatialInfo = _transformedBoneKeys[currentRef.parent];
             }
 			else 
 			{
@@ -141,7 +142,7 @@ class SpriterAnimation
 			}
 
             spatialInfo = currentKey.info.unmapFromParent(spatialInfo);
-            transformedBoneKeys.push(spatialInfo);
+            _transformedBoneKeys.push(spatialInfo);
         }
 
         //var objectKeys:Array<TimelineKey>;
@@ -155,7 +156,7 @@ class SpriterAnimation
 			//trace(currentKey.info.a);
             if(currentRef.parent >= 0)
             {
-                spatialInfo = transformedBoneKeys[currentRef.parent];
+                spatialInfo = _transformedBoneKeys[currentRef.parent];
             }
             else
             {
@@ -167,25 +168,26 @@ class SpriterAnimation
 			var activePivots:PivotInfo;
 			if (Std.is(currentKey, SpriteTimelineKey)) {
 				var currentSpriteKey:SpriteTimelineKey = cast(currentKey, SpriteTimelineKey);
-				activePivots = root.getPivots(currentSpriteKey.folder, currentSpriteKey.file);
-				activePivots = currentKey.paint(activePivots.pivotX, activePivots.pivotY);
 				//render from library
 				var currentKeyName:String = root.getFileName(currentSpriteKey.folder, currentSpriteKey.file);
 				if (currentKeyName != null) {//hidden object test (via mapping)
+					activePivots = root.getPivots(currentSpriteKey.folder, currentSpriteKey.file);
+					activePivots = currentKey.paint(activePivots);
 					library.addGraphic(currentKeyName, spatialInfo, activePivots);
 				}
 			}else if (Std.is(currentKey, SubEntityTimelineKey)){
 				var currentSubKey:SubEntityTimelineKey = cast(currentKey, SubEntityTimelineKey);
 				root.setSubEntityCurrentTime(library, currentSubKey.t, currentSubKey.entity, currentSubKey.animation, spatialInfo);
 			}else {
-				activePivots = new PivotInfo();
-				activePivots = currentKey.paint(activePivots.pivotX, activePivots.pivotY);
 				var currentObjectKey:ObjectTimelineKey = cast(currentKey, ObjectTimelineKey);
 				
 				if (currentObjectKey.type == ObjectType.POINT)
 				{
+					activePivots = PivotInfo.DEFAULT;
 					points.push(library.compute(spatialInfo, activePivots,0,0));
 				}else {//BOX
+					activePivots = new PivotInfo();//default pivot, but need to be overrided
+					activePivots = currentKey.paint(activePivots);
 					var currentBox:SpriterBox = currentEntity.boxes_info.get(getTimelineName(currentRef.timeline));
 					boxes.push(library.computeRectCoordinates(spatialInfo, activePivots, currentBox.width, currentBox.height));
 				}
@@ -245,16 +247,10 @@ class SpriterAnimation
 			}
 		}
 		//clean up
-		if(spatialInfo != null)
-			spatialInfo.put();//back to pool
 		spatialInfo = null;
-		len = transformedBoneKeys.length;
-        for(p in 0...len)
-        {
-			spatialInfo = transformedBoneKeys[p];
-			spatialInfo.put();//back to pool
-			spatialInfo = null;
-		}
+		len = _transformedBoneKeys.length;
+		if (len > 0)
+			_transformedBoneKeys.splice(0, len);//instead of creating an array each time, clear it
     }
 
     public function mainlineKeyFromTime(time:Int):MainlineKey

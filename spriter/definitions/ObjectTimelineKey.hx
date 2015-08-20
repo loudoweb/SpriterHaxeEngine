@@ -49,22 +49,15 @@ class ObjectTimelineKey extends SpatialTimelineKey
 		return c;
 	}
 	
-	override public function paint(pivotX:Float, pivotY:Float):PivotInfo
+	override public function paint(defaultPivots:PivotInfo):PivotInfo
     {
-        var paintPivotX:Float;
-        var paintPivotY:Float;
-        if(useDefaultPivot)
+        if(!useDefaultPivot)
         {
-            paintPivotX = pivotX;
-            paintPivotY = pivotY;
-        }
-        else
-        {
-            paintPivotX = pivot_x;
-            paintPivotY = pivot_y;
+            defaultPivots.pivotX = pivot_x;
+            defaultPivots.pivotY = pivot_y;
         }
 		
-		return new PivotInfo(paintPivotX , paintPivotY);
+		return defaultPivots;
     }
 
     override public function linearKey(keyB:TimelineKey, t:Float):Void

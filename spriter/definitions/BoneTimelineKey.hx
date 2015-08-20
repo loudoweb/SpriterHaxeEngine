@@ -43,7 +43,7 @@ class BoneTimelineKey extends SpatialTimelineKey
 		return c;
 	}
 	
-	override public function paint(pivotX:Float, pivotY:Float):PivotInfo
+	override public function paint(defaultPivots:PivotInfo):PivotInfo
     {
         if(paintDebugBones)
         {
@@ -55,7 +55,7 @@ class BoneTimelineKey extends SpatialTimelineKey
             // of length drawLength, and height drawHeight
 			
          }
-		 return new PivotInfo(pivotX, pivotY);
+		 return defaultPivots;
     }           
 
     override public function linearKey(keyB:TimelineKey,t:Float):Void

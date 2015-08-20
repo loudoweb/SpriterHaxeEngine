@@ -6,6 +6,8 @@ package spriter.definitions;
  */
 class PivotInfo
 {
+	public static var DEFAULT:PivotInfo = new PivotInfo();
+	
 	public var pivotX:Float; 
     public var pivotY:Float; 
 	

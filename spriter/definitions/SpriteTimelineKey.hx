@@ -38,9 +38,6 @@ class SpriteTimelineKey extends ObjectTimelineKey
 		
 		c.folder = folder;
 		c.file = file;
-		c.useDefaultPivot = useDefaultPivot;
-		c.pivot_x = pivot_x;
-		c.pivot_y = pivot_y;
 		return c;
 	}
 }

@@ -269,7 +269,7 @@ class Spriter
 	public function destroy():Void
 	{
 		scml.destroy();
-		info.put();
+		//info.put();
 		info = null;
 		//don't destroy library here since library is shared between all Spriter in the engine
 		library = null;
