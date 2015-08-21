@@ -1,5 +1,4 @@
 package spriter.engine;
-import flash.display.Sprite;
 import flash.Lib;
 import spriter.definitions.ScmlObject;
 import spriter.definitions.SpatialInfo;
@@ -30,9 +29,9 @@ class SpriterEngine
 	 * #############################################
 	 */
 	/**
-	 * SCML object created with the Brashmonkey Spriter document (.scml).
+	 * SCML library created with the Brashmonkey Spriter document (.scml).
 	 */
-	public var scml(default,null):ScmlObject;
+	public var default_scml:ScmlObject;
 	/**
 	 * Used to retrieve a graphic and add it to the custom rendering system.
 	 */
@@ -105,13 +104,15 @@ class SpriterEngine
 		
 		if(scml_toParse != null && scml_toParse != "")
 		{
-			scml = new ScmlObject(Xml.parse(scml_toParse));
+			default_scml = new ScmlObject(Xml.parse(scml_toParse));
 		}
 		else if (scml_parsed != null)
 		{
-			scml = scml_parsed;
+			default_scml = scml_parsed;
 		}else {
-			throw 'You should passed either scml_ToParse:String (%scml_toParse) or scml_parsed:ScmlObject (%scml_parsed) in the constructor';
+			#if SPRITER_DEBUG
+			trace('If you don\'t add default scml with scml_ToParse or scml_parsed parameter in the constructor, you will have to add with addEntity()');
+			#end
 		}
 		_lib = library;
 		this.fixedTick = fixedTick;
@@ -128,14 +129,16 @@ class SpriterEngine
 	 * @param	autoRemoval if true, the Spriter will be removed after the animation is ended
 	 * @return  the Spriter created
 	 */
-	public function addEntity(id:String, x:Float = 0, y:Float = 0, ?index:Null<Int>, autoRemoval:Bool = false):Spriter 
+	public function addEntity(id:String, x:Float = 0, y:Float = 0, ?scml:ScmlObject, ?index:Null<Int>, autoRemoval:Bool = false):Spriter 
 	{
 
 		//create spatial info for the current Spriter
 		var info:SpatialInfo = new SpatialInfo(x, -y);//-y because use inverted y coordinates
 		
+		if (scml == null)
+			scml = default_scml.copy(id);
 		//create the Spriter
-		var spriter:Spriter = new Spriter(id, scml.copy(id), _lib, info);
+		var spriter:Spriter = new Spriter(id, scml, _lib, info);
 		if (autoRemoval) {
 			spriter.playAnim(removeSpriterEntity, true);
 		}
@@ -279,7 +282,8 @@ class SpriterEngine
 		_spritersNamed = null;
 		_spriters = null;
 		_lib.destroy();
-		scml.destroy();
+		default_scml.destroy();
+		default_scml = null;
 	}
 	/**
 	 * Pauses animations. Use unpause() after.
