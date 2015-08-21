@@ -35,13 +35,13 @@ class SpatialTimelineKey extends TimelineKey
 		}
 	}
 	
-	override public function copy ():TimelineKey
+	override public function copy():TimelineKey
 	{
 		var	copy:TimelineKey = new SpatialTimelineKey();
 		return clone (copy);
 	}
 
-	override public function clone (clone:TimelineKey):TimelineKey
+	override public function clone(clone:TimelineKey):TimelineKey
 	{
 		super.clone(clone);//TODO instead of cloning we should only manipulate SpatialInfo from linearSpatialInfo();
 
@@ -58,7 +58,7 @@ class SpatialTimelineKey extends TimelineKey
 	 * @param	t
 	 * @return
 	 */
-	public	function linearSpatialInfo (infoA:SpatialInfo, infoB:SpatialInfo, spin:Int, t:Float):Void
+	public function linearSpatialInfo(infoA:SpatialInfo, infoB:SpatialInfo, spin:Int, t:Float):Void
 	{
 		info.x = linear (infoA.x, infoB.x, t); 
 		info.y = linear (infoA.y, infoB.y, t);  

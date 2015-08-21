@@ -23,7 +23,6 @@ class BitmapLibrary extends AbstractLibrary
 	var _alphaTransform:ColorTransform;
 	var _currentBd:BitmapData;
 	var _alphaBd:BitmapData;
-	var _currentSpatialResult:SpatialInfo;
 	
 	public function new(basePath:String, canvas : BitmapData) 
 	{
@@ -46,25 +45,26 @@ class BitmapLibrary extends AbstractLibrary
 	{
 		_currentBd = cast getFile(name);
 		
-		_currentSpatialResult = compute(info, pivots, _currentBd.width, _currentBd.height);
+		info = compute(info, pivots, _currentBd.width, _currentBd.height);
 		
 		
-		if(_currentSpatialResult.angle == 0 && _currentSpatialResult.scaleX == 1 && _currentSpatialResult.scaleY == 1)
+		if(info.angle == 0 && info.scaleX == 1 && info.scaleY == 1)
         {
-            _point.x = _currentSpatialResult.x;
-            _point.y = _currentSpatialResult.y;
-			_alphaBd = new BitmapData(_currentBd.width, _currentBd.height, true, ColorUtils.multiplyAlpha(Math.abs(_currentSpatialResult.a)));
+            _point.x = info.x;
+            _point.y = info.y;
+			_alphaBd = new BitmapData(_currentBd.width, _currentBd.height, true, ColorUtils.multiplyAlpha(Math.abs(info.a)));
             _canvas.copyPixels(_currentBd, _currentBd.rect, _point,_alphaBd, _point,true);
         }
         else
         {
             _matrix.identity();
-            _matrix.scale(_currentSpatialResult.scaleX, _currentSpatialResult.scaleY);
-            _matrix.rotate(SpriterUtil.toRadians(SpriterUtil.fixRotation(_currentSpatialResult.angle)));
-            _matrix.translate(_currentSpatialResult.x, _currentSpatialResult.y);
-			_alphaTransform.alphaMultiplier = Math.abs(_currentSpatialResult.a);
+            _matrix.scale(info.scaleX, info.scaleY);
+            _matrix.rotate(SpriterUtil.toRadians(SpriterUtil.fixRotation(info.angle)));
+            _matrix.translate(info.x, info.y);
+			_alphaTransform.alphaMultiplier = Math.abs(info.a);
             _canvas.draw(_currentBd, _matrix, _alphaTransform, null, null, true);
         }
+		info = null;
 	}
 	override public function render():Void
 	{	
@@ -76,7 +76,6 @@ class BitmapLibrary extends AbstractLibrary
 		_alphaTransform = null;
 		 _point = null;
         _matrix = null;
-		_currentSpatialResult = null;
 		_currentBd.dispose();
 		_currentBd = null;
 		_alphaBd.dispose();

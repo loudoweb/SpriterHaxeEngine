@@ -1,7 +1,7 @@
 package spriter.definitions;
 #if openfl
 import openfl.geom.Point;
-#else if flambe
+#elseif flambe
 import flambe.math.Point;
 #end
 

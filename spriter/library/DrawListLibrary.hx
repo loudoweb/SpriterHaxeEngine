@@ -131,8 +131,8 @@ class DrawListLibrary extends AbstractLibrary
 		}
 		if (imageIndex == -1)
 			return;
-		var spatialResult:SpatialInfo = compute(info, pivots, size.width, size.height);
-		//if (spatialResult.a == 0) return;
+		info = compute(info, pivots, size.width, size.height);
+		//if (info.a == 0) return;
 		
 		if (tilesheetIndex != lastTilesheetUsed) {
 			currentDrawListIndex = 0;
@@ -153,24 +153,24 @@ class DrawListLibrary extends AbstractLibrary
 		var offsetAlpha = currentDrawList.offsetAlpha;
 
 		list[currentDrawListIndex+2] = imageIndex;
-		list[currentDrawListIndex] = spatialResult.x;
-		list[currentDrawListIndex + 1] = spatialResult.y;
+		list[currentDrawListIndex] = info.x;
+		list[currentDrawListIndex + 1] = info.y;
 		
 		if (offsetTransform > 0) {
-			var rotation:Float = SpriterUtil.toRadians(SpriterUtil.fixRotation(spatialResult.angle));
+			var rotation:Float = SpriterUtil.toRadians(SpriterUtil.fixRotation(info.angle));
 			if (rotation != 0) {
 				var cos = Math.cos(rotation);
 				var sin = Math.sin(rotation);
-				list[currentDrawListIndex+offsetTransform] = cos * spatialResult.scaleX;
-				list[currentDrawListIndex+offsetTransform+1] = sin * spatialResult.scaleX;
-				list[currentDrawListIndex+offsetTransform+2] = -1 * sin * spatialResult.scaleY;
-				list[currentDrawListIndex + offsetTransform + 3] = cos * spatialResult.scaleY;
+				list[currentDrawListIndex+offsetTransform] = cos * info.scaleX;
+				list[currentDrawListIndex+offsetTransform+1] = sin * info.scaleX;
+				list[currentDrawListIndex+offsetTransform+2] = -1 * sin * info.scaleY;
+				list[currentDrawListIndex + offsetTransform + 3] = cos * info.scaleY;
 			}
 			else {
-				list[currentDrawListIndex+offsetTransform] = spatialResult.scaleX;
+				list[currentDrawListIndex+offsetTransform] = info.scaleX;
 				list[currentDrawListIndex+offsetTransform+1] = 0;
 				list[currentDrawListIndex+offsetTransform+2] = 0;
-				list[currentDrawListIndex+offsetTransform+3] = spatialResult.scaleY;
+				list[currentDrawListIndex+offsetTransform+3] = info.scaleY;
 			}
 		}
 		/*if (offsetRGB > 0) {
@@ -178,10 +178,11 @@ class DrawListLibrary extends AbstractLibrary
 			list[currentDrawListIndex+offsetRGB+1] = sprite.g;
 			list[currentDrawListIndex+offsetRGB+2] = sprite.b;
 		}*/
-		if (offsetAlpha > 0) list[currentDrawListIndex+offsetAlpha] = spatialResult.a;
+		if (offsetAlpha > 0) list[currentDrawListIndex+offsetAlpha] = info.a;
 		
 		currentDrawListIndex += fields;
 		currentDrawList.index = currentDrawListIndex;
+		info = null;
 	}
 	
 	//overrided because tilelayer use the center of the sprite for the coordinates
@@ -201,7 +202,7 @@ class DrawListLibrary extends AbstractLibrary
 		var x2 = (preX - pivotX) * c - (preY - pivotY) * s + pivotX;
         var y2 = (preX - pivotX) * s + (preY - pivotY) * c + pivotY;
 		
-		return new SpatialInfo(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
+		return info.init(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
 	}
 	
 	override public function destroy():Void 

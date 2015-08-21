@@ -119,22 +119,22 @@ class FlixelLibrary extends AbstractLibrary
 	untyped	_flxGroup.length = 0;
     }
 	
-	override public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
+	override public function addGraphic(name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
 		var sprite:FlxSprite = cast getFile(name);
-		var spatialResult:SpatialInfo = compute(info, pivots, sprite.frameWidth, sprite.frameHeight);
+		info = compute(info, pivots, sprite.frameWidth, sprite.frameHeight);
 		
 		sprite.origin.set(0, 0);
-		sprite.x = spatialResult.x;
-		sprite.y = spatialResult.y;
-		sprite.angle = SpriterUtil.fixRotation(spatialResult.angle);
-		sprite.scale.x = spatialResult.scaleX;
-		sprite.scale.y = spatialResult.scaleY;
-		sprite.alpha = spatialResult.a;
+		sprite.x = info.x;
+		sprite.y = info.y;
+		sprite.angle = SpriterUtil.fixRotation(info.angle);
+		sprite.scale.x = info.scaleX;
+		sprite.scale.y = info.scaleY;
+		sprite.alpha = info.a;
 		
 		_flxGroup.add(sprite);
+		info = null;
 	}
-	override public function setRoot(root:Dynamic):Void {  }
 	
 	override public function render():Void {  }
 	

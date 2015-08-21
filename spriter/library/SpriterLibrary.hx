@@ -21,7 +21,6 @@ class SpriterLibrary extends AbstractLibrary
 	var _canvas:Sprite;
 	
 	var _currentBitmap:Bitmap;
-	var _currentSpatialResult:SpatialInfo;
 	
 	
 	/**
@@ -61,14 +60,15 @@ class SpriterLibrary extends AbstractLibrary
 
 		_currentBitmap = new Bitmap (getFile(name), PixelSnapping.AUTO, true);
 		
-		_currentSpatialResult = compute(info, pivots, _currentBitmap.bitmapData.width, _currentBitmap.bitmapData.height);
-		_currentBitmap.x = _currentSpatialResult.x;
-		_currentBitmap.y = _currentSpatialResult.y;
-		_currentBitmap.scaleX = _currentSpatialResult.scaleX;
-		_currentBitmap.scaleY = _currentSpatialResult.scaleY;
-		_currentBitmap.rotation = SpriterUtil.fixRotation(_currentSpatialResult.angle);
-		_currentBitmap.alpha = Math.abs(_currentSpatialResult.a);
+		info = compute(info, pivots, _currentBitmap.bitmapData.width, _currentBitmap.bitmapData.height);
+		_currentBitmap.x = info.x;
+		_currentBitmap.y = info.y;
+		_currentBitmap.scaleX = info.scaleX;
+		_currentBitmap.scaleY = info.scaleY;
+		_currentBitmap.rotation = SpriterUtil.fixRotation(info.angle);
+		_currentBitmap.alpha = Math.abs(info.a);
 		_canvas.addChild(_currentBitmap);
+		info = null;
 	}
 	
 	override public function render():Void
@@ -79,8 +79,8 @@ class SpriterLibrary extends AbstractLibrary
 	override public function destroy():Void
 	{
 		clear();
+		_currentBitmap.bitmapData.dispose();
 		_currentBitmap = null;
-		_currentSpatialResult = null;
 	}
 	
 }

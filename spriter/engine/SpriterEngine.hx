@@ -248,7 +248,7 @@ class SpriterEngine
 	/**
 	 * You should call this function to have Spriter animation working.
 	 * Call it from ENTER_FRAME or your own update engine.
-	 * @param	?customElasped (optional) if you have your own engine handles elapsedTime. MilliSeconds!
+	 * @param	?customElapsed (optional) if you have your own engine handles elapsedTime. MilliSeconds!
 	 */
 	public function update(?customElapsed:Int):Void
 	{

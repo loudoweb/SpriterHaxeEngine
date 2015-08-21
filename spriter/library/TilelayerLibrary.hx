@@ -26,8 +26,6 @@ class TilelayerLibrary extends AbstractLibrary
 	 */
 	var _canvas:Sprite;
 	
-	var _currentSpatialResult:SpatialInfo;
-	
 	/**
 	 * Advanced OpenFL renderer using Texture Atlas thanks to Tilelayer (https://github.com/elsassph/openfl-tilelayer)
 	 * 
@@ -62,18 +60,19 @@ class TilelayerLibrary extends AbstractLibrary
 		var sprite:TileSprite = getFile(name);
 		_layer.addChild(sprite);
 		
-		_currentSpatialResult = compute(info, pivots, sprite.width, sprite.height);
+		info = compute(info, pivots, sprite.width, sprite.height);
 		
 		
 		//sprite.offset = getPivotsRelativeToCenter(info, pivots, sprite.width, sprite.height);//TOFIX tilelayer seems buggy
-		sprite.x =  _currentSpatialResult.x;
-		sprite.y =  _currentSpatialResult.y;
-		sprite.rotation = SpriterUtil.toRadians(SpriterUtil.fixRotation(_currentSpatialResult.angle));
-		sprite.scaleX = _currentSpatialResult.scaleX;
-		sprite.scaleY = _currentSpatialResult.scaleY;
-		sprite.alpha = _currentSpatialResult.a;
+		sprite.x =  info.x;
+		sprite.y =  info.y;
+		sprite.rotation = SpriterUtil.toRadians(SpriterUtil.fixRotation(info.angle));
+		sprite.scaleX = info.scaleX;
+		sprite.scaleY = info.scaleY;
+		sprite.alpha = info.a;
 		
-		//_currentSpatialResult.put();//back to pool
+		//info.put();//back to pool
+		info = null;
 	}
 	
 	private function getPivotsRelativeToCenter(info:SpatialInfo, pivots:PivotInfo, width:Float, height:Float):Point
@@ -100,7 +99,7 @@ class TilelayerLibrary extends AbstractLibrary
 		var x2 = (preX - pivotX) * c - (preY - pivotY) * s + pivotX;
         var y2 = (preX - pivotX) * s + (preY - pivotY) * c + pivotY;
 		
-		return new SpatialInfo(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
+		return info.init(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
 	}
 	
 	override public function render():Void

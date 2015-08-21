@@ -1,9 +1,13 @@
 package spriter.library;
-import openfl.geom.Point;
 import spriter.definitions.PivotInfo;
 import spriter.definitions.Quadrilateral;
 import spriter.definitions.SpatialInfo;
 import spriter.util.SpriterUtil;
+#if openfl
+import openfl.geom.Point;
+#elseif flambe
+import flambe.math.Point;
+#end
 
 /**
  * ...
@@ -60,7 +64,7 @@ class AbstractLibrary
 		
 		var x2 = (preX - pivotX) * c - (preY - pivotY) * s + pivotX;
         var y2 = (preX - pivotX) * s + (preY - pivotY) * c + pivotY;
-		return new SpatialInfo(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);//TODO pool?
+		return info.init(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);//TODO pool?
 	}
 	
 	public function computeRectCoordinates(info:SpatialInfo, pivots:PivotInfo, width:Float, height:Float):Quadrilateral

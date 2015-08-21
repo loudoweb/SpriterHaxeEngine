@@ -77,12 +77,10 @@ class SpatialInfo implements ISpriterPooled
 	
 	public function unmapFromParent(parentInfo:SpatialInfo):SpatialInfo
     {
-        var unmapped_x : Float;
-		var unmapped_y : Float;
-		var unmapped_angle = angle + parentInfo.angle;
-		var unmapped_scaleX = scaleX * parentInfo.scaleX;
-		var unmapped_scaleY = scaleY * parentInfo.scaleY;
-		var unmapped_alpha = a * parentInfo.a;
+		angle += parentInfo.angle;
+		scaleX *= parentInfo.scaleX;
+		scaleY *= parentInfo.scaleY;
+		a *= parentInfo.a;
 		
 		if (x != 0 || y != 0)
 		{
@@ -92,16 +90,16 @@ class SpatialInfo implements ISpriterPooled
 			var s = Math.sin(parentRad);
 			var c = Math.cos(parentRad);
 			
-			unmapped_x = (preMultX * c) - (preMultY * s) + parentInfo.x;
-			unmapped_y = (preMultX * s) + (preMultY * c) + parentInfo.y;
+			x = (preMultX * c) - (preMultY * s) + parentInfo.x;
+			y = (preMultX * s) + (preMultY * c) + parentInfo.y;
 		}
 		else
 		{
-			unmapped_x = parentInfo.x;
-			unmapped_y = parentInfo.y;
+			x = parentInfo.x;
+			y = parentInfo.y;
 		}
 		
-		return new SpatialInfo(unmapped_x, unmapped_y, unmapped_angle, unmapped_scaleX, unmapped_scaleY, unmapped_alpha, spin);
+		return this;
     }
 	
 	public function copy():SpatialInfo
