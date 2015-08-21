@@ -32,7 +32,7 @@ class SpriterTimeline
 		name = fast.has.name ? fast.att.name : "";
 		objectType = fast.has.object_type ? Type.createEnum(ObjectType, fast.att.object_type.toUpperCase()) : ObjectType.SPRITE;
 		
-		switch (objectType)//TODO over objectType
+		switch (objectType)
 		{
 			case ObjectType.SPRITE:					
 				for (k in fast.nodes.key)
