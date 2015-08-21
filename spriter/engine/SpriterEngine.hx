@@ -1,8 +1,10 @@
 package spriter.engine;
-import flash.Lib;
 import spriter.definitions.ScmlObject;
 import spriter.definitions.SpatialInfo;
 import spriter.library.AbstractLibrary;
+#if openfl
+import openfl.Lib;
+#end
 
 /**
  * ...
@@ -118,7 +120,9 @@ class SpriterEngine
 		this.fixedTick = fixedTick;
 		this.framerate = frameRate;
 		this.handleLibraryClearAndRender = handleRender;
+		#if openfl
 		_lastTime = Lib.getTimer();
+		#end
 	}
 	/**
 	 * Allow you to add a Spriter on screen.
@@ -303,7 +307,9 @@ class SpriterEngine
 	{
 		if(paused){
 			paused = false;
+			#if openfl
 			_lastTime = Lib.getTimer();
+			#end
 		}
 		
 	}
@@ -319,12 +325,16 @@ class SpriterEngine
 		}
 		else
 		{
+			#if openfl
 			var previous:Int = _lastTime;
 			_lastTime = Lib.getTimer();
 			_elapsed = _lastTime - previous;
 
 			if (_elapsed > maxElapsed) 
 				_elapsed = maxElapsed;
+			#elseif SPRITER_DEBUG
+			trace('variable tick not supported outside openfl, please set fixedTick to true or use your own elapsedTime in update()');
+			#end
 		}
 		_total += _elapsed;
 	}
