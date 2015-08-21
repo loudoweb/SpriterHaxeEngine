@@ -4,6 +4,9 @@ import spriter.definitions.SpatialInfo;
 import spriter.definitions.Quadrilateral;
 import spriter.library.AbstractLibrary;
 import spriter.vars.Variable;
+#if SPRITER_CUSTOM_MAP
+import spriter.definitions.CustomCharMap;
+#end
 
 /**
  * ...
@@ -17,6 +20,9 @@ class Spriter
 	public var spriterName:String;
 	public var timeMS:Int = 0;
 	
+	/**
+	 * Manipulate positions (x,y), scale, alpha and rotation through this object.
+	 */
 	public var info:SpatialInfo;
 	
 	/**
@@ -28,6 +34,13 @@ class Spriter
 	 * To slow down or speed up an animation.
 	 */
 	public var playbackSpeed:Float = 1;
+	
+	//Optional features
+	
+	#if SPRITER_CUSTOM_MAP
+	var _customMap:Map<String, CustomCharMap>;
+	#end
+	
 	
 	public function new(_name:String, _scml:ScmlObject, _library:AbstractLibrary, _info:SpatialInfo) 
 	{
@@ -48,22 +61,56 @@ class Spriter
 	/**
 	 * Apply character mapping to change an element in the animation.
 	 * @param	name of the character map in the xml
-	 * @param	reset to apply only the new character map, if not, you can have multiple character map at the same time
-	 * @return  true if the character map exist, false if doesn't exist
+	 * @param	reset to apply only the new character map, if not, you can have multiple character map at the same time. Default is false.
+	 * @return  this
 	 */
-	inline public function applyCharacterMap(name:String, reset:Bool):Bool
+	inline public function applyCharacterMap(name:String, reset:Bool = false):Spriter
 	{
-		return scml.applyCharacterMap(name, reset);
+		#if SPRITER_CUSTOM_MAP
+		if (_customMap.exists(name))
+		{
+			if (reset){
+				scml.resetCharacterMap();
+			}
+			
+			var currentMap = _customMap.get(name);
+			for (i in currentMap.folder...currentMap.folder + currentMap.length)
+			{
+				for (j in 0...scml.activeCharacterMap[i].files.length) 
+				{
+					scml.activeCharacterMap[i].files[j].name = StringTools.replace(scml.activeCharacterMap[i].files[j].name, currentMap.sub, currentMap.by);
+				}
+			}
+		}else{
+		#end
+		scml.applyCharacterMap(name, reset);
+		#if SPRITER_CUSTOM_MAP
+		}
+		#end
+		return this;
 	}
+	#if SPRITER_CUSTOM_MAP
+	/**
+	 * @see CustomCharMap
+	 * @return	this
+	 */
+	public function addCustomCharacterMap(name:String, sub:String, by:String, folder:Int, folderLength:Int = 1):Spriter
+	{
+		if (_customMap == null)
+			_customMap = new Map<String, CustomCharMap>();
+		_customMap.set(name, new CustomCharMap(name, sub, by, folder, folderLength));
+		return this;
+	}
+	#end
 	
 	/**
 	 * Play a specific animation
 	 * @param	name of the animation
 	 * @param	endAnimCallback function callback, return (s:Spriter, entity:String, anim:String)
 	 * @param	removeCallback remove function callback after dispatch
-	 * @return  true if the animation exist, false if doesn't exist
+	 * @return  this
 	 */
-	public function playAnim(?name:String, ?endAnimCallback:Spriter->String->String->Void, removeCallback:Bool = true):Bool
+	public function playAnim(?name:String, ?endAnimCallback:Spriter->String->String->Void, removeCallback:Bool = true):Spriter
 	{
 		if (name == null) {
 			if (paused) 
@@ -73,7 +120,6 @@ class Spriter
 				scml.endAnimCallback = endAnimCallback.bind(this, scml.currentEntity, scml.currentAnimation);
 				scml.endAnimRemoval = removeCallback;
 			}
-			return true;
 		}else if (scml.entities.get(scml.currentEntity).animations.exists(name)) {
 			if (paused) 
 				paused = false;
@@ -83,10 +129,12 @@ class Spriter
 				scml.endAnimCallback = endAnimCallback.bind(this, scml.currentEntity, name);
 				scml.endAnimRemoval = removeCallback;
 			}
-			return true;
 		}else {
-			return false;
+			#if SPRITER_DEBUG
+			trace('animation $name does not exist in entity ${scml.currentEntity}');
+			#end
 		}
+		return this;
 	}
 	/**
 	 * Play a specific entity.
@@ -94,9 +142,9 @@ class Spriter
 	 * @param	anim name of the animation (optional)
 	 * @param	endAnimCallback function callback, return (s:Spriter, entity:String, anim:String)
 	 * @param	removeCallback remove function callback after dispatch
-	 * @return  true if the entity exist, false if doesn't exist
+	 * @return  this
 	 */
-	public function playAnimFromEntity(entity:String, anim:String = '', ?endAnimCallback:Spriter->String->String->Void, removeCallback:Bool = true):Bool
+	public function playAnimFromEntity(entity:String, anim:String = '', ?endAnimCallback:Spriter->String->String->Void, removeCallback:Bool = true):Spriter
 	{
 		if (scml.entities.exists(entity)) {
 			if (paused) 
@@ -106,25 +154,31 @@ class Spriter
 			if(anim != ''){
 				if (scml.entities.get(entity).animations.exists(anim)) {
 					scml.currentAnimation = anim;
+				}else {
+					#if SPRITER_DEBUG
+					trace('animation $anim does not exist in entity $entity');
+					#end
 				}
 			}
 			if(endAnimCallback != null){
 				scml.endAnimCallback = endAnimCallback.bind(this, entity, scml.currentAnimation);
 				scml.endAnimRemoval = removeCallback;
 			}
-			return true;
 		}else {
-			return false;
+			#if SPRITER_DEBUG
+			trace('entity $entity does not exist');
+			#end
 		}
+		return this;
 	}
 	/**
 	 * Play a stack of animations
 	 * @param	names of the animations in order
 	 * @param	endAnimCallback function callback, return (s:Spriter, entity:String, anim:String)
 	 * @param	removeCallback remove function callback after dispatch
-	 * @return  true if the animation exist, false if doesn't exist
+	 * @return  this
 	 */
-	public function playAnimsStack(names:Array<String>, ?endAnimCallback:Spriter->String->String->Void):Bool
+	public function playAnimsStack(names:Array<String>, ?endAnimCallback:Spriter->String->String->Void):Spriter
 	{
 		if (scml.entities.get(scml.currentEntity).animations.exists(names[0])) {
 			if (paused) 
@@ -133,10 +187,12 @@ class Spriter
 			scml.currentAnimation = names[0];
 			scml.endAnimCallback = stackAnims.bind(names, 1, endAnimCallback);
 			scml.endAnimRemoval = true;
-			return true;
 		}else {
-			return false;
+			#if SPRITER_DEBUG
+			trace('animation ${names[0]} does not exist in entity ${scml.currentEntity}');
+			#end
 		}
+		return this;
 	}
 	/**
 	 * Play a stack of animations from a specific entity.

@@ -187,6 +187,10 @@ class ScmlObject implements IScml
 			return false;
 		}
     }
+	inline public function resetCharacterMap():Void
+	{
+		activeCharacterMap = copyFolders();
+	}
 	/**
 	 * Get the names of all animations in the scml file
 	 * @param	entity you have to speficy an entity where we can search the animations.
