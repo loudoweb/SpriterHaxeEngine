@@ -109,7 +109,6 @@ class DrawListLibrary extends AbstractLibrary
 	override public function addGraphic(name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
 		//get file indice and size
-		var imageIndices:Array<Int>;
 		var size:Rectangle = new Rectangle(0, 0, 0, 0);
 		/**
 		 * Index of the image in the atlas
@@ -121,9 +120,8 @@ class DrawListLibrary extends AbstractLibrary
 		var tilesheetIndex:Int = 0;
 		for (sheet in tilesheetLibrary)
 		{
-			imageIndices = sheet.getAnim(name);//TODO should we store from which sheets the tile comes from?
-			if (imageIndices.length > 0) {
-				imageIndex = imageIndices[0];
+			imageIndex = sheet.getIndex(name);//TODO should we store from which sheets the tile comes from?
+			if (imageIndex != -1) {
 				size = sheet.getSize(imageIndex);
 				break;
 			}
