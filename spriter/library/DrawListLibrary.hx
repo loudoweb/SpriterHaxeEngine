@@ -109,7 +109,7 @@ class DrawListLibrary extends AbstractLibrary
 	override public function addGraphic(name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
 		//get file indice and size
-		var size:Rectangle = new Rectangle(0, 0, 0, 0);
+		var size:Rectangle = null;
 		/**
 		 * Index of the image in the atlas
 		 */
@@ -127,10 +127,11 @@ class DrawListLibrary extends AbstractLibrary
 			}
 			tilesheetIndex++;
 		}
-		if (imageIndex == -1)
+		
+		if (imageIndex == -1 || info.a == 0)//if image not finded or not visible, exit method
 			return;
+			
 		info = compute(info, pivots, size.width, size.height);
-		//if (info.a == 0) return;
 		
 		if (tilesheetIndex != lastTilesheetUsed) {
 			currentDrawListIndex = 0;
