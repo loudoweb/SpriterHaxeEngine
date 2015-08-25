@@ -3,7 +3,6 @@ import haxe.io.Bytes;
 import haxe.io.Output;
 import haxe.macro.Expr;
 import haxe.Serializer;
-import org.msgpack.MsgPack;
 import spriter.definitions.ScmlObject;
 #if !flash
 import sys.FileSystem;

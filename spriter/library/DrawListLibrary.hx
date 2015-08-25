@@ -6,7 +6,10 @@ import openfl.geom.Rectangle;
 import spriter.definitions.PivotInfo;
 import spriter.definitions.SpatialInfo;
 import spriter.library.AbstractLibrary;
+import spriter.library.DrawListLibrary.DrawList;
 import spriter.util.SpriterUtil;
+import spriter.interfaces.ISpriterPooled;
+import spriter.util.SpriterPool;
 
 /**
  * This class is a modified version of Tilelayer allowing to use many Tilesheet in one single view with Spriter.
@@ -30,9 +33,10 @@ class DrawListLibrary extends AbstractLibrary
 	public var useTransforms:Bool;
 	public var useTint:Bool;
 
-	var layerDrawingList:Array<DrawList>;
-	var tilesheetLibrary:Array<TilesheetEx>;
-	var lastTilesheetUsed:Int = -1;
+	var layerDrawingList:Array<DrawList>;//all your drawList (one drawCall per drawList)
+	var tilesheetLibrary:Array<TilesheetEx>;//all your tilesheet
+	//var tilesheetCache:Map<String, Int>;//cache all your assets to find quickly which tilesheet to use
+	var lastTilesheetUsed:Int = -1;//allow to set your data in the current drawList if it uses the same tilesheet
 	var currentDrawListIndex:Int = 0;
 	var currentDrawList:DrawList;
 	#if mobile
@@ -47,7 +51,7 @@ class DrawListLibrary extends AbstractLibrary
 	 * @param	smooth
 	 * @param	additive
 	 */
-	public function new(tilesheets:Array<TilesheetEx>, view:Sprite, smooth:Bool=true, additive:Bool=false) 
+		 public function new(tilesheets:Array<TilesheetEx>, view:Sprite, smooth:Bool=true, tint:Bool = false, additive:Bool=false) 
 	{
 		super("");
 
@@ -59,8 +63,10 @@ class DrawListLibrary extends AbstractLibrary
 		useAdditive = additive;
 		useAlpha = true;
 		useTransforms = true;
+		useTint = tint;
 
 		layerDrawingList = [];
+		//tilesheetCache = new Map<String, Int>();
 		tilesheetLibrary = tilesheets;
 	}
 	
@@ -80,7 +86,7 @@ class DrawListLibrary extends AbstractLibrary
 		currentDrawListIndex = 0;
 		for (drawList in layerDrawingList)
 		{
-			drawList.destroy();
+			drawList.put();
 		}
 		layerDrawingList.splice(0, layerDrawingList.length); // compact buffer
 	}
@@ -118,15 +124,25 @@ class DrawListLibrary extends AbstractLibrary
 		 * Index of the tilesheet in the library
 		 */
 		var tilesheetIndex:Int = 0;
-		for (sheet in tilesheetLibrary)
+		/*if (tilesheetCache.exists(name)) 
 		{
-			imageIndex = sheet.getIndex(name);//TODO should we store from which sheets the tile comes from?
-			if (imageIndex != -1) {
-				size = sheet.getSize(imageIndex);
-				break;
+			tilesheetIndex = tilesheetCache.get(name);
+			var sheet = tilesheetLibrary[tilesheetIndex];
+			imageIndex = sheet.getIndex(name);
+			size = sheet.getSize(imageIndex);
+		}else {*/
+			for (sheet in tilesheetLibrary)
+			{
+				imageIndex = sheet.getIndex(name);//TODO should we store from which sheets the tile comes from?
+				if (imageIndex != -1) {
+					size = sheet.getSize(imageIndex);
+					break;
+				}
+				tilesheetIndex++;
 			}
-			tilesheetIndex++;
-		}
+			/*tilesheetCache.set(name, tilesheetIndex);
+		}*/
+		
 		
 		if (imageIndex == -1 || info.a == 0)//if image not finded or not visible, exit method
 			return;
@@ -135,9 +151,9 @@ class DrawListLibrary extends AbstractLibrary
 		
 		if (tilesheetIndex != lastTilesheetUsed) {
 			currentDrawListIndex = 0;
-			currentDrawList = new DrawList();
+			currentDrawList = DrawList.get();
 			currentDrawList.tilesheet = tilesheetIndex;
-			currentDrawList.begin(true, true, false, false);
+			currentDrawList.begin(true, true, useTint, useAdditive);
 			lastTilesheetUsed = tilesheetIndex;
 			addDrawList(currentDrawList);
 		}else {
@@ -145,43 +161,45 @@ class DrawListLibrary extends AbstractLibrary
 		}
 		
 		
-		var list = currentDrawList.list;
-		var fields = currentDrawList.fields;
+		
 		var offsetTransform = currentDrawList.offsetTransform;
-		var offsetRGB = currentDrawList.offsetRGB;
 		var offsetAlpha = currentDrawList.offsetAlpha;
 
-		list[currentDrawListIndex+2] = imageIndex;
-		list[currentDrawListIndex] = info.x;
-		list[currentDrawListIndex + 1] = info.y;
+		currentDrawList.list[currentDrawListIndex+2] = imageIndex;
+		currentDrawList.list[currentDrawListIndex] = info.x;
+		currentDrawList.list[currentDrawListIndex + 1] = info.y;
 		
 		if (offsetTransform > 0) {
 			var rotation:Float = SpriterUtil.toRadians(SpriterUtil.fixRotation(info.angle));
 			if (rotation != 0) {
 				var cos = Math.cos(rotation);
 				var sin = Math.sin(rotation);
-				list[currentDrawListIndex+offsetTransform] = cos * info.scaleX;
-				list[currentDrawListIndex+offsetTransform+1] = sin * info.scaleX;
-				list[currentDrawListIndex+offsetTransform+2] = -1 * sin * info.scaleY;
-				list[currentDrawListIndex + offsetTransform + 3] = cos * info.scaleY;
+				currentDrawList.list[currentDrawListIndex+offsetTransform] = cos * info.scaleX;
+				currentDrawList.list[currentDrawListIndex+offsetTransform+1] = sin * info.scaleX;
+				currentDrawList.list[currentDrawListIndex+offsetTransform+2] = -1 * sin * info.scaleY;
+				currentDrawList.list[currentDrawListIndex + offsetTransform + 3] = cos * info.scaleY;
 			}
 			else {
-				list[currentDrawListIndex+offsetTransform] = info.scaleX;
-				list[currentDrawListIndex+offsetTransform+1] = 0;
-				list[currentDrawListIndex+offsetTransform+2] = 0;
-				list[currentDrawListIndex+offsetTransform+3] = info.scaleY;
+				currentDrawList.list[currentDrawListIndex+offsetTransform] = info.scaleX;
+				currentDrawList.list[currentDrawListIndex+offsetTransform+1] = 0;
+				currentDrawList.list[currentDrawListIndex+offsetTransform+2] = 0;
+				currentDrawList.list[currentDrawListIndex+offsetTransform+3] = info.scaleY;
 			}
 		}
-		/*if (offsetRGB > 0) {
-			list[currentDrawListIndex+offsetRGB] = sprite.r;
-			list[currentDrawListIndex+offsetRGB+1] = sprite.g;
-			list[currentDrawListIndex+offsetRGB+2] = sprite.b;
-		}*/
-		if (offsetAlpha > 0) list[currentDrawListIndex+offsetAlpha] = info.a;
+		/*
+		var offsetRGB = currentDrawList.offsetRGB;
+		if (offsetRGB > 0) {//TODO add tint
+			currentDrawList.list[currentDrawListIndex+offsetRGB] = info.r;
+			currentDrawList.list[currentDrawListIndex+offsetRGB+1] = info.g;
+			currentDrawList.list[currentDrawListIndex+offsetRGB+2] = info.b;
+		}
+		*/
+		if (offsetAlpha > 0) currentDrawList.list[currentDrawListIndex+offsetAlpha] = info.a;
 		
-		currentDrawListIndex += fields;
+		currentDrawListIndex += currentDrawList.fields;
 		currentDrawList.index = currentDrawListIndex;
 		info = null;
+		pivots = null;
 	}
 	
 	//overrided because tilelayer use the center of the sprite for the coordinates
@@ -210,25 +228,20 @@ class DrawListLibrary extends AbstractLibrary
 		view = null;
 		layerDrawingList = null;
 		tilesheetLibrary = null;//TODO proper destroy function for tilesheet?
-		if (currentDrawList != null)
-		{
-			currentDrawList.destroy();
-			currentDrawList = null;
-		}
+		currentDrawList = null;
 	}
 	
-	public function addDrawList(list:DrawList):Void
+	inline public function addDrawList(list:DrawList):Void
 	{
 		layerDrawingList.push(list);
 	}
 }
 /**
  * Modified DrawList from Tilelayer which allows to compare the current tilesheet used.
- * TODO pool
  * @author loudo (Ludovic Bas)
  * @author forked from TileLayer by Philippe / http://philippe.elsass.me
  */
-class DrawList
+class DrawList implements ISpriterPooled 
 {
 	/**
 	 * Tilesheet index
@@ -241,14 +254,29 @@ class DrawList
 	public var offsetRGB:Int;
 	public var offsetAlpha:Int;
 	public var flags:Int;
-	public var runs:Int;
+	
+	private static var _pool = new SpriterPool<DrawList>(DrawList);
+	private var _inPool:Bool = false;
 
 	
 	public function new() 
 	{
 		list = new Array<Float>();
-		runs = 0;
-		index = 0;
+	}
+	
+	/**
+	 * Recycle or create a new SpatialInfo. 
+	 * Be sure to put() them back into the pool after you're done with them!
+	 * 
+	 * @param	X		The X-coordinate of the point in space.
+	 * @param	Y		The Y-coordinate of the point in space.
+	 * @return	This point.
+	 */
+	public static inline function get():DrawList
+	{
+		var pooledInfo = _pool.get();
+		pooledInfo._inPool = false;
+		return pooledInfo;
 	}
 	
 	public function begin(useTransforms:Bool, useAlpha:Bool, useTint:Bool, useAdditive:Bool) 
@@ -277,31 +305,21 @@ class DrawList
 		if (useAdditive) flags |= Graphics.TILE_BLEND_ADD;
 		#end
 	}
-
-	public function end()
-	{
-		if (list.length > index) 
-		{
-			if (++runs > 60) 
-			{
-				list.splice(index, list.length - index); // compact buffer
-				runs = 0;
-			}
-			else
-			{
-				while (index < list.length)
-				{
-					list[index + 2] = -2.0; // set invalid ID
-					index += fields;
-				}
-			}
-		}
-	}
 	public function destroy():Void
 	{
-		runs = 0;
 		index = 0;
 		list.splice(index, list.length); // compact buffer
+	}
+	/**
+	 * Add this SpatialInfo to the recycling pool.
+	 */
+	public function put():Void
+	{
+		if (!_inPool)
+		{
+			_inPool = true;
+			_pool.putUnsafe(this);
+		}
 	}
 	
 }

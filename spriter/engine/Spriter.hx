@@ -254,7 +254,9 @@ class Spriter
 			resetTime();
 			scml.currentAnimation = anims[nextAnim];
 		}
+		#if SPRITER_DEBUG
 		trace('stackAnims', scml.currentAnimation);
+		#end
 		//anim after next anim handler
 		if (++nextAnim >= anims.length) {
 			if(endAnimsCallback != null)
@@ -275,7 +277,9 @@ class Spriter
 				scml.currentAnimation = anims[nextAnim];
 			}
 		}
+		#if SPRITER_DEBUG
 		trace('stackAnims', scml.currentAnimation);
+		#end
 		//anim after next anim handler
 		if (++nextAnim >= anims.length) {
 			if(endAnimsCallback != null)
