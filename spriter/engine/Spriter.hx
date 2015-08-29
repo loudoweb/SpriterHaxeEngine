@@ -67,7 +67,7 @@ class Spriter
 	inline public function applyCharacterMap(name:String, reset:Bool = false):Spriter
 	{
 		#if SPRITER_CUSTOM_MAP
-		if (_customMap.exists(name))
+		if (_customMap != null && _customMap.exists(name))
 		{
 			if (reset){
 				scml.resetCharacterMap();
