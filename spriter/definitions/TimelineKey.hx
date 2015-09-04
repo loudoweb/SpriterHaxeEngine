@@ -58,7 +58,7 @@ class TimelineKey
 		return clone;
 	}
 	
-	public function interpolate(nextKey:TimelineKey, nextKeyTime:Int, currentTime:Float):Void
+	inline public function interpolate(nextKey:TimelineKey, nextKeyTime:Int, currentTime:Float):Void
     {
         linearKey(nextKey, getTWithNextKey(nextKey, nextKeyTime, currentTime));
     }           
@@ -100,7 +100,7 @@ class TimelineKey
         return 0; // Runtime should never reach here        
     }	
 
-    public function linear(a:Float, b:Float, t:Float):Float
+	inline public function linear(a:Float, b:Float, t:Float):Float
     {
 		return ((b-a)*t)+a;
     }
@@ -135,20 +135,20 @@ class TimelineKey
 		return linear(angleA,angleB,t);
 	}
 
-	public function quadratic(a:Float, b:Float, c:Float, t:Float):Float
+	inline public function quadratic(a:Float, b:Float, c:Float, t:Float):Float
 	{
 		return linear(linear(a,b,t),linear(b,c,t),t);
 	}
 
-	public function cubic(a:Float, b:Float, c:Float, d:Float, t:Float):Float
+	inline public function cubic(a:Float, b:Float, c:Float, d:Float, t:Float):Float
 	{
 		return linear(quadratic(a,b,c,t),quadratic(b,c,d,t),t);
 	}
-	public function quartic(a:Float, b:Float, c:Float, d:Float, e:Float, t:Float):Float
+	inline public function quartic(a:Float, b:Float, c:Float, d:Float, e:Float, t:Float):Float
 	{
 		return linear(cubic(a,b,c,d,t),cubic(b,c,d,e,t),t);
 	}
-	public function quintinc(a:Float, b:Float, c:Float, d:Float, e:Float, f:Float,t:Float):Float
+	inline public function quintinc(a:Float, b:Float, c:Float, d:Float, e:Float, f:Float,t:Float):Float
 	{
 		return linear(quartic(a,b,c,d,e,t),quartic(b,c,d,e,f,t),t);
 	}
@@ -177,12 +177,12 @@ class TimelineKey
 	}
 	// Bezier requires a few helper functions, but the main function you actually use is going to be: float CubicBezierAtTime(float p1x,float p1y,float p2x,float p2y,float t)
 
-	private function sampleCurve(a:Float, b:Float, c:Float, t:Float):Float
+	inline private function sampleCurve(a:Float, b:Float, c:Float, t:Float):Float
 	{
 		return ((a*t+b)*t+c)*t;
 	}
 
-	private function sampleCurveDerivativeX(ax:Float, bx:Float, cx:Float, t:Float):Float 
+	inline private function sampleCurveDerivativeX(ax:Float, bx:Float, cx:Float, t:Float):Float 
 	{
 		return (3.0*ax*t+2.0*bx)*t+cx;
 	}
@@ -191,13 +191,13 @@ class TimelineKey
 
 	// animation, the more precision is needed in the timing function result to avoid ugly discontinuities.
 
-	private function solveEpsilon(duration:Float):Float 
+	inline private function solveEpsilon(duration:Float):Float 
 	{
 		return 1.0/(200.0*duration);
 	}
 
 
-	private function solve(ax:Float, bx:Float, cx:Float, ay:Float, by:Float, cy:Float, x:Float, epsilon:Float):Float 
+	inline private function solve(ax:Float, bx:Float, cx:Float, ay:Float, by:Float, cy:Float, x:Float, epsilon:Float):Float 
 	{
 		return sampleCurve(ay,by,cy,solveCurveX(ax,bx,cx,x,epsilon));
 	}
@@ -205,7 +205,7 @@ class TimelineKey
 
 	// Given an x value, find a parametric value it came from.
 
-	private function fabs(n:Float):Float
+	inline private function fabs(n:Float):Float
 	{
 		if(n >= 0) {
 			return n;
