@@ -63,10 +63,7 @@ class ObjectTimelineKey extends SpatialTimelineKey
     override public function linearKey(keyB:TimelineKey, t:Float):Void
     // keyB must be ObjectTimelineKey
     {
-		if (!Std.is(keyB, ObjectTimelineKey))
-			throw "keyB must be ObjectTimelineKey";
-			
-        var keyBSprite:ObjectTimelineKey = cast(keyB, ObjectTimelineKey);
+        var keyBSprite:ObjectTimelineKey = cast keyB;
 		
         linearSpatialInfo(info, keyBSprite.info, info.spin, t);
 

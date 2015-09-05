@@ -55,10 +55,7 @@ class BoneTimelineKey extends SpatialTimelineKey
 
     override public function linearKey(keyB:TimelineKey,t:Float):Void
     {
-		if (!Std.is(keyB, BoneTimelineKey))
-			throw "keyB must be BoneTimelineKeys";
-			
-        var keyBBone:BoneTimelineKey = cast(keyB, BoneTimelineKey);
+        var keyBBone:BoneTimelineKey = cast keyB;
         linearSpatialInfo(info, keyBBone.info, info.spin, t);
 
         #if SPRITER_DEBUG_BONE

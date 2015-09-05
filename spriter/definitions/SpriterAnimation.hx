@@ -171,7 +171,7 @@ class SpriterAnimation
 			spatialInfo = currentKey.info.unmapFromParent(spatialInfo);
 			var activePivots:PivotInfo;
 			if (Std.is(currentKey, SpriteTimelineKey)) {
-				var currentSpriteKey:SpriteTimelineKey = cast(currentKey, SpriteTimelineKey);
+				var currentSpriteKey:SpriteTimelineKey = cast currentKey;
 				//render from library
 				var currentKeyName:String = root.getFileName(currentSpriteKey.folder, currentSpriteKey.file);
 				if (currentKeyName != null) {//hidden object test (via mapping)
@@ -180,10 +180,10 @@ class SpriterAnimation
 					library.addGraphic(currentKeyName, spatialInfo, activePivots);
 				}
 			}else if (Std.is(currentKey, SubEntityTimelineKey)){
-				var currentSubKey:SubEntityTimelineKey = cast(currentKey, SubEntityTimelineKey);
+				var currentSubKey:SubEntityTimelineKey = cast currentKey;
 				root.setSubEntityCurrentTime(library, currentSubKey.t, currentSubKey.entity, currentSubKey.animation, spatialInfo);
 			}else {
-				var currentObjectKey:ObjectTimelineKey = cast(currentKey, ObjectTimelineKey);
+				var currentObjectKey:ObjectTimelineKey = cast currentKey;
 				
 				if (currentObjectKey.type == ObjectType.POINT)
 				{
