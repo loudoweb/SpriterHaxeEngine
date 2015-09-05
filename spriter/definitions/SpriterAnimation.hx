@@ -280,7 +280,7 @@ class SpriterAnimation
     public function keyFromRef(ref:Ref, newTime:Int):TimelineKey
     {
         var timeline:SpriterTimeline = timelines[ref.timeline];
-        var keyA:TimelineKey = timeline.keys[ref.key].copy();
+        var keyA:TimelineKey = timeline.keys[ref.key];
         
         if(timeline.keys.length == 1 || keyA.curveType == INSTANT)
         {
@@ -308,7 +308,7 @@ class SpriterAnimation
         {
             keyBTime = keyBTime+length;
         }
-		
+		keyA = keyA.copy();
         keyA.interpolate(keyB, keyBTime, newTime);
 		return keyA;
     }
