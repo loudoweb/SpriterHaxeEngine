@@ -77,7 +77,7 @@ class SpatialInfo implements ISpriterPooled
 	
 	public function unmapFromParent(parentInfo:SpatialInfo):SpatialInfo
     {
-		angle += parentInfo.angle;
+		angle = parentInfo.scaleX * parentInfo.scaleY >= 0 ? angle + parentInfo.angle : (360-angle)+parentInfo.angle;
 		scaleX *= parentInfo.scaleX;
 		scaleY *= parentInfo.scaleY;
 		a *= parentInfo.a;
