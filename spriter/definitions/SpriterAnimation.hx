@@ -39,6 +39,9 @@ class SpriterAnimation
 	public var points:Array<SpatialInfo>;
 	public var boxes:Array<Quadrilateral>;
 	
+	//spatial info cached and shared between all animations to avoid allocating new ones. Used by libraries to compute final coordinates and draw the object on the screen.
+	static var _cachedSpatialInfo:SpatialInfo = new SpatialInfo();
+	
 	public function new(fast:Fast) 
 	{
 		mainlineKeys = [];
@@ -126,10 +129,13 @@ class SpriterAnimation
     public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
 		var currentKey:SpatialTimelineKey;
-		
 		var	currentRef:Ref;
 		var spatialInfo:SpatialInfo = null;
+		
+		//BONES
 		var len:Int = mainKey.boneRefs.length;
+		ensureNumOfCachedTransformedBoneKeys(len);
+		
         for (b in 0...len)
         {
             currentRef = mainKey.boneRefs[b];
@@ -143,15 +149,16 @@ class SpriterAnimation
 				spatialInfo = parentSpatialInfo;
 			}
 
-            spatialInfo = currentKey.info.unmapFromParent(spatialInfo);
-            _transformedBoneKeys.push(spatialInfo);
+            currentKey.info.unmapFromParent(spatialInfo, _transformedBoneKeys[b]);//update _transformedBoneKeys[b]
         }
 
-        //var objectKeys:Array<TimelineKey>;
+        //POINTS/BOXES
 		if (points.length > 0)
 			points.splice(0, points.length);//instead of creating an array each time, clear it
 		if (boxes.length > 0)
 			boxes.splice(0, boxes.length);//instead of creating an array each time, clear it
+			
+		//TIMELINE KEYS
 		len = mainKey.objectRefs.length;
         for(o in 0...len)
         {
@@ -167,8 +174,8 @@ class SpriterAnimation
                 spatialInfo = parentSpatialInfo;
             }
 			
-		    //currentKey.info = currentKey.info.unmapFromParent(parentInfo);//TOFIX and remove next line ?
-			spatialInfo = currentKey.info.unmapFromParent(spatialInfo);
+			currentKey.info.unmapFromParent(spatialInfo, _cachedSpatialInfo);//update _cachedSpatialInfo
+			
 			var activePivots:PivotInfo;
 			if (Std.is(currentKey, SpriteTimelineKey)) {
 				var currentSpriteKey:SpriteTimelineKey = cast currentKey;
@@ -177,23 +184,23 @@ class SpriterAnimation
 				if (currentKeyName != null) {//hidden object test (via mapping)
 					activePivots = root.getPivots(currentSpriteKey.folder, currentSpriteKey.file);
 					activePivots = currentKey.paint(activePivots);
-					library.addGraphic(currentKeyName, spatialInfo, activePivots);
+					library.addGraphic(currentKeyName, _cachedSpatialInfo, activePivots);
 				}
 			}else if (Std.is(currentKey, SubEntityTimelineKey)){
 				var currentSubKey:SubEntityTimelineKey = cast currentKey;
-				root.setSubEntityCurrentTime(library, currentSubKey.t, currentSubKey.entity, currentSubKey.animation, spatialInfo);
+				root.setSubEntityCurrentTime(library, currentSubKey.t, currentSubKey.entity, currentSubKey.animation, _cachedSpatialInfo);
 			}else {
 				var currentObjectKey:ObjectTimelineKey = cast currentKey;
 				
 				if (currentObjectKey.type == ObjectType.POINT)
 				{
 					activePivots = PivotInfo.DEFAULT;
-					points.push(library.compute(spatialInfo, activePivots,0,0));
+					points.push(library.compute(_cachedSpatialInfo, activePivots, 0, 0));
 				}else {//BOX
 					activePivots = new PivotInfo();//default pivot, but need to be overrided
 					activePivots = currentKey.paint(activePivots);
 					var currentBox:SpriterBox = currentEntity.boxes_info.get(getTimelineName(currentRef.timeline));
-					boxes.push(library.computeRectCoordinates(spatialInfo, activePivots, currentBox.width, currentBox.height));
+					boxes.push(library.computeRectCoordinates(_cachedSpatialInfo, activePivots, currentBox.width, currentBox.height));
 				}
 			}
 			
@@ -252,10 +259,14 @@ class SpriterAnimation
 		}
 		//clean up
 		spatialInfo = null;
-		len = _transformedBoneKeys.length;
-		if (len > 0)
-			_transformedBoneKeys.splice(0, len);//instead of creating an array each time, clear it
     }
+	
+	private inline function ensureNumOfCachedTransformedBoneKeys(num:Int):Void {
+		if (num <= _transformedBoneKeys.length) return;
+		for (i in _transformedBoneKeys.length...num) {
+			_transformedBoneKeys.push(new SpatialInfo());
+		}
+	}
 
     public function mainlineKeyFromTime(time:Int):MainlineKey
     {

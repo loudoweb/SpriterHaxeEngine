@@ -74,32 +74,45 @@ class SpatialInfo implements ISpriterPooled
 		this.scaleY = scale;
 		return this;
 	}
-	
-	public function unmapFromParent(parentInfo:SpatialInfo):SpatialInfo
+	/**
+	 * 
+	 * @param	parentInfo
+	 * @param	out if null, this method will override this SpatialInfo
+	 * @return
+	 */
+	public function unmapFromParent(parentInfo:SpatialInfo, out:SpatialInfo = null):SpatialInfo
     {
-		angle = parentInfo.scaleX * parentInfo.scaleY >= 0 ? angle + parentInfo.angle : (360-angle)+parentInfo.angle;
-		scaleX *= parentInfo.scaleX;
-		scaleY *= parentInfo.scaleY;
-		a *= parentInfo.a;
+		if (out == null)
+			out = this;
+		else
+			out.init(x, y, angle, scaleX, scaleY, a, spin);//initializing the out object with the values of this object
 		
-		if (x != 0 || y != 0)
+		if (parentInfo.scaleX * parentInfo.scaleY < 0)
+			out.angle *= -1; //allow flipping using negative scaling
+			
+		out.angle += parentInfo.angle;
+		out.scaleX *= parentInfo.scaleX;
+		out.scaleY *= parentInfo.scaleY;
+		out.a *= parentInfo.a;
+		
+		if (out.x != 0 || out.y != 0)
 		{
-			var preMultX = x * parentInfo.scaleX;
-			var preMultY = y * parentInfo.scaleY;
+			var preMultX = out.x * parentInfo.scaleX;
+			var preMultY = out.y * parentInfo.scaleY;
 			var parentRad = SpriterUtil.toRadians(SpriterUtil.under360(parentInfo.angle));
 			var s = Math.sin(parentRad);
 			var c = Math.cos(parentRad);
 			
-			x = (preMultX * c) - (preMultY * s) + parentInfo.x;
-			y = (preMultX * s) + (preMultY * c) + parentInfo.y;
+			out.x = (preMultX * c) - (preMultY * s) + parentInfo.x;
+			out.y = (preMultX * s) + (preMultY * c) + parentInfo.y;
 		}
 		else
 		{
-			x = parentInfo.x;
-			y = parentInfo.y;
+			out.x = parentInfo.x;
+			out.y = parentInfo.y;
 		}
 		
-		return this;
+		return out;
     }
 	
 	public function copy():SpatialInfo
