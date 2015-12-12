@@ -113,7 +113,7 @@ class SpriterEngine
 			default_scml = scml_parsed;
 		}else {
 			#if SPRITER_DEBUG
-			trace('If you don\'t add default scml with scml_ToParse or scml_parsed parameter in the constructor, you will have to add with addEntity()');
+			trace('WARNING: If you don\'t add default scml with scml_ToParse or scml_parsed parameter in the constructor, you will have to specify each time the scml with addSpriter()');
 			#end
 		}
 		_lib = library;
@@ -125,15 +125,16 @@ class SpriterEngine
 		#end
 	}
 	/**
-	 * Allow you to add a Spriter on screen.
-	 * @param	id unique name of your Spriter.
-	 * @param	x
-	 * @param	y
+	 * Allow you to add a Spriter on screen. By default, the first animation of the first entity of the scml is played.
+	 * @param	id unique name of your Spriter. This id helps you retrieve the Spriter in getSpriter(id:String) and other methods
+	 * @param	x position of your Spriter
+	 * @param	y position of your Spriter
+	 * @param	scml scml of this Spriter if you don't want to use the default scml
 	 * @param	?index if null same result as addChild, else same result as addChildAt(index). Spriters at and after the replaced index move up. You can use index out of range but negative means 0.
 	 * @param	autoRemoval if true, the Spriter will be removed after the animation is ended
 	 * @return  the Spriter created
 	 */
-	public function addEntity(id:String, x:Float = 0, y:Float = 0, ?scml:ScmlObject, ?index:Null<Int>, autoRemoval:Bool = false):Spriter 
+	public function addSpriter(id:String, x:Float = 0, y:Float = 0, ?scml:ScmlObject, ?index:Null<Int>, autoRemoval:Bool = false):Spriter 
 	{
 
 		//create spatial info for the current Spriter
@@ -144,7 +145,7 @@ class SpriterEngine
 		//create the Spriter
 		var spriter:Spriter = new Spriter(id, scml, _lib, info);
 		if (autoRemoval) {
-			spriter.playAnim(removeSpriterEntity, true);
+			spriter.playAnim(autoRemoveSpriter, true);
 		}
 		
 		//store in array
@@ -161,12 +162,22 @@ class SpriterEngine
 		//return the spriter
 		return spriter;
 	}
+	
+	/**
+	 * Retrieve the index of a Spriter
+	 * @param	spriter
+	 * @return index
+	 */
 	public function getIndex(spriter:Spriter):Int
 	{
 		return _spriters.indexOf(spriter);
 	}
 	
-	/** Moves a Spriter to a certain index. Spriters at and after the replaced position move up.*/
+	/**
+	 * Moves a Spriter to a certain index. Spriters at and after the replaced position move up.
+	 * @param	spriter
+	 * @param	index
+	 */
 	public function setIndex(spriter:Spriter, index:Int):Void
 	{
 		var oldIndex:Int = getIndex(spriter);
@@ -176,7 +187,11 @@ class SpriterEngine
 		_spriters.insert(index, spriter);
 	}
 	
-	/** Swaps the indexes of two children. */
+	/**
+	 * Swaps the indexes of two children.
+	 * @param	spriter1
+	 * @param	spriter2
+	 */
 	public function swap(spriter1:Spriter, spriter2:Spriter):Void
 	{
 		var index1:Int = getIndex(spriter1);
@@ -185,15 +200,23 @@ class SpriterEngine
 		swapAt(index1, index2);
 	}
 	
-	/** Swaps the indexes of two children. */
+	/**
+	 * Swaps the indexes of two children.
+	 * @param	index1
+	 * @param	index2
+	 */
 	public function swapAt(index1:Int, index2:Int):Void
 	{
-		var spriter1:Spriter = getEntityAt(index1);
-		var spriter2:Spriter = getEntityAt(index2);
+		var spriter1:Spriter = getSpriterAt(index1);
+		var spriter2:Spriter = getSpriterAt(index2);
 		_spriters[index1] = spriter2;
 		_spriters[index2] = spriter1;
 	}
-	public function removeEntity(id:String):Void 
+	/**
+	 * Remove a Spriter from screen and destroy it
+	 * @param	id of the Spriter you want to remove
+	 */
+	public function removeSpriter(id:String):Void 
 	{
 		if (_spritersNamed.exists(id)) {
 			var current:Spriter = _spritersNamed.get(id);
@@ -206,7 +229,11 @@ class SpriterEngine
 			trace("id doesn't exist");
 		}
 	}
-	public function removeEntityAt(index:Int):Void 
+	/**
+	 * Remove a Spriter from screen and destroy it
+	 * @param	index of the Spriter you want to remove
+	 */
+	public function removeSpriterAt(index:Int):Void 
 	{
 		if (index >= 0 && index < _spriters.length) {
 			var current:Spriter = _spriters[index];
@@ -218,6 +245,9 @@ class SpriterEngine
 			trace('index outside range');
 		}
 	}
+	/**
+	 * Remove all Spriters from screen and destroy them
+	 */
 	public function removeAll():Void
 	{
 		var current:Spriter;
@@ -231,17 +261,27 @@ class SpriterEngine
 		_spritersNamed = new Map<String ,Spriter>();
 		_lib.clear();
 	}
-	private function removeSpriterEntity(spriter:Spriter, entity:String, anim:String):Void
+	function autoRemoveSpriter(spriter:Spriter, entity:String, anim:String):Void
 	{
-		removeEntity(spriter.spriterName);
+		removeSpriter(spriter.spriterName);
 	}
-	public function getEntity(id:String):Spriter
+	/**
+	 * Get a Spriter from its id
+	 * @param	id
+	 * @return
+	 */
+	public function getSpriter(id:String):Spriter
 	{
 		if (_spritersNamed.exists(id))
 			return _spritersNamed.get(id);
 		return null;
 	}
-	public function getEntityAt(index:Int):Spriter
+	/**
+	 * Get a Spriter from its index
+	 * @param	index
+	 * @return
+	 */
+	public function getSpriterAt(index:Int):Spriter
 	{
 		if (index >= 0 && index < _spriters.length)
 			return _spriters[index];
