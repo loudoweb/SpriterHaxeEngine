@@ -51,7 +51,7 @@ class DrawListLibrary extends AbstractLibrary
 	 * @param	smooth
 	 * @param	additive
 	 */
-		 public function new(tilesheets:Array<TilesheetEx>, view:Sprite, smooth:Bool=true, tint:Bool = false, additive:Bool=false) 
+	public function new(tilesheets:Array<TilesheetEx>, view:Sprite, smooth:Bool=true, tint:Bool = false, additive:Bool=false) 
 	{
 		super("");
 

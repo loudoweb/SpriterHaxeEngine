@@ -105,7 +105,8 @@ Spriter Haxe Engine Features
  - BitmapData library (copypixels, dependency : openfl)
  - Tilelayer library (drawTiles using only one tilesheet)(dependency : https://github.com/elsassph/openfl-tilelayer and openfl).
  - DrawTiles library (using many tilesheets)(dependency : https://github.com/elsassph/openfl-tilelayer and openfl).
- - Flixel Library (atlas support or bitmaps handled with addChild, , dependency : flixel) by Zaphod
+ - Flixel Library (atlas support or bitmaps handled with addChild, dependency : flixel) by Zaphod
+ - Heaps Library (h3d/heaps, dependency : https://github.com/ncannasse/heaps) by Delahee
  - override the AbstractLibrary to provide a new library
  
 **Other features**

@@ -134,7 +134,7 @@ class SpriterEngine
 	 * @param	autoRemoval if true, the Spriter will be removed after the animation is ended
 	 * @return  the Spriter created
 	 */
-	public function addSpriter(id:String, x:Float = 0, y:Float = 0, ?scml:ScmlObject, ?index:Null<Int>, autoRemoval:Bool = false):Spriter 
+	public function addSpriter(id:String, ?x:Float = 0, ?y:Float = 0, ?scml:ScmlObject, ?index:Null<Int>, ?autoRemoval:Bool = false):Spriter 
 	{
 
 		//create spatial info for the current Spriter
