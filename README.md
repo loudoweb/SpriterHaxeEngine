@@ -107,6 +107,7 @@ Spriter Haxe Engine Features
  - DrawTiles library (using many tilesheets)(dependency : https://github.com/elsassph/openfl-tilelayer and openfl).
  - Flixel Library (atlas support or bitmaps handled with addChild, dependency : flixel) by Zaphod
  - Heaps Library (h3d/heaps, dependency : https://github.com/ncannasse/heaps) by Delahee
+ - Luxe Library (dependency : https://github.com/underscorediscovery/luxe)
  - override the AbstractLibrary to provide a new library
  
 **Other features**
@@ -125,11 +126,10 @@ TODO
  - add tilesheet stage 3d support : https://github.com/as3boyan/TilesheetStage3D/
  - add ash and haxepunk support
  - add Flambe support (waiting for pull request, see here https://github.com/quinnhoener/SpriterHaxeEngine)
+ - add Kha support (waiting for pull request, see here https://github.com/sh-dave/SpriterHaxeEngine/tree/dev)
  - Optimized engine : draw call only when needed. So "instant" keys are not updated between keys.
  - animation callback optimization
  - check Garbage collector
- - binary scml
- - use multiple scml in the engine
  
 Examples
 ------------

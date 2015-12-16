@@ -3,6 +3,8 @@ package spriter.definitions;
 import openfl.geom.Point;
 #elseif flambe
 import flambe.math.Point;
+#elseif luxe
+typedef Point = phoenix.Vector;
 #end
 
 /**
