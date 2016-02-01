@@ -195,7 +195,7 @@ class SpriterAnimation
 				if (currentObjectKey.type == ObjectType.POINT)
 				{
 					activePivots = PivotInfo.DEFAULT;
-					points.push(library.compute(_cachedSpatialInfo, activePivots, 0, 0));
+					points.push(library.compute(_cachedSpatialInfo.copy(), activePivots, 0, 0));
 				}else {//BOX
 					activePivots = new PivotInfo();//default pivot, but need to be overrided
 					activePivots = currentKey.paint(activePivots);
