@@ -48,4 +48,11 @@ class SubEntityTimelineKey extends ObjectTimelineKey
 		return c;
 	}
 	
+	override public function linearKey(keyB:TimelineKey, t:Float):Void
+    {
+        super.linearKey(keyB, t);
+		var keyBSub:SubEntityTimelineKey = cast keyB;
+		this.t = linear (this.t, keyBSub.t, t); 
+    }
+	
 }

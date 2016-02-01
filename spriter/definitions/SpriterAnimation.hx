@@ -188,7 +188,7 @@ class SpriterAnimation
 				}
 			}else if (Std.is(currentKey, SubEntityTimelineKey)){
 				var currentSubKey:SubEntityTimelineKey = cast currentKey;
-				root.setSubEntityCurrentTime(library, currentSubKey.t, currentSubKey.entity, currentSubKey.animation, _cachedSpatialInfo);
+				root.setSubEntityCurrentTime(library, currentSubKey.t, currentSubKey.entity, currentSubKey.animation, _cachedSpatialInfo.copy());
 			}else {
 				var currentObjectKey:ObjectTimelineKey = cast currentKey;
 				

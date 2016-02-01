@@ -60,10 +60,10 @@ class TimelineKey
 	
 	inline public function interpolate(nextKey:TimelineKey, nextKeyTime:Int, currentTime:Float):Void
     {
-        linearKey(nextKey, getTWithNextKey(nextKey, nextKeyTime, currentTime));
+        linearKey(nextKey, getTWithNextKey(nextKeyTime, currentTime));
     }           
 
-    public function getTWithNextKey(nextKey:TimelineKey, nextKeyTime:Int, currentTime:Float):Float
+    public function getTWithNextKey(nextKeyTime:Int, currentTime:Float):Float
     {
         if(curveType == INSTANT || time == nextKeyTime)
         {

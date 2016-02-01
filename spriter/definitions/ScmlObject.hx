@@ -149,9 +149,9 @@ class ScmlObject implements IScml
 	public function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo):Void
 	{
 		var entityName:String = entitiesName[entity];
-		var currentEnt:SpriterEntity 		=	entities.get(entityName);
+		var currentEnt:SpriterEntity =	entities.get(entityName);
 		var animationName:String = currentEnt.animationsName[animation];
-		var currentAnim:SpriterAnimation	=	currentEnt.animations.get(animationName);
+		var currentAnim:SpriterAnimation = currentEnt.animations.get(animationName);
 		var newTime:Int = Std.int(t * currentAnim.length);
 		currentAnim.setCurrentTime(newTime, library, this, currentEnt, spatialInfo);
 	}
