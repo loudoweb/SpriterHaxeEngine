@@ -27,9 +27,8 @@ class ScmlObject implements IScml
 	 */
 	public var entitiesName:Array<String>;
 	public var tags:Array<String>;
-
-    public var currentEntity:String 	= ""; 
-    public var currentAnimation:String  = ""; 
+    public var defaultEntity:String 	= ""; 
+    public var defaultAnimation:String  = ""; 
 
     public var currentTime:Float; 
 	
@@ -76,8 +75,8 @@ class ScmlObject implements IScml
 					entities.set(el.att.name, new SpriterEntity(el));
 					entitiesName.push(el.att.name);
 					if (el.att.id == "0") {
-						currentEntity = el.att.name;
-						currentAnimation = el.node.animation.att.name;
+						defaultEntity = el.att.name;
+						defaultAnimation = el.node.animation.att.name;
 					}
 				}else if (el.name == "tag_list")
 				{
@@ -128,9 +127,9 @@ class ScmlObject implements IScml
 			tagCallback(tags[tag]);
 		}
 	}
-	public function onVar(id:Int, value:String):Void
+	public function onVar(id:Int, value:String, entity:SpriterEntity):Void
 	{
-		var variable:Variable<Dynamic> = entities[currentEntity].variables[id];
+		var variable:Variable<Dynamic> = entity.variables[id];
 		//callback only if var changes
 		if (variable.set(value))
 		{
@@ -149,14 +148,14 @@ class ScmlObject implements IScml
 		currentAnim.setCurrentTime(newTime, library, this, currentEnt, spatialInfo);
 	}
 	//interface IScml end
-    public function applyCharacterMap(name:String, reset:Bool):Bool
+    public function applyCharacterMap(name:String, reset:Bool, entityName:String):Bool
     {
 		if(reset)
 		{
 			activeCharacterMap = copyFolders();
 		}
 		
-		var	entity:SpriterEntity = entities.get(currentEntity);
+		var entity:SpriterEntity = entities.get(entityName);
 		
 		if (entity.characterMaps.exists(name)) {
 			
@@ -233,8 +232,8 @@ class ScmlObject implements IScml
 		newSCML.entitiesName = entitiesName;
 		newSCML.tags = tags;
 		
-		newSCML.currentEntity 	= Std.string(currentEntity); 
-		newSCML.currentAnimation  = Std.string(currentAnimation); 
+		newSCML.defaultEntity 	= Std.string(defaultEntity); 
+		newSCML.defaultAnimation  = Std.string(defaultAnimation); 
 		newSCML.currentTime = 0; 
 		newSCML.spriterName = id;
 		return newSCML;

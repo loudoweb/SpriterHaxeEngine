@@ -228,13 +228,13 @@ class SpriterAnimation
 					{
 						if (root.metaDispatch == ALWAYS)
 						{
-							root.onVar(_var.id, keyVar.value);
+							root.onVar(_var.id, keyVar.value, currentEntity);
 						}else if (root.metaDispatch == ONCE_PER_LOOP && mainKey.time != keyVar.lastDispatched) {
 							keyVar.lastDispatched = mainKey.time;
-							root.onVar(_var.id, keyVar.value);
+							root.onVar(_var.id, keyVar.value, currentEntity);
 						}else if (root.metaDispatch == ONCE && !keyVar.dispatched) {
 							keyVar.lastDispatched = mainKey.time;
-							root.onVar(_var.id, keyVar.value);
+							root.onVar(_var.id, keyVar.value, currentEntity);
 						}
 					}
 				}

@@ -56,8 +56,8 @@ class Spriter
 		library = _library;
 		spriterName = _name;
 		scml.spriterName = spriterName;
-		currentEntityName = scml.currentEntity;
-		currentAnimationName = scml.currentAnimation;
+		currentEntityName = scml.defaultEntity;
+		currentAnimationName = scml.defaultAnimation;
 		currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
 		info = _info;
 	}
@@ -122,7 +122,7 @@ class Spriter
 			}
 		}else{
 		#end
-		scml.applyCharacterMap(name, reset);
+		scml.applyCharacterMap(name, reset, currentEntityName);
 		#if SPRITER_CUSTOM_MAP
 		}
 		#end
@@ -171,7 +171,7 @@ class Spriter
 			}
 		}else {
 			#if SPRITER_DEBUG
-			trace('animation $name does not exist in entity ${scml.currentEntity}');
+			trace('animation $name does not exist in entity $currentEntityName');
 			#end
 		}
 		return this;
@@ -231,7 +231,7 @@ class Spriter
 			scml.endAnimRemoval = true;
 		}else {
 			#if SPRITER_DEBUG
-			trace('animation ${names[0]} does not exist in entity ${scml.currentEntity}');
+			trace('animation ${names[0]} does not exist in entity $currentEntityName');
 			#end
 		}
 		return this;
@@ -367,7 +367,7 @@ class Spriter
 		{
 			playbackSpeed = -1;
 			loop = lastLoop = 1;
-			normalizedTime = timeMS = scml.entities[scml.currentEntity].animations[scml.currentAnimation].length;
+			normalizedTime = timeMS = currentAnimation.length;
 		}else {
 			playbackSpeed = 1;
 			resetTime();
