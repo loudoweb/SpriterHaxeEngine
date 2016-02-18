@@ -315,6 +315,12 @@ class Spriter
 	{
 		timeMS = 0;
 	}
+	public function reverse():Spriter
+	{
+		playbackSpeed = -1;
+		timeMS = scml.entities[scml.currentEntity].animations[scml.currentAnimation].length;
+		return this;
+	}
 	/**
 	 * Set positions of the Spriter
 	 * @param	x
