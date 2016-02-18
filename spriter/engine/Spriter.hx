@@ -315,10 +315,16 @@ class Spriter
 	{
 		timeMS = 0;
 	}
-	public function reverse():Spriter
+	public function reverse(value:Bool = true):Spriter
 	{
-		playbackSpeed = -1;
-		timeMS = scml.entities[scml.currentEntity].animations[scml.currentAnimation].length;
+		if (value)
+		{
+			playbackSpeed = -1;
+			timeMS = scml.entities[scml.currentEntity].animations[scml.currentAnimation].length;
+		}else {
+			playbackSpeed = 1;
+			timeMS = 0;
+		}
 		return this;
 	}
 	/**

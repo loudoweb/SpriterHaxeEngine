@@ -5,6 +5,7 @@ import spriter.definitions.SpriterAnimation.LoopType;
 import spriter.definitions.SpriterTimeline.ObjectType;
 import spriter.interfaces.IScml;
 import spriter.library.AbstractLibrary;
+import spriter.util.SpriterUtil;
 
 /**
  * ...
@@ -35,7 +36,7 @@ class SpriterAnimation
 	 * Custom definitions
 	 * 
 	 */
-	var loop:Int = 0;
+	var loop:Float = 0;
 	public var points:Array<SpatialInfo>;
 	public var boxes:Array<Quadrilateral>;
 	
@@ -100,24 +101,27 @@ class SpriterAnimation
 	public function setCurrentTime(newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
 		var currentTime:Int;
-		var tempLoop:Int;
+		var lastLoop:Float;
 		switch(loopType)
         {
 			case LOOPING:
-				tempLoop = loop;
-				loop = Std.int(newTime / length);
+				lastLoop = loop;
+				loop = newTime / length;
 				currentTime = newTime % length;
+				if (currentTime < 0)//backward
+					currentTime += length;
 				//update
 				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root, currentEntity, parentSpatialInfo);
-				if (root.metaDispatch == ONCE_PER_LOOP && tempLoop != loop) {
-					resetMetaDispatch();
-				}
-				//callback only at the first loop and once
-				if (loop == 1 && tempLoop < 1)
+				//callback each loop
+				if (Std.int(loop) != Std.int(lastLoop) || (Std.int(loop) == 0 && !SpriterUtil.sameSign(lastLoop, loop))) {
+					resetMetaDispatch();	
 					root.onEndAnim();
+				}
 				
 			case NO_LOOPING:
 				currentTime = Std.int(Math.min(newTime, length));
+				if (currentTime < 0)//backward
+					currentTime += length;
 				//update
 				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root, currentEntity, parentSpatialInfo);
 				//callback
