@@ -1,8 +1,10 @@
 package spriter.engine;
+import spriter.definitions.Quadrilateral;
 import spriter.definitions.ScmlObject;
 import spriter.definitions.SpatialInfo;
-import spriter.definitions.Quadrilateral;
+import spriter.definitions.SpriterAnimation;
 import spriter.library.AbstractLibrary;
+import spriter.util.SpriterUtil;
 import spriter.vars.Variable;
 #if SPRITER_CUSTOM_MAP
 import spriter.definitions.CustomCharMap;
@@ -35,8 +37,14 @@ class Spriter
 	 */
 	public var playbackSpeed:Float = 1;
 	
-	//Optional features
+	var loop:Float = 0;
+	var lastLoop:Float = 0;
+	var normalizedTime:Int = 0;
+	var currentEntityName:String 	= ""; 
+    var currentAnimationName:String  = "";
+	var currentAnimation:SpriterAnimation;
 	
+	//Optional features
 	#if SPRITER_CUSTOM_MAP
 	var _customMap:Map<String, CustomCharMap>;
 	#end
@@ -48,15 +56,46 @@ class Spriter
 		library = _library;
 		spriterName = _name;
 		scml.spriterName = spriterName;
+		currentEntityName = scml.currentEntity;
+		currentAnimationName = scml.currentAnimation;
+		currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
 		info = _info;
 	}
 	
 	public function advanceTime(elapsedMS:Int):Void
 	{
-		if(!paused)
+		if (!paused)
+		{
 			timeMS += Std.int(elapsedMS * playbackSpeed);
+			lastLoop = loop;
+			loop = timeMS / currentAnimation.length;
 			
-		scml.setCurrentTime(timeMS, library, info);//even if paused we need to draw it
+			if (currentAnimation.loopType == LOOPING)
+			{
+					
+					normalizedTime = timeMS % currentAnimation.length;
+					if (normalizedTime < 0)//backward
+						normalizedTime += currentAnimation.length;
+			
+			}else{//no looping
+					normalizedTime = Std.int(Math.min(timeMS, currentAnimation.length));
+					if (normalizedTime < 0)//backward
+						normalizedTime += currentAnimation.length;
+			}
+		}
+		//even if paused we need to draw it	
+		currentAnimation.setCurrentTime(normalizedTime, library, scml, scml.entities[currentEntityName], info);
+		//callback
+		if (currentAnimation.loopType == LOOPING)
+		{
+			if (Std.int(loop) != Std.int(lastLoop) || (Std.int(loop) == 0 && !SpriterUtil.sameSign(lastLoop, loop))) {
+				currentAnimation.resetMetaDispatch();	
+				scml.onEndAnim();
+			}
+		}else {//no looping
+			if (normalizedTime == currentAnimation.length)
+				scml.onEndAnim();
+		}
 	}
 	/**
 	 * Apply character mapping to change an element in the animation.
@@ -117,16 +156,17 @@ class Spriter
 				paused = false;
 			resetTime();
 			if (endAnimCallback != null) {
-				scml.endAnimCallback = endAnimCallback.bind(this, scml.currentEntity, scml.currentAnimation);
+				scml.endAnimCallback = endAnimCallback.bind(this, currentEntityName, currentAnimationName);
 				scml.endAnimRemoval = removeCallback;
 			}
-		}else if (scml.entities.get(scml.currentEntity).animations.exists(name)) {
+		}else if (scml.entities.get(currentEntityName).animations.exists(name)) {
 			if (paused) 
 				paused = false;
 			resetTime();
-			scml.currentAnimation = name;
+			currentAnimationName = name;
+			currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
 			if (endAnimCallback != null) {
-				scml.endAnimCallback = endAnimCallback.bind(this, scml.currentEntity, name);
+				scml.endAnimCallback = endAnimCallback.bind(this, currentEntityName, currentAnimationName);
 				scml.endAnimRemoval = removeCallback;
 			}
 		}else {
@@ -150,10 +190,11 @@ class Spriter
 			if (paused) 
 				paused = false;
 			resetTime();
-			scml.currentEntity = entity;
+			currentEntityName = entity;
 			if(anim != ''){
-				if (scml.entities.get(entity).animations.exists(anim)) {
-					scml.currentAnimation = anim;
+				if (scml.entities.get(currentEntityName).animations.exists(anim)) {
+					currentAnimationName = anim;
+					currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
 				}else {
 					#if SPRITER_DEBUG
 					trace('animation $anim does not exist in entity $entity');
@@ -161,7 +202,7 @@ class Spriter
 				}
 			}
 			if(endAnimCallback != null){
-				scml.endAnimCallback = endAnimCallback.bind(this, entity, scml.currentAnimation);
+				scml.endAnimCallback = endAnimCallback.bind(this, currentEntityName, currentAnimationName);
 				scml.endAnimRemoval = removeCallback;
 			}
 		}else {
@@ -180,11 +221,12 @@ class Spriter
 	 */
 	public function playAnimsStack(names:Array<String>, ?endAnimCallback:Spriter->String->String->Void):Spriter
 	{
-		if (scml.entities.get(scml.currentEntity).animations.exists(names[0])) {
+		if (scml.entities.get(currentEntityName).animations.exists(names[0])) {
 			if (paused) 
 				paused = false;
 			resetTime();
-			scml.currentAnimation = names[0];
+			currentAnimationName = names[0];
+			currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
 			scml.endAnimCallback = stackAnims.bind(names, 1, endAnimCallback);
 			scml.endAnimRemoval = true;
 		}else {
@@ -208,9 +250,10 @@ class Spriter
 			if (paused) 
 				paused = false;
 			resetTime();
-			scml.currentEntity = entity;
-			if (scml.entities.get(entity).animations.exists(anims[0])) {
-				scml.currentAnimation = anims[0];
+			currentEntityName = entity;
+			if (scml.entities.get(currentEntityName).animations.exists(anims[0])) {
+				currentAnimationName = anims[0];
+				currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
 			}
 			scml.endAnimCallback = stackAnims.bind(anims, 1, endAnimCallback);
 			scml.endAnimRemoval = true;
@@ -234,9 +277,10 @@ class Spriter
 			if (paused) 
 				paused = false;
 			resetTime();
-			scml.currentEntity = entities[0];
-			if (scml.entities.get(entities[0]).animations.exists(anims[0])) {
-				scml.currentAnimation = anims[0];
+			currentEntityName = entities[0];
+			if (scml.entities.get(currentEntityName).animations.exists(anims[0])) {
+				currentAnimationName = anims[0];
+				currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
 			}
 			scml.endAnimCallback = stackAnimsWithEntitiesChange.bind(entities , anims, 1, endAnimCallback);
 			scml.endAnimRemoval = true;
@@ -248,19 +292,20 @@ class Spriter
 	
 	private function stackAnims(anims:Array<String>, nextAnim:Int, endAnimsCallback:Spriter->String->String->Void):Void
 	{
-		if (scml.entities.get(scml.currentEntity).animations.exists(anims[nextAnim])) {
+		if (scml.entities.get(currentEntityName).animations.exists(anims[nextAnim])) {
 			if (paused) 
 				paused = false;
 			resetTime();
-			scml.currentAnimation = anims[nextAnim];
+			currentAnimationName = anims[nextAnim];
+			currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
 		}
 		#if SPRITER_DEBUG
-		trace('stackAnims', scml.currentAnimation);
+		trace('stackAnims', currentAnimationName);
 		#end
 		//anim after next anim handler
 		if (++nextAnim >= anims.length) {
 			if(endAnimsCallback != null)
-				scml.endAnimCallback = endAnimsCallback.bind(this, scml.currentEntity, scml.currentAnimation);
+				scml.endAnimCallback = endAnimsCallback.bind(this, currentEntityName, currentAnimationName);
 		}else {
 				scml.endAnimCallback = stackAnims.bind(anims, nextAnim, endAnimsCallback);
 		}
@@ -269,21 +314,22 @@ class Spriter
 	private function stackAnimsWithEntitiesChange(entities:Array<String>, anims:Array<String>, nextAnim:Int, endAnimsCallback:Spriter->String->String->Void):Void
 	{
 		if (scml.entities.exists(entities[nextAnim])) {
-			scml.currentEntity = entities[nextAnim];
-			if (scml.entities.get(scml.currentEntity).animations.exists(anims[nextAnim])) {
+			currentEntityName = entities[nextAnim];
+			if (scml.entities.get(currentEntityName).animations.exists(anims[nextAnim])) {
 				if (paused) 
 					paused = false;
 				resetTime();
-				scml.currentAnimation = anims[nextAnim];
+				currentAnimationName = anims[nextAnim];
+				currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
 			}
 		}
 		#if SPRITER_DEBUG
-		trace('stackAnims', scml.currentAnimation);
+		trace('stackAnims', currentAnimationName);
 		#end
 		//anim after next anim handler
 		if (++nextAnim >= anims.length) {
 			if(endAnimsCallback != null)
-				scml.endAnimCallback = endAnimsCallback.bind(this, scml.currentEntity, scml.currentAnimation);
+				scml.endAnimCallback = endAnimsCallback.bind(this, currentEntityName, currentAnimationName);
 		}else {
 				scml.endAnimCallback = stackAnimsWithEntitiesChange.bind(entities, anims, nextAnim, endAnimsCallback);
 		}
@@ -291,15 +337,15 @@ class Spriter
 	
 	inline public function getBoxes():Array<Quadrilateral>
 	{
-		return scml.entities[scml.currentEntity].animations[scml.currentAnimation].boxes;
+		return currentAnimation.boxes;
 	}
 	inline public function getPoints():Array<SpatialInfo>
 	{
-		return scml.entities[scml.currentEntity].animations[scml.currentAnimation].points;
+		return currentAnimation.points;
 	}
 	public function getVariable(name:String):Variable<Dynamic>//TODO generic
 	{
-		for (currVar in scml.entities[scml.currentEntity].variables)
+		for (currVar in scml.entities[currentEntityName].variables)
 		{
 			if (currVar.name == name)
 				return currVar;
@@ -308,22 +354,23 @@ class Spriter
 	}
 	inline public function getVariableFromId(id:Int):Variable<Dynamic>//TODO generic
 	{
-		return scml.entities[scml.currentEntity].variables[id];
+		return scml.entities[currentEntityName].variables[id];
 	}
 	
 	inline public function resetTime():Void
 	{
-		timeMS = 0;
+		loop = lastLoop = normalizedTime = timeMS = 0;
 	}
 	public function reverse(value:Bool = true):Spriter
 	{
 		if (value)
 		{
 			playbackSpeed = -1;
-			timeMS = scml.entities[scml.currentEntity].animations[scml.currentAnimation].length;
+			loop = lastLoop = 1;
+			normalizedTime = timeMS = scml.entities[scml.currentEntity].animations[scml.currentAnimation].length;
 		}else {
 			playbackSpeed = 1;
-			timeMS = 0;
+			resetTime();
 		}
 		return this;
 	}

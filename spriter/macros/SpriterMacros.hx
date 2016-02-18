@@ -4,7 +4,7 @@ import haxe.io.Output;
 import haxe.macro.Expr;
 import haxe.Serializer;
 import spriter.definitions.ScmlObject;
-#if !flash
+#if (!flash && !js)
 import sys.FileSystem;
 import sys.io.FileOutput;
 #end
@@ -221,7 +221,7 @@ class SpriterMacros
 	}
 	macro public static function cacheSCML(scmlPath:String, output:String) 
 	{
-		#if !flash		
+		#if (!flash && !js)	
 		var file = sys.io.File.getContent(scmlPath);
 		var result:String = createCache(file);
 		if (result != "") {
@@ -233,7 +233,7 @@ class SpriterMacros
 		#end
 		return macro null;
 	}
-	#if !flash
+	#if (!flash && !js)
 	static function createCache(file:String):String
 	{
 		var serializer:Serializer = new Serializer();
@@ -243,7 +243,7 @@ class SpriterMacros
 	#end
 	macro public static function cacheFolderSCML(scmlFolderPath:String, output:String) 
 	{
-		#if !flash
+		#if (!flash && !js)
 		trace('checking scml files in : ' + scmlFolderPath);
 		
 		var files:Array<String> = FileSystem.readDirectory(scmlFolderPath);
@@ -257,7 +257,7 @@ class SpriterMacros
 		#end
 		return macro null;
 	}
-	#if !flash
+	#if (!flash && !js)
 	static function createCacheFromFolder(path:String, files:Array<String>):String
 	{
 		var map:Map<String, ScmlObject> = new Map<String, ScmlObject>();

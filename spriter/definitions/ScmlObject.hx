@@ -139,13 +139,6 @@ class ScmlObject implements IScml
 			}
 		}
 	}
-	//interface IScml end
-    public function setCurrentTime(newTime:Int, library:AbstractLibrary, characterInfo:SpatialInfo):Void
-    {
-        var currentEnt:SpriterEntity 		=	entities.get(currentEntity);
-		var currentAnim:SpriterAnimation	=	currentEnt.animations.get(currentAnimation);
-		currentAnim.setCurrentTime(newTime, library, this, currentEnt, characterInfo);
-    }
 	public function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo):Void
 	{
 		var entityName:String = entitiesName[entity];
@@ -155,7 +148,7 @@ class ScmlObject implements IScml
 		var newTime:Int = Std.int(t * currentAnim.length);
 		currentAnim.setCurrentTime(newTime, library, this, currentEnt, spatialInfo);
 	}
-
+	//interface IScml end
     public function applyCharacterMap(name:String, reset:Bool):Bool
     {
 		if(reset)

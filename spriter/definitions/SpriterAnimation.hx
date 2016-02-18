@@ -5,7 +5,6 @@ import spriter.definitions.SpriterAnimation.LoopType;
 import spriter.definitions.SpriterTimeline.ObjectType;
 import spriter.interfaces.IScml;
 import spriter.library.AbstractLibrary;
-import spriter.util.SpriterUtil;
 
 /**
  * ...
@@ -36,7 +35,6 @@ class SpriterAnimation
 	 * Custom definitions
 	 * 
 	 */
-	var loop:Float = 0;
 	public var points:Array<SpatialInfo>;
 	public var boxes:Array<Quadrilateral>;
 	
@@ -97,37 +95,18 @@ class SpriterAnimation
 			
 		}
 	}
-	
+	/**
+	 * 
+	 * @param	newTime Use a time between [0,length]
+	 * @param	library library to compute and draw the final graphics
+	 * @param	root IScml to use some features
+	 * @param	currentEntity to use some features
+	 * @param	parentSpatialInfo SpatialInfo from the Spriter (positions, etc.)
+	 */
 	public function setCurrentTime(newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
-		var currentTime:Int;
-		var lastLoop:Float;
-		switch(loopType)
-        {
-			case LOOPING:
-				lastLoop = loop;
-				loop = newTime / length;
-				currentTime = newTime % length;
-				if (currentTime < 0)//backward
-					currentTime += length;
-				//update
-				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root, currentEntity, parentSpatialInfo);
-				//callback each loop
-				if (Std.int(loop) != Std.int(lastLoop) || (Std.int(loop) == 0 && !SpriterUtil.sameSign(lastLoop, loop))) {
-					resetMetaDispatch();	
-					root.onEndAnim();
-				}
-				
-			case NO_LOOPING:
-				currentTime = Std.int(Math.min(newTime, length));
-				if (currentTime < 0)//backward
-					currentTime += length;
-				//update
-				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root, currentEntity, parentSpatialInfo);
-				//callback
-				if (currentTime == length)
-					root.onEndAnim();
-        }
+		//update
+		updateCharacter(mainlineKeyFromTime(newTime), newTime, library, root, currentEntity, parentSpatialInfo);
     }
 
     public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
@@ -333,7 +312,7 @@ class SpriterAnimation
 		return timelines[id].name;
 	}
 	
-	private function resetMetaDispatch():Void
+	public function resetMetaDispatch():Void
 	{
 		if(taglines != null){
 			for (tag in taglines) {
