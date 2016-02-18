@@ -78,9 +78,7 @@ class Spriter
 						normalizedTime += currentAnimation.length;
 			
 			}else{//no looping
-					normalizedTime = Std.int(Math.min(timeMS, currentAnimation.length));
-					if (normalizedTime < 0)//backward
-						normalizedTime += currentAnimation.length;
+					normalizedTime = Std.int(Math.max(0, Math.min(timeMS, currentAnimation.length)));
 			}
 		}
 		//even if paused we need to draw it	
@@ -93,7 +91,8 @@ class Spriter
 				scml.onEndAnim();
 			}
 		}else {//no looping
-			if (normalizedTime == currentAnimation.length)
+			var when:Int = playbackSpeed > 0 ? currentAnimation.length : 0;
+			if (normalizedTime == when)
 				scml.onEndAnim();
 		}
 	}
@@ -359,15 +358,20 @@ class Spriter
 	
 	inline public function resetTime():Void
 	{
-		loop = lastLoop = normalizedTime = timeMS = 0;
+		if (playbackSpeed > 0)
+		{
+			loop = lastLoop = normalizedTime = timeMS = 0;
+		}else{
+			loop = lastLoop = 1;
+			normalizedTime = timeMS = currentAnimation.length;
+		}
 	}
 	public function reverse(value:Bool = true):Spriter
 	{
 		if (value)
 		{
 			playbackSpeed = -1;
-			loop = lastLoop = 1;
-			normalizedTime = timeMS = currentAnimation.length;
+			resetTime();
 		}else {
 			playbackSpeed = 1;
 			resetTime();
