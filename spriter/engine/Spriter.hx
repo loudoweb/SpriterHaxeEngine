@@ -353,10 +353,11 @@ class Spriter
 	 * @param	x
 	 * @param	y (spriter uses inverted y, so it will automatically inverted in this function)
 	 */
-	public function set(x:Float, y:Float):Void
+	public function set(x:Float, y:Float):Spriter
 	{
 		//-y because use inverted y coordinates
 		info.setPos(x, -y);
+		return this;
 	}
 	
 	public function destroy():Void
