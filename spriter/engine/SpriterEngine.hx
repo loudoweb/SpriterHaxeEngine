@@ -261,7 +261,7 @@ class SpriterEngine
 		_spritersNamed = new Map<String ,Spriter>();
 		_lib.clear();
 	}
-	function autoRemoveSpriter(spriter:Spriter, entity:String, anim:String):Void
+	function autoRemoveSpriter(spriter:Spriter):Void
 	{
 		removeSpriter(spriter.spriterName);
 	}

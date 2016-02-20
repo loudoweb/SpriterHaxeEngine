@@ -37,12 +37,21 @@ class Spriter
 	 */
 	public var playbackSpeed:Float = 1;
 	
+	public var currentEntityName(default, null):String 	= ""; 
+    public var currentAnimationName(default, null):String  = "";
+	
 	var loop:Float = 0;
 	var lastLoop:Float = 0;
 	var normalizedTime:Int = 0;
-	var currentEntityName:String 	= ""; 
-    var currentAnimationName:String  = "";
 	var currentAnimation:SpriterAnimation;
+	/**
+	 * Callback called at the end of the anim
+	 */
+	var endAnimCallback:Void->Void;
+	/**
+	 * Auto Remove the callback at the end of the anim
+	 */
+	var endAnimRemoval:Bool = true;
 	
 	//Optional features
 	#if SPRITER_CUSTOM_MAP
@@ -88,12 +97,12 @@ class Spriter
 		{
 			if (Std.int(loop) != Std.int(lastLoop) || (Std.int(loop) == 0 && !SpriterUtil.sameSign(lastLoop, loop))) {
 				currentAnimation.resetMetaDispatch();	
-				scml.onEndAnim();
+				onComplete();
 			}
 		}else {//no looping
 			var when:Int = playbackSpeed > 0 ? currentAnimation.length : 0;
 			if (normalizedTime == when)
-				scml.onEndAnim();
+				onComplete();
 		}
 	}
 	/**
@@ -148,15 +157,15 @@ class Spriter
 	 * @param	removeCallback remove function callback after dispatch
 	 * @return  this
 	 */
-	public function playAnim(?name:String, ?endAnimCallback:Spriter->String->String->Void, removeCallback:Bool = true):Spriter
+	public function playAnim(?name:String, ?endAnimCallback:Spriter->Void, removeCallback:Bool = true):Spriter
 	{
 		if (name == null) {
 			if (paused) 
 				paused = false;
 			resetTime();
 			if (endAnimCallback != null) {
-				scml.endAnimCallback = endAnimCallback.bind(this, currentEntityName, currentAnimationName);
-				scml.endAnimRemoval = removeCallback;
+				this.endAnimCallback = endAnimCallback.bind(this);
+				this.endAnimRemoval = removeCallback;
 			}
 		}else if (scml.entities.get(currentEntityName).animations.exists(name)) {
 			if (paused) 
@@ -165,8 +174,8 @@ class Spriter
 			currentAnimationName = name;
 			currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
 			if (endAnimCallback != null) {
-				scml.endAnimCallback = endAnimCallback.bind(this, currentEntityName, currentAnimationName);
-				scml.endAnimRemoval = removeCallback;
+				this.endAnimCallback = endAnimCallback.bind(this);
+				this.endAnimRemoval = removeCallback;
 			}
 		}else {
 			#if SPRITER_DEBUG
@@ -183,7 +192,7 @@ class Spriter
 	 * @param	removeCallback remove function callback after dispatch
 	 * @return  this
 	 */
-	public function playAnimFromEntity(entity:String, anim:String = '', ?endAnimCallback:Spriter->String->String->Void, removeCallback:Bool = true):Spriter
+	public function playAnimFromEntity(entity:String, anim:String = '', ?endAnimCallback:Spriter->Void, removeCallback:Bool = true):Spriter
 	{
 		if (scml.entities.exists(entity)) {
 			if (paused) 
@@ -201,8 +210,8 @@ class Spriter
 				}
 			}
 			if(endAnimCallback != null){
-				scml.endAnimCallback = endAnimCallback.bind(this, currentEntityName, currentAnimationName);
-				scml.endAnimRemoval = removeCallback;
+				this.endAnimCallback = endAnimCallback.bind(this);
+				this.endAnimRemoval = removeCallback;
 			}
 		}else {
 			#if SPRITER_DEBUG
@@ -218,7 +227,7 @@ class Spriter
 	 * @param	removeCallback remove function callback after dispatch
 	 * @return  this
 	 */
-	public function playAnimsStack(names:Array<String>, ?endAnimCallback:Spriter->String->String->Void):Spriter
+	public function playAnimsStack(names:Array<String>, ?endAnimCallback:Spriter->Void):Spriter
 	{
 		if (scml.entities.get(currentEntityName).animations.exists(names[0])) {
 			if (paused) 
@@ -226,8 +235,8 @@ class Spriter
 			resetTime();
 			currentAnimationName = names[0];
 			currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
-			scml.endAnimCallback = stackAnims.bind(names, 1, endAnimCallback);
-			scml.endAnimRemoval = true;
+			this.endAnimCallback = stackAnims.bind(names, 1, endAnimCallback);
+			this.endAnimRemoval = true;
 		}else {
 			#if SPRITER_DEBUG
 			trace('animation ${names[0]} does not exist in entity $currentEntityName');
@@ -243,7 +252,7 @@ class Spriter
 	 * @param	removeCallback remove function callback after dispatch
 	 * @return  true if the entity exist, false if doesn't exist
 	 */
-	public function playAnimsStackFromEntity(entity:String, anims:Array<String>, ?endAnimCallback:Spriter->String->String->Void):Bool
+	public function playAnimsStackFromEntity(entity:String, anims:Array<String>, ?endAnimCallback:Spriter->Void):Bool
 	{
 		if (scml.entities.exists(entity)) {
 			if (paused) 
@@ -254,8 +263,8 @@ class Spriter
 				currentAnimationName = anims[0];
 				currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
 			}
-			scml.endAnimCallback = stackAnims.bind(anims, 1, endAnimCallback);
-			scml.endAnimRemoval = true;
+			this.endAnimCallback = stackAnims.bind(anims, 1, endAnimCallback);
+			this.endAnimRemoval = true;
 			return true;
 		}else {
 			return false;
@@ -270,7 +279,7 @@ class Spriter
 	 * @param	removeCallback remove function callback after dispatch
 	 * @return  true if the entity exist, false if doesn't exist
 	 */
-	public function playAnimsStackFromEntities(entities:Array<String>, anims:Array<String>, ?endAnimCallback:Spriter->String->String->Void):Bool
+	public function playAnimsStackFromEntities(entities:Array<String>, anims:Array<String>, ?endAnimCallback:Spriter->Void):Bool
 	{
 		if (scml.entities.exists(entities[0])) {
 			if (paused) 
@@ -281,56 +290,11 @@ class Spriter
 				currentAnimationName = anims[0];
 				currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
 			}
-			scml.endAnimCallback = stackAnimsWithEntitiesChange.bind(entities , anims, 1, endAnimCallback);
-			scml.endAnimRemoval = true;
+			this.endAnimCallback = stackAnimsWithEntitiesChange.bind(entities , anims, 1, endAnimCallback);
+			this.endAnimRemoval = true;
 			return true;
 		}else {
 			return false;
-		}
-	}
-	
-	private function stackAnims(anims:Array<String>, nextAnim:Int, endAnimsCallback:Spriter->String->String->Void):Void
-	{
-		if (scml.entities.get(currentEntityName).animations.exists(anims[nextAnim])) {
-			if (paused) 
-				paused = false;
-			resetTime();
-			currentAnimationName = anims[nextAnim];
-			currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
-		}
-		#if SPRITER_DEBUG
-		trace('stackAnims', currentAnimationName);
-		#end
-		//anim after next anim handler
-		if (++nextAnim >= anims.length) {
-			if(endAnimsCallback != null)
-				scml.endAnimCallback = endAnimsCallback.bind(this, currentEntityName, currentAnimationName);
-		}else {
-				scml.endAnimCallback = stackAnims.bind(anims, nextAnim, endAnimsCallback);
-		}
-	}
-	
-	private function stackAnimsWithEntitiesChange(entities:Array<String>, anims:Array<String>, nextAnim:Int, endAnimsCallback:Spriter->String->String->Void):Void
-	{
-		if (scml.entities.exists(entities[nextAnim])) {
-			currentEntityName = entities[nextAnim];
-			if (scml.entities.get(currentEntityName).animations.exists(anims[nextAnim])) {
-				if (paused) 
-					paused = false;
-				resetTime();
-				currentAnimationName = anims[nextAnim];
-				currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
-			}
-		}
-		#if SPRITER_DEBUG
-		trace('stackAnims', currentAnimationName);
-		#end
-		//anim after next anim handler
-		if (++nextAnim >= anims.length) {
-			if(endAnimsCallback != null)
-				scml.endAnimCallback = endAnimsCallback.bind(this, currentEntityName, currentAnimationName);
-		}else {
-				scml.endAnimCallback = stackAnimsWithEntitiesChange.bind(entities, anims, nextAnim, endAnimsCallback);
 		}
 	}
 	
@@ -378,6 +342,12 @@ class Spriter
 		}
 		return this;
 	}
+	public function reflect():Spriter
+	{
+		endAnimCallback = reflectOnEndAnim.bind(endAnimCallback);
+		endAnimRemoval = true;
+		return this;
+	}
 	/**
 	 * Set positions of the Spriter
 	 * @param	x
@@ -399,4 +369,65 @@ class Spriter
 		library = null;
 	}
 	
+	function onComplete():Void
+	{
+		if (endAnimCallback != null) {
+			var tempCallback:Void->Void = endAnimCallback;
+			if (endAnimRemoval)
+				endAnimCallback = null;
+			tempCallback();
+		}
+	}
+	
+	function stackAnims(anims:Array<String>, nextAnim:Int, endAnimsCallback:Spriter->Void):Void
+	{
+		if (scml.entities.get(currentEntityName).animations.exists(anims[nextAnim])) {
+			if (paused) 
+				paused = false;
+			resetTime();
+			currentAnimationName = anims[nextAnim];
+			currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
+		}
+		#if SPRITER_DEBUG
+		trace('stackAnims', currentAnimationName);
+		#end
+		//anim after next anim handler
+		if (++nextAnim >= anims.length) {
+			if(endAnimsCallback != null)
+				this.endAnimCallback = endAnimsCallback.bind(this);
+		}else {
+				this.endAnimCallback = stackAnims.bind(anims, nextAnim, endAnimsCallback);
+		}
+	}
+	
+	function stackAnimsWithEntitiesChange(entities:Array<String>, anims:Array<String>, nextAnim:Int, endAnimsCallback:Spriter->Void):Void
+	{
+		if (scml.entities.exists(entities[nextAnim])) {
+			currentEntityName = entities[nextAnim];
+			if (scml.entities.get(currentEntityName).animations.exists(anims[nextAnim])) {
+				if (paused) 
+					paused = false;
+				resetTime();
+				currentAnimationName = anims[nextAnim];
+				currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
+			}
+		}
+		#if SPRITER_DEBUG
+		trace('stackAnims', currentAnimationName);
+		#end
+		//anim after next anim handler
+		if (++nextAnim >= anims.length) {
+			if(endAnimsCallback != null)
+				this.endAnimCallback = endAnimsCallback.bind(this);
+		}else {
+				this.endAnimCallback = stackAnimsWithEntitiesChange.bind(entities, anims, nextAnim, endAnimsCallback);
+		}
+	}
+	function reflectOnEndAnim(callback:Void->Void):Void
+	{
+		playbackSpeed = -playbackSpeed;
+		endAnimCallback = callback;
+		onComplete();
+		reflect();
+	}
 }

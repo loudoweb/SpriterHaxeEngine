@@ -35,14 +35,6 @@ class ScmlObject implements IScml
 	public var spriterName:String;
 		
 	/**
-	 * Callback called at the end of the anim
-	 */
-	public var endAnimCallback:Void->Void;
-	/**
-	 * Auto Remove the callback at the end of the anim
-	 */
-	public var endAnimRemoval:Bool = true;
-	/**
 	 * Callback called when variable value changes
 	 */
 	public var varChangeCallback:Variable<Dynamic>->Void;
@@ -51,6 +43,19 @@ class ScmlObject implements IScml
 	 */
 	public var tagCallback:String->Void;
 	public var metaDispatch:MetaDispatch = ONCE_PER_LOOP;
+	
+	public static function unserialize(bin:String):ScmlObject
+	{
+		var serializer:Unserializer = new Unserializer(bin);
+		var scml:ScmlObject = cast serializer.unserialize();
+		return scml;
+	}
+	public static function unserializePack(bin:String):Map<String, ScmlObject>
+	{
+		var serializer:Unserializer = new Unserializer(bin);
+		var map:Map<String, ScmlObject> = cast serializer.unserialize();
+		return map;
+	}
 		
 	public function new(source:Xml = null) 
 	{
@@ -110,15 +115,6 @@ class ScmlObject implements IScml
 			return currentFile.name;
 		}else {
 			return null;
-		}
-	}
-	public function onEndAnim():Void
-	{
-		if (endAnimCallback != null) {
-			var tempCallback:Void->Void = endAnimCallback;
-			if (endAnimRemoval)
-				endAnimCallback = null;
-			tempCallback();
 		}
 	}
 	public function onTag(tag:Int):Void
@@ -246,21 +242,7 @@ class ScmlObject implements IScml
 		entities = null;
 		entitiesName = null;
 		tags = null;
-		endAnimCallback = null;
 		tagCallback = null;
 		varChangeCallback = null;
-	}
-	
-	public static function unserialize(bin:String):ScmlObject
-	{
-		var serializer:Unserializer = new Unserializer(bin);
-		var scml:ScmlObject = cast serializer.unserialize();
-		return scml;
-	}
-	public static function unserializePack(bin:String):Map<String, ScmlObject>
-	{
-		var serializer:Unserializer = new Unserializer(bin);
-		var map:Map<String, ScmlObject> = cast serializer.unserialize();
-		return map;
 	}
 }

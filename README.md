@@ -60,7 +60,7 @@ engine.getSpriter('uniqueId').applyCharacterMap('gun', true);
 engine.update();
 
 //Callback on end anim
-function myCallback(s:Spriter, entity:String, anim:String):Void
+function myCallback(s:Spriter):Void
 
 //var and tag callback
 engine.getSpriterAt(0).scml.tagCallback = function tagCallback(tag:String):Void{}

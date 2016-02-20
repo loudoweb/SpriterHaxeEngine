@@ -18,6 +18,9 @@ enum LoopType
  
 class SpriterAnimation
 {
+	//spatial info cached and shared between all animations to avoid allocating new ones. Used by libraries to compute final coordinates and draw the object on the screen.
+	static var _cachedSpatialInfo:SpatialInfo = new SpatialInfo();
+	
 	/*
 	 * SCML definitions
 	 */
@@ -29,7 +32,6 @@ class SpriterAnimation
     public var timelines:Array<SpriterTimeline>;
 	public var taglines:Array<TaglineKey>;
 	public var varlines:Array<Varline>;
-	var _transformedBoneKeys:Array<SpatialInfo>;
 	
 	/*
 	 * Custom definitions
@@ -38,8 +40,7 @@ class SpriterAnimation
 	public var points:Array<SpatialInfo>;
 	public var boxes:Array<Quadrilateral>;
 	
-	//spatial info cached and shared between all animations to avoid allocating new ones. Used by libraries to compute final coordinates and draw the object on the screen.
-	static var _cachedSpatialInfo:SpatialInfo = new SpatialInfo();
+	var _transformedBoneKeys:Array<SpatialInfo>;
 	
 	public function new(fast:Fast) 
 	{
