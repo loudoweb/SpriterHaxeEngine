@@ -21,9 +21,12 @@ class ScmlObject implements IScml
 	 * Get the names of all entities in the scml file
 	 */
 	public var entitiesName:Array<String>;
-	public var tags:Array<String>;
     public var defaultEntity:String 	= ""; 
     public var defaultAnimation:String  = ""; 
+	
+	#if !SPRITER_NO_TAG
+	public var tags:Array<String>;
+	#end
 
     public var currentTime:Float; 
 		
@@ -68,12 +71,14 @@ class ScmlObject implements IScml
 					}
 				}else if (el.name == "tag_list")
 				{
+					#if !SPRITER_NO_TAG
 					if (tags == null)
 						tags = [];
 					for (t in el.elements)
 					{
 						tags.push(t.att.name);
 					}
+					#end
 					
 				}
 			}
@@ -193,7 +198,9 @@ class ScmlObject implements IScml
 		newSCML.activeCharacterMap = copyFolders();
 		newSCML.entities = entities;//TODO copy ?
 		newSCML.entitiesName = entitiesName;
+		#if !SPRITER_NO_TAG
 		newSCML.tags = tags;
+		#end
 		
 		newSCML.defaultEntity 	= Std.string(defaultEntity); 
 		newSCML.defaultAnimation  = Std.string(defaultAnimation); 
@@ -207,6 +214,8 @@ class ScmlObject implements IScml
 		activeCharacterMap = null;
 		entities = null;
 		entitiesName = null;
+		#if !SPRITER_NO_TAG
 		tags = null;
+		#end
 	}
 }

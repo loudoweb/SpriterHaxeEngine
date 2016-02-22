@@ -208,13 +208,17 @@ class SpriterAnimation
 				
 				if (currentObjectKey.type == ObjectType.POINT)
 				{
+					#if !SPRITER_NO_POINT
 					activePivots = PivotInfo.DEFAULT;
 					spriter.points.push(library.compute(_cachedSpatialInfo.copy(), activePivots, 0, 0));
+					#end
 				}else {//BOX
+					#if !SPRITER_NO_BOX
 					activePivots = new PivotInfo();//default pivot, but need to be overrided
 					activePivots = currentKey.paint(activePivots);
 					var currentBox:SpriterBox = currentEntity.boxes_info.get(getTimelineName(currentRef.timeline));
 					spriter.boxes.push(library.computeRectCoordinates(_cachedSpatialInfo, activePivots, currentBox.width, currentBox.height));
+					#end
 				}
 			}
 			
