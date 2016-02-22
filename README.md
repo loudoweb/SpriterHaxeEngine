@@ -99,6 +99,7 @@ Spriter Haxe Engine Features
  - Points (usage example : to shot a bullet when gun fire)
  - Boxes (usage example : hitbox)
  - sub entities
+ - playing backward and reflect
 
 **Libraries**
  - Simple bitmap library (bitmaps handled with addChild, dependency : openfl)
@@ -130,6 +131,10 @@ TODO
  - Optimized engine : draw call only when needed. So "instant" keys are not updated between keys.
  - animation callback optimization
  - check Garbage collector
+ 
+ WIKI
+ -----------
+ The [wiki](https://github.com/loudoweb/SpriterHaxeEngine/wiki) provides more details on features and how it works.
  
 Examples
 ------------
