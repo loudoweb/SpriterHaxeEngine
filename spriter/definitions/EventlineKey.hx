@@ -3,36 +3,29 @@ import haxe.xml.Fast;
 
 /**
  * ...
- * @author Loudo
+ * @author loudo
  */
-class TaglineKey
+class EventlineKey
 {
 	public var id:Int;
 	public var time:Int = 0;
-	public var t:Array<Int>;
 	public function new(fast:Fast = null) 
 	{
 		if(fast != null){
 			id = fast.has.id ? Std.parseInt(fast.att.id) : 0;
 			time = fast.has.time ? Std.parseInt(fast.att.time) : 0;
-			t = [];
-			for (tag in fast.nodes.tag)
-			{
-				t.push(Std.parseInt(tag.att.t));
-			}
 		}
 	}
-	public function copy ():TaglineKey
+	public function copy ():EventlineKey
 	{
-		var	copy:TaglineKey = new TaglineKey();
+		var	copy:EventlineKey = new EventlineKey();
 		return clone (copy);
 	}
 
-	public function clone (clone:TaglineKey):TaglineKey
+	public function clone (clone:EventlineKey):EventlineKey
 	{
 		clone.id = id;
 		clone.time = time;
-		clone.t = t;
 		return clone;
 	}
 }

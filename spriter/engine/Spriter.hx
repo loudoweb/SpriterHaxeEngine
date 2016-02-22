@@ -3,6 +3,8 @@ import spriter.definitions.Quadrilateral;
 import spriter.definitions.ScmlObject;
 import spriter.definitions.SpatialInfo;
 import spriter.definitions.SpriterAnimation;
+import spriter.definitions.SpriterEntity;
+import spriter.interfaces.ISpriter;
 import spriter.library.AbstractLibrary;
 import spriter.util.SpriterUtil;
 import spriter.vars.Variable;
@@ -14,7 +16,7 @@ import spriter.definitions.CustomCharMap;
  * ...
  * @author Loudo
  */
-class Spriter
+class Spriter implements ISpriter
 {
 
 	public var scml:ScmlObject;
@@ -40,18 +42,41 @@ class Spriter
 	public var currentEntityName(default, null):String 	= ""; 
     public var currentAnimationName(default, null):String  = "";
 	
+	//Removable features
+	#if !SPRITER_NO_EVENT
+	public var onEvent:String->Void;
+	#end
+	#if !SPRITER_NO_SOUND
+	public var onSound:String->Void;
+	#end
+	#if !SPRITER_NO_POINT
+	public var points:Array<SpatialInfo>;
+	#end
+	#if !SPRITER_NO_BOX
+	public var boxes:Array<Quadrilateral>;
+	#end
+	#if !SPRITER_NO_TAG
+	public var tags:Array<String>;
+	#end
+	#if !SPRITER_NO_VAR
+	public var onVarChanged:String->Dynamic->Void;
+	var variables:Array<Dynamic>;
+	#end
+	
+	
 	var loop:Float = 0;
 	var lastLoop:Float = 0;
 	var normalizedTime:Int = 0;
 	var currentAnimation:SpriterAnimation;
+	var currentEntity:SpriterEntity;
 	/**
 	 * Callback called at the end of the anim
 	 */
-	var endAnimCallback:Void->Void;
+	var onComplete:Void->Void;
 	/**
 	 * Auto Remove the callback at the end of the anim
 	 */
-	var endAnimRemoval:Bool = true;
+	var onCompleteOnce:Bool = true;
 	
 	//Optional features
 	#if SPRITER_CUSTOM_MAP
@@ -61,14 +86,26 @@ class Spriter
 	
 	public function new(_name:String, _scml:ScmlObject, _library:AbstractLibrary, _info:SpatialInfo) 
 	{
-		scml 	= _scml;
-		library = _library;
-		spriterName = _name;
-		scml.spriterName = spriterName;
-		currentEntityName = scml.defaultEntity;
-		currentAnimationName = scml.defaultAnimation;
-		currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
-		info = _info;
+		this.scml 	= _scml;
+		this.library = _library;
+		this.spriterName = _name;
+		this.currentEntityName = scml.defaultEntity;
+		this.currentAnimationName = scml.defaultAnimation;
+		this.currentEntity = scml.entities.get(currentEntityName);
+		this.currentAnimation = currentEntity.animations.get(currentAnimationName);
+		this.info = _info;
+		#if !SPRITER_NO_POINT
+		this.points = [];
+		#end
+		#if !SPRITER_NO_BOX
+		this.boxes = [];
+		#end
+		#if !SPRITER_NO_TAG
+		this.tags = [];
+		#end
+		#if !SPRITER_NO_VAR
+		this.variables = [];
+		#end
 	}
 	
 	public function advanceTime(elapsedMS:Int):Void
@@ -91,18 +128,17 @@ class Spriter
 			}
 		}
 		//even if paused we need to draw it	
-		currentAnimation.setCurrentTime(normalizedTime, library, scml, scml.entities[currentEntityName], info);
+		currentAnimation.setCurrentTime(normalizedTime, Std.int(elapsedMS * playbackSpeed), library, this, scml, scml.entities[currentEntityName], info);
 		//callback
 		if (currentAnimation.loopType == LOOPING)
 		{
 			if (Std.int(loop) != Std.int(lastLoop) || (Std.int(loop) == 0 && !SpriterUtil.sameSign(lastLoop, loop))) {
-				currentAnimation.resetMetaDispatch();	
-				onComplete();
+				dispatchComplete();
 			}
 		}else {//no looping
 			var when:Int = playbackSpeed > 0 ? currentAnimation.length : 0;
 			if (normalizedTime == when)
-				onComplete();
+				dispatchComplete();
 		}
 	}
 	/**
@@ -164,18 +200,18 @@ class Spriter
 				paused = false;
 			resetTime();
 			if (endAnimCallback != null) {
-				this.endAnimCallback = endAnimCallback.bind(this);
-				this.endAnimRemoval = removeCallback;
+				this.onComplete = endAnimCallback.bind(this);
+				this.onCompleteOnce = removeCallback;
 			}
 		}else if (scml.entities.get(currentEntityName).animations.exists(name)) {
 			if (paused) 
 				paused = false;
 			resetTime();
 			currentAnimationName = name;
-			currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
+			currentAnimation = currentEntity.animations.get(currentAnimationName);
 			if (endAnimCallback != null) {
-				this.endAnimCallback = endAnimCallback.bind(this);
-				this.endAnimRemoval = removeCallback;
+				this.onComplete = endAnimCallback.bind(this);
+				this.onCompleteOnce = removeCallback;
 			}
 		}else {
 			#if SPRITER_DEBUG
@@ -199,10 +235,11 @@ class Spriter
 				paused = false;
 			resetTime();
 			currentEntityName = entity;
+			currentEntity = scml.entities.get(currentEntityName);
 			if(anim != ''){
-				if (scml.entities.get(currentEntityName).animations.exists(anim)) {
+				if (currentEntity.animations.exists(anim)) {
 					currentAnimationName = anim;
-					currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
+					currentAnimation = currentEntity.animations.get(currentAnimationName);
 				}else {
 					#if SPRITER_DEBUG
 					trace('animation $anim does not exist in entity $entity');
@@ -210,8 +247,8 @@ class Spriter
 				}
 			}
 			if(endAnimCallback != null){
-				this.endAnimCallback = endAnimCallback.bind(this);
-				this.endAnimRemoval = removeCallback;
+				this.onComplete = endAnimCallback.bind(this);
+				this.onCompleteOnce = removeCallback;
 			}
 		}else {
 			#if SPRITER_DEBUG
@@ -229,14 +266,14 @@ class Spriter
 	 */
 	public function playAnimsStack(names:Array<String>, ?endAnimCallback:Spriter->Void):Spriter
 	{
-		if (scml.entities.get(currentEntityName).animations.exists(names[0])) {
+		if (currentEntity.animations.exists(names[0])) {
 			if (paused) 
 				paused = false;
 			resetTime();
 			currentAnimationName = names[0];
-			currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
-			this.endAnimCallback = stackAnims.bind(names, 1, endAnimCallback);
-			this.endAnimRemoval = true;
+			currentAnimation = currentEntity.animations.get(currentAnimationName);
+			this.onComplete = stackAnims.bind(names, 1, endAnimCallback);
+			this.onCompleteOnce = true;
 		}else {
 			#if SPRITER_DEBUG
 			trace('animation ${names[0]} does not exist in entity $currentEntityName');
@@ -259,12 +296,13 @@ class Spriter
 				paused = false;
 			resetTime();
 			currentEntityName = entity;
-			if (scml.entities.get(currentEntityName).animations.exists(anims[0])) {
+			currentEntity = scml.entities.get(currentEntityName);
+			if (currentEntity.animations.exists(anims[0])) {
 				currentAnimationName = anims[0];
-				currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
+				currentAnimation = currentEntity.animations.get(currentAnimationName);
 			}
-			this.endAnimCallback = stackAnims.bind(anims, 1, endAnimCallback);
-			this.endAnimRemoval = true;
+			this.onComplete = stackAnims.bind(anims, 1, endAnimCallback);
+			this.onCompleteOnce = true;
 			return true;
 		}else {
 			return false;
@@ -286,38 +324,17 @@ class Spriter
 				paused = false;
 			resetTime();
 			currentEntityName = entities[0];
-			if (scml.entities.get(currentEntityName).animations.exists(anims[0])) {
+			currentEntity = scml.entities.get(currentEntityName);
+			if (currentEntity.animations.exists(anims[0])) {
 				currentAnimationName = anims[0];
-				currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
+				currentAnimation = currentEntity.animations.get(currentAnimationName);
 			}
-			this.endAnimCallback = stackAnimsWithEntitiesChange.bind(entities , anims, 1, endAnimCallback);
-			this.endAnimRemoval = true;
+			this.onComplete = stackAnimsWithEntitiesChange.bind(entities , anims, 1, endAnimCallback);
+			this.onCompleteOnce = true;
 			return true;
 		}else {
 			return false;
 		}
-	}
-	
-	inline public function getBoxes():Array<Quadrilateral>
-	{
-		return currentAnimation.boxes;
-	}
-	inline public function getPoints():Array<SpatialInfo>
-	{
-		return currentAnimation.points;
-	}
-	public function getVariable(name:String):Variable<Dynamic>//TODO generic
-	{
-		for (currVar in scml.entities[currentEntityName].variables)
-		{
-			if (currVar.name == name)
-				return currVar;
-		}
-		return null;
-	}
-	inline public function getVariableFromId(id:Int):Variable<Dynamic>//TODO generic
-	{
-		return scml.entities[currentEntityName].variables[id];
 	}
 	
 	inline public function resetTime():Void
@@ -344,8 +361,8 @@ class Spriter
 	}
 	public function reflect():Spriter
 	{
-		endAnimCallback = reflectOnEndAnim.bind(endAnimCallback);
-		endAnimRemoval = true;
+		onComplete = reflectOnEndAnim.bind(onComplete);
+		onCompleteOnce = true;
 		return this;
 	}
 	/**
@@ -370,24 +387,92 @@ class Spriter
 		library = null;
 	}
 	
-	function onComplete():Void
+	#if !SPRITER_NO_SOUND
+	@:noCompletion
+	public function dispatchSound(folder:Int, file:Int):Void
 	{
-		if (endAnimCallback != null) {
-			var tempCallback:Void->Void = endAnimCallback;
-			if (endAnimRemoval)
-				endAnimCallback = null;
+		onSound(scml.folders[folder].files[file].name);
+	}
+	#end
+	
+	#if !SPRITER_NO_TAG
+	@:noCompletion
+	public function clearTag():Void
+	{
+		if (tags.length > 0)
+			tags.splice(0, tags.length);//instead of creating an array each time, clear it
+	}
+	@:noCompletion
+	public function addTag(t:Int):Void
+	{
+		tags.push(scml.tags[t]);
+	}
+	#end
+	
+	#if !SPRITER_NO_VAR
+	@:noCompletion
+	public function updateVar(id:Int, value:String):Void
+	{
+		var variable:Variable<Dynamic> = currentEntity.variables[id];
+		
+		var temp:Dynamic = variable.convert(value);
+		var changed:Bool = false;
+		
+		if (variables.length > id)
+		{
+			if (variables[id] != temp)
+			{
+				variables[id] = temp;
+				changed = true;
+			}
+		}else {
+			for (i in variables.length...id)
+			{
+				variables[i] = i == id ? temp : null;
+			}
+			changed = true;
+		}
+		
+		
+		if (onVarChanged != null && changed) {
+			onVarChanged(variable.name, temp);
+		}
+	}
+	
+	public function getVariable(name:String):Dynamic
+	{
+		for (i in 0...currentEntity.variables.length)
+		{
+			if (currentEntity.variables[i].name == name)
+				return variables[i];
+		}
+		return null;
+	}
+	
+	inline public function getVariableFromId(id:Int):Dynamic
+	{
+		return variables[id];
+	}
+	#end
+	
+	function dispatchComplete():Void
+	{
+		if (onComplete != null) {
+			var tempCallback:Void->Void = onComplete;
+			if (onCompleteOnce)
+				onComplete = null;
 			tempCallback();
 		}
 	}
 	
 	function stackAnims(anims:Array<String>, nextAnim:Int, endAnimsCallback:Spriter->Void):Void
 	{
-		if (scml.entities.get(currentEntityName).animations.exists(anims[nextAnim])) {
+		if (currentEntity.animations.exists(anims[nextAnim])) {
 			if (paused) 
 				paused = false;
 			resetTime();
 			currentAnimationName = anims[nextAnim];
-			currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
+			currentAnimation = currentEntity.animations.get(currentAnimationName);
 		}
 		#if SPRITER_DEBUG
 		trace('stackAnims', currentAnimationName);
@@ -395,9 +480,9 @@ class Spriter
 		//anim after next anim handler
 		if (++nextAnim >= anims.length) {
 			if(endAnimsCallback != null)
-				this.endAnimCallback = endAnimsCallback.bind(this);
+				this.onComplete = endAnimsCallback.bind(this);
 		}else {
-				this.endAnimCallback = stackAnims.bind(anims, nextAnim, endAnimsCallback);
+				this.onComplete = stackAnims.bind(anims, nextAnim, endAnimsCallback);
 		}
 	}
 	
@@ -405,12 +490,13 @@ class Spriter
 	{
 		if (scml.entities.exists(entities[nextAnim])) {
 			currentEntityName = entities[nextAnim];
-			if (scml.entities.get(currentEntityName).animations.exists(anims[nextAnim])) {
+			currentEntity = scml.entities.get(currentEntityName);
+			if (currentEntity.animations.exists(anims[nextAnim])) {
 				if (paused) 
 					paused = false;
 				resetTime();
 				currentAnimationName = anims[nextAnim];
-				currentAnimation = scml.entities.get(currentEntityName).animations.get(currentAnimationName);
+				currentAnimation = currentEntity.animations.get(currentAnimationName);
 			}
 		}
 		#if SPRITER_DEBUG
@@ -419,15 +505,15 @@ class Spriter
 		//anim after next anim handler
 		if (++nextAnim >= anims.length) {
 			if(endAnimsCallback != null)
-				this.endAnimCallback = endAnimsCallback.bind(this);
+				this.onComplete = endAnimsCallback.bind(this);
 		}else {
-				this.endAnimCallback = stackAnimsWithEntitiesChange.bind(entities, anims, nextAnim, endAnimsCallback);
+				this.onComplete = stackAnimsWithEntitiesChange.bind(entities, anims, nextAnim, endAnimsCallback);
 		}
 	}
 	function reflectOnEndAnim(callback:Void->Void):Void
 	{
 		playbackSpeed = -playbackSpeed;
-		endAnimCallback = callback;
+		onComplete = callback;
 		onComplete();
 		reflect();
 	}

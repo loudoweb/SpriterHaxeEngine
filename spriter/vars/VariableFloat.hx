@@ -11,6 +11,7 @@ class VariableFloat extends Variable<Float>
 	{
 		super(name,value);
 	}
+	
 	override public function set(value:String):Bool
 	{
 		var temp = this.value;
@@ -18,6 +19,10 @@ class VariableFloat extends Variable<Float>
 		if (temp != this.value)
 			return true;
 		return false;
+	}
+	override public function convert(value:String):Float 
+	{
+		return Std.parseFloat(value);
 	}
 	
 }

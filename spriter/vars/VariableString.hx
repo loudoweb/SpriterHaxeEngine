@@ -11,6 +11,7 @@ class VariableString extends Variable<String>
 	{
 		super(name,value);
 	}
+	
 	override public function set(value:String):Bool
 	{
 		var temp:String = this.value;
@@ -18,6 +19,11 @@ class VariableString extends Variable<String>
 		if (temp != this.value)
 			return true;
 		return false;
+	}
+	
+	override public function convert(value:String):String 
+	{
+		return value;
 	}
 	
 }

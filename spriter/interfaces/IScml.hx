@@ -11,11 +11,7 @@ import spriter.library.AbstractLibrary;
 
 interface IScml 
 {
-	var spriterName:String;
-	var metaDispatch:MetaDispatch;
 	function getPivots(folder:Int, file:Int):PivotInfo;
 	function getFileName(folder:Int, file:Int):String;
-	function onTag(tag:Int):Void;
-	function onVar(id:Int, value:String, entity:SpriterEntity):Void;
-	function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo):Void;
+	function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo, spriter:ISpriter):Void;
 }

@@ -3,6 +3,7 @@ package spriter.definitions;
 import haxe.Unserializer;
 import haxe.xml.Fast;
 import spriter.interfaces.IScml;
+import spriter.interfaces.ISpriter;
 import spriter.library.AbstractLibrary;
 import spriter.vars.Variable;
 
@@ -10,12 +11,6 @@ import spriter.vars.Variable;
  * ...
  * @author Loudo
  */
-enum MetaDispatch
-{
-	ONCE;
-	ONCE_PER_LOOP;
-	ALWAYS;
-}
 class ScmlObject implements IScml
 {
 
@@ -31,19 +26,7 @@ class ScmlObject implements IScml
     public var defaultAnimation:String  = ""; 
 
     public var currentTime:Float; 
-	
-	public var spriterName:String;
 		
-	/**
-	 * Callback called when variable value changes
-	 */
-	public var varChangeCallback:Variable<Dynamic>->Void;
-	/**
-	 * Callback called when tag dispatched
-	 */
-	public var tagCallback:String->Void;
-	public var metaDispatch:MetaDispatch = ONCE_PER_LOOP;
-	
 	public static function unserialize(bin:String):ScmlObject
 	{
 		var serializer:Unserializer = new Unserializer(bin);
@@ -117,31 +100,15 @@ class ScmlObject implements IScml
 			return null;
 		}
 	}
-	public function onTag(tag:Int):Void
-	{
-		if (tagCallback != null) {
-			tagCallback(tags[tag]);
-		}
-	}
-	public function onVar(id:Int, value:String, entity:SpriterEntity):Void
-	{
-		var variable:Variable<Dynamic> = entity.variables[id];
-		//callback only if var changes
-		if (variable.set(value))
-		{
-			if (varChangeCallback != null) {
-				varChangeCallback(variable);
-			}
-		}
-	}
-	public function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo):Void
+	
+	public function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo, spriter:ISpriter):Void
 	{
 		var entityName:String = entitiesName[entity];
 		var currentEnt:SpriterEntity =	entities.get(entityName);
 		var animationName:String = currentEnt.animationsName[animation];
 		var currentAnim:SpriterAnimation = currentEnt.animations.get(animationName);
 		var newTime:Int = Std.int(t * currentAnim.length);
-		currentAnim.setCurrentTime(newTime, library, this, currentEnt, spatialInfo);
+		currentAnim.setCurrentTime(newTime, currentAnim.length, library, spriter,  this, currentEnt, spatialInfo);
 	}
 	//interface IScml end
     public function applyCharacterMap(name:String, reset:Bool, entityName:String):Bool
@@ -219,7 +186,7 @@ class ScmlObject implements IScml
 		return newFolders;
 	}
 	
-	public function copy(?id:String):ScmlObject
+	public function copy():ScmlObject
 	{
 		var newSCML:ScmlObject = new ScmlObject();
 		newSCML.folders = copyFolders();
@@ -231,7 +198,6 @@ class ScmlObject implements IScml
 		newSCML.defaultEntity 	= Std.string(defaultEntity); 
 		newSCML.defaultAnimation  = Std.string(defaultAnimation); 
 		newSCML.currentTime = 0; 
-		newSCML.spriterName = id;
 		return newSCML;
 	}
 	
@@ -242,7 +208,5 @@ class ScmlObject implements IScml
 		entities = null;
 		entitiesName = null;
 		tags = null;
-		tagCallback = null;
-		varChangeCallback = null;
 	}
 }

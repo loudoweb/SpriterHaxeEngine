@@ -11,6 +11,7 @@ class VariableInt extends Variable<Int>
 	{
 		super(name,value);
 	}
+	
 	override public function set(value:String):Bool
 	{
 		var temp:Int = this.value;
@@ -18,6 +19,11 @@ class VariableInt extends Variable<Int>
 		if (temp != this.value)
 			return true;
 		return false;
+	}
+	
+	override public function convert(value:String):Int 
+	{
+		return Std.parseInt(value);
 	}
 	
 }
