@@ -62,13 +62,21 @@ engine.update();
 //Callback on end anim
 function myCallback(s:Spriter):Void
 
-//var and tag callback
-engine.getSpriterAt(0).scml.tagCallback = function tagCallback(tag:String):Void{}
-engine.getSpriterAt(0).scml.varChangeCallback function varCallback(variable:Variable<Dynamic>):Void{}
+//callback
+engine.getSpriterAt(0).onVarChanged = function varCallback(name:String, value:Dynamic):Void{}
+engine.getSpriterAt(0).onEvent = function eventCallback(name:String):Void{}
+engine.getSpriterAt(0).onSound = function soundCallback(name:String):Void{}
 
-//points and boxes
-var points:Array<SpatialInfo> = engine.getSpriterAt(0).getPoints();
-var boxes:Array<Quadrilateral> = engine.getSpriterAt(0).getBoxes();
+//current points and boxes
+var points:Array<SpatialInfo> = engine.getSpriterAt(0).points;
+var boxes:Array<Quadrilateral> = engine.getSpriterAt(0).boxes;
+
+//current tags
+var tags:Array<String> = engine.getSpriterAt(0).tags;
+
+//current variables values
+var value:Dynamic = engine.getSpriterAt(0).getVariable('myVar');
+
 
 //stack anims
 engine.getSpriter('uniqueId').playAnimsStackFromEntity("entityName", ["anim1","anim2"], myCallback).
