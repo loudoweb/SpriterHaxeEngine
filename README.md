@@ -94,10 +94,11 @@ Spriter Haxe Engine Features
  - callback when animation ended
  - play, stack anim, pause
  - you can display duplicate of spriter entity and manipulate them separatly
- - callback when variable changes
- - callback when tag dispatches
+ - callback when events, sounds are triggered
+ - callback when variables change
  - Points (usage example : to shot a bullet when gun fire)
  - Boxes (usage example : hitbox)
+ - Tags (usage example : state vulnerable)
  - sub entities
  - playing backward and reflect
 
@@ -124,6 +125,8 @@ Spriter Haxe Engine Features
 
 TODO
 ----
+ - interpolation on variable
+ - move all unique stuff from scml to Spriter to allow all spriters sharing the same scml (=reduce allocation)
  - add tilesheet stage 3d support : https://github.com/as3boyan/TilesheetStage3D/
  - add ash and haxepunk support
  - add Flambe support (waiting for pull request, see here https://github.com/quinnhoener/SpriterHaxeEngine)
@@ -132,8 +135,8 @@ TODO
  - animation callback optimization
  - check Garbage collector
  
- WIKI
- -----------
+WIKI
+-----------
  The [wiki](https://github.com/loudoweb/SpriterHaxeEngine/wiki) provides more details on features and how it works.
  
 Examples
