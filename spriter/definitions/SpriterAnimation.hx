@@ -1,10 +1,9 @@
 package spriter.definitions;
 import haxe.xml.Fast;
-import spriter.definitions.Quadrilateral;
 import spriter.definitions.SpriterAnimation.LoopType;
 import spriter.definitions.SpriterTimeline.ObjectType;
+import spriter.engine.Spriter;
 import spriter.interfaces.IScml;
-import spriter.interfaces.ISpriter;
 import spriter.library.AbstractLibrary;
 
 /**
@@ -130,13 +129,13 @@ class SpriterAnimation
 	 * @param	currentEntity to use some features
 	 * @param	parentSpatialInfo SpatialInfo from the Spriter (positions, etc.)
 	 */
-	public function setCurrentTime(newTime:Int, elapsedTime:Int, library:AbstractLibrary, spriter:ISpriter, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
+	public function setCurrentTime(newTime:Int, elapsedTime:Int, library:AbstractLibrary, spriter:Spriter, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
 		//update
 		updateCharacter(mainlineKeyFromTime(newTime), newTime, elapsedTime, library, spriter, root, currentEntity, parentSpatialInfo);
     }
 
-    public function updateCharacter(mainKey:MainlineKey, newTime:Int, elapsedTime:Int, library:AbstractLibrary, spriter:ISpriter, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
+    public function updateCharacter(mainKey:MainlineKey, newTime:Int, elapsedTime:Int, library:AbstractLibrary, spriter:Spriter, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
 		var currentKey:SpatialTimelineKey;
 		var	currentRef:Ref;

@@ -3,6 +3,7 @@ import spriter.definitions.PivotInfo;
 import spriter.definitions.ScmlObject.MetaDispatch;
 import spriter.definitions.SpatialInfo;
 import spriter.definitions.SpriterEntity;
+import spriter.engine.Spriter;
 import spriter.library.AbstractLibrary;
 
 /**
@@ -11,5 +12,5 @@ import spriter.library.AbstractLibrary;
 
 interface IScml 
 {
-	function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo, spriter:ISpriter):Void;
+	function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo, spriter:Spriter):Void;
 }

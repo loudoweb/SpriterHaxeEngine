@@ -9,7 +9,6 @@ import spriter.definitions.SpriterAnimation;
 import spriter.definitions.SpriterEntity;
 import spriter.definitions.SpriterFile;
 import spriter.definitions.SpriterFolder;
-import spriter.interfaces.ISpriter;
 import spriter.library.AbstractLibrary;
 import spriter.util.SpriterUtil;
 import spriter.vars.Variable;
@@ -21,7 +20,7 @@ import spriter.definitions.CustomCharMap;
  * ...
  * @author Loudo
  */
-class Spriter implements ISpriter
+class Spriter
 {
 
 	public var scml:ScmlObject;

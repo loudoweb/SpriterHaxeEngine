@@ -2,10 +2,9 @@ package spriter.definitions;
 
 import haxe.Unserializer;
 import haxe.xml.Fast;
+import spriter.engine.Spriter;
 import spriter.interfaces.IScml;
-import spriter.interfaces.ISpriter;
 import spriter.library.AbstractLibrary;
-import spriter.vars.Variable;
 
 /**
  * ...
@@ -84,7 +83,7 @@ class ScmlObject implements IScml
 		}
 	}
 	//interface IScml begin
-	public function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo, spriter:ISpriter):Void
+	public function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo, spriter:Spriter):Void
 	{
 		var entityName:String = entitiesName[entity];
 		var currentEnt:SpriterEntity =	entities.get(entityName);
