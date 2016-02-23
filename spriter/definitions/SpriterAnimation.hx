@@ -20,6 +20,7 @@ class SpriterAnimation
 {
 	//spatial info cached and shared between all animations to avoid allocating new ones. Used by libraries to compute final coordinates and draw the object on the screen.
 	static var _cachedSpatialInfo:SpatialInfo = new SpatialInfo();
+	static var _cachedPivot:PivotInfo = new PivotInfo();
 	
 	/*
 	 * SCML definitions
@@ -189,15 +190,14 @@ class SpriterAnimation
 			
 			currentKey.info.unmapFromParent(spatialInfo, _cachedSpatialInfo);//update _cachedSpatialInfo
 			
-			var activePivots:PivotInfo;
 			if (Std.is(currentKey, SpriteTimelineKey)) {
 				var currentSpriteKey:SpriteTimelineKey = cast currentKey;
 				//render from library
 				var currentKeyName:String = spriter.getFileName(currentSpriteKey.folder, currentSpriteKey.file);
 				if (currentKeyName != null) {//hidden object test (via mapping)
-					activePivots = spriter.getPivots(currentSpriteKey.folder, currentSpriteKey.file);
-					activePivots = currentKey.paint(activePivots);
-					library.addGraphic(currentKeyName, _cachedSpatialInfo, activePivots);
+					_cachedPivot = spriter.getPivots(_cachedPivot, currentSpriteKey.folder, currentSpriteKey.file);
+					_cachedPivot = currentKey.paint(_cachedPivot);//use default pivot or custom pivot
+					library.addGraphic(currentKeyName, _cachedSpatialInfo, _cachedPivot);
 				}
 			}else if (Std.is(currentKey, SubEntityTimelineKey)){
 				var currentSubKey:SubEntityTimelineKey = cast currentKey;
@@ -208,15 +208,15 @@ class SpriterAnimation
 				if (currentObjectKey.type == ObjectType.POINT)
 				{
 					#if !SPRITER_NO_POINT
-					activePivots = PivotInfo.DEFAULT;
-					spriter.points.push(library.compute(_cachedSpatialInfo.copy(), activePivots, 0, 0));
+					_cachedPivot.setToDefault();
+					spriter.points.push(library.compute(_cachedSpatialInfo.copy(), _cachedPivot, 0, 0));
 					#end
 				}else {//BOX
 					#if !SPRITER_NO_BOX
-					activePivots = new PivotInfo();//default pivot, but need to be overrided
-					activePivots = currentKey.paint(activePivots);
+					_cachedPivot.setToDefault();
+					_cachedPivot = currentKey.paint(_cachedPivot);
 					var currentBox:SpriterBox = currentEntity.boxes_info.get(getTimelineName(currentRef.timeline));
-					spriter.boxes.push(library.computeRectCoordinates(_cachedSpatialInfo, activePivots, currentBox.width, currentBox.height));
+					spriter.boxes.push(library.computeRectCoordinates(_cachedSpatialInfo, _cachedPivot, currentBox.width, currentBox.height));
 					#end
 				}
 			}

@@ -472,11 +472,13 @@ class Spriter
 		}
 	}
 	
-	public function getPivots(folder:Int, file:Int):PivotInfo
+	public function getPivots(pivotToReturn:PivotInfo, folder:Int, file:Int):PivotInfo
 	{
 		var currentFile:SpriterFile = activeCharacterMap[folder].files[file];
 		if(currentFile != null){
-			return new PivotInfo(currentFile.pivotX, currentFile.pivotY);
+			pivotToReturn.pivotX = currentFile.pivotX;
+			pivotToReturn.pivotY = currentFile.pivotY;
+			return pivotToReturn;
 		}else {
 			return null;
 		}
