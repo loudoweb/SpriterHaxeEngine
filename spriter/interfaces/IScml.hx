@@ -11,7 +11,5 @@ import spriter.library.AbstractLibrary;
 
 interface IScml 
 {
-	function getPivots(folder:Int, file:Int):PivotInfo;
-	function getFileName(folder:Int, file:Int):String;
 	function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo, spriter:ISpriter):Void;
 }

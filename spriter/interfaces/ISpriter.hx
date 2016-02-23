@@ -1,4 +1,5 @@
 package spriter.interfaces;
+import spriter.definitions.PivotInfo;
 import spriter.definitions.Quadrilateral;
 import spriter.definitions.SpatialInfo;
 
@@ -22,8 +23,11 @@ interface ISpriter
 	 * event callback
 	 * @param	name of event
 	 */
-	public var onEvent:String->Void;
+	public function dispatchEvent(name:String):Void;
 	#end
+	
+	public function getPivots(folder:Int, file:Int):PivotInfo;
+	public function getFileName(folder:Int, file:Int):String;
 	
 	#if !SPRITER_NO_TAG
 	/**

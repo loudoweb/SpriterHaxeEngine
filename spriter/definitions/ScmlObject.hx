@@ -15,7 +15,6 @@ class ScmlObject implements IScml
 {
 
 	public var folders:Array<SpriterFolder>;
-	public var activeCharacterMap:Array<SpriterFolder>;
 	public var entities:Map<String, SpriterEntity>;
 	/**
 	 * Get the names of all entities in the scml file
@@ -82,30 +81,9 @@ class ScmlObject implements IScml
 					
 				}
 			}
-			
-			activeCharacterMap = copyFolders();
 		}
 	}
 	//interface IScml begin
-	public function getPivots(folder:Int, file:Int):PivotInfo
-	{
-		var currentFile:SpriterFile = activeCharacterMap[folder].files[file];
-		if(currentFile != null){
-			return new PivotInfo(currentFile.pivotX, currentFile.pivotY);
-		}else {
-			return null;
-		}
-	}
-	public function getFileName(folder:Int, file:Int):String
-	{
-		var currentFile:SpriterFile = activeCharacterMap[folder].files[file];
-		if(currentFile != null){
-			return currentFile.name;
-		}else {
-			return null;
-		}
-	}
-	
 	public function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo, spriter:ISpriter):Void
 	{
 		var entityName:String = entitiesName[entity];
@@ -116,41 +94,6 @@ class ScmlObject implements IScml
 		currentAnim.setCurrentTime(newTime, currentAnim.length, library, spriter,  this, currentEnt, spatialInfo);
 	}
 	//interface IScml end
-    public function applyCharacterMap(name:String, reset:Bool, entityName:String):Bool
-    {
-		if(reset)
-		{
-			activeCharacterMap = copyFolders();
-		}
-		
-		var entity:SpriterEntity = entities.get(entityName);
-		
-		if (entity.characterMaps.exists(name)) {
-			
-			var charMap:CharacterMap = entity.characterMaps.get(name);
-			
-			var len:Int = charMap.maps.length;
-			for(m in 0...len)
-			{
-				var currentMap:MapInstruction = charMap.maps[m];
-				if(currentMap.tarFolder > -1 && currentMap.tarFile > -1)
-				{
-					var targetFolder:SpriterFolder	=	activeCharacterMap[currentMap.tarFolder];
-					var targetFile:SpriterFile		=	targetFolder.files[currentMap.tarFile];
-					activeCharacterMap[currentMap.folder].files[currentMap.file]	=	targetFile;
-				}else {
-					activeCharacterMap[currentMap.folder].files[currentMap.file]	=	null;//hidden
-				}
-			}
-			return true;
-		}else {
-			return false;
-		}
-    }
-	inline public function resetCharacterMap():Void
-	{
-		activeCharacterMap = copyFolders();
-	}
 	/**
 	 * Get the names of all animations in the scml file
 	 * @param	entity you have to speficy an entity where we can search the animations.
@@ -181,7 +124,7 @@ class ScmlObject implements IScml
 		return null;
 	}
 	
-	private function copyFolders():Array<SpriterFolder>
+	public function copyFolders():Array<SpriterFolder>
 	{
 		var newFolders = new Array<SpriterFolder>();
 		for (i in 0...folders.length)
@@ -195,7 +138,6 @@ class ScmlObject implements IScml
 	{
 		var newSCML:ScmlObject = new ScmlObject();
 		newSCML.folders = copyFolders();
-		newSCML.activeCharacterMap = copyFolders();
 		newSCML.entities = entities;//TODO copy ?
 		newSCML.entitiesName = entitiesName;
 		#if !SPRITER_NO_TAG
@@ -211,7 +153,6 @@ class ScmlObject implements IScml
 	public function destroy():Void
 	{
 		folders = null;
-		activeCharacterMap = null;
 		entities = null;
 		entitiesName = null;
 		#if !SPRITER_NO_TAG

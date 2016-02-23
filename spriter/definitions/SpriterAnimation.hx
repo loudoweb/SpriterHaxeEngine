@@ -194,9 +194,9 @@ class SpriterAnimation
 			if (Std.is(currentKey, SpriteTimelineKey)) {
 				var currentSpriteKey:SpriteTimelineKey = cast currentKey;
 				//render from library
-				var currentKeyName:String = root.getFileName(currentSpriteKey.folder, currentSpriteKey.file);
+				var currentKeyName:String = spriter.getFileName(currentSpriteKey.folder, currentSpriteKey.file);
 				if (currentKeyName != null) {//hidden object test (via mapping)
-					activePivots = root.getPivots(currentSpriteKey.folder, currentSpriteKey.file);
+					activePivots = spriter.getPivots(currentSpriteKey.folder, currentSpriteKey.file);
 					activePivots = currentKey.paint(activePivots);
 					library.addGraphic(currentKeyName, _cachedSpatialInfo, activePivots);
 				}
@@ -292,7 +292,7 @@ class SpriterAnimation
 				{
 					if (isTriggered(eventKey.time, mainKey.time, newTime, elapsedTime))
 					{
-						spriter.onEvent(event.name);	
+						spriter.dispatchEvent(event.name);	
 					}
 				}
 			}

@@ -1,9 +1,14 @@
 package spriter.engine;
+import spriter.definitions.CharacterMap;
+import spriter.definitions.MapInstruction;
+import spriter.definitions.PivotInfo;
 import spriter.definitions.Quadrilateral;
 import spriter.definitions.ScmlObject;
 import spriter.definitions.SpatialInfo;
 import spriter.definitions.SpriterAnimation;
 import spriter.definitions.SpriterEntity;
+import spriter.definitions.SpriterFile;
+import spriter.definitions.SpriterFolder;
 import spriter.interfaces.ISpriter;
 import spriter.library.AbstractLibrary;
 import spriter.util.SpriterUtil;
@@ -63,6 +68,7 @@ class Spriter implements ISpriter
 	var variables:Array<Dynamic>;
 	#end
 	
+	var activeCharacterMap:Array<SpriterFolder>;
 	
 	var loop:Float = 0;
 	var lastLoop:Float = 0;
@@ -106,6 +112,8 @@ class Spriter implements ISpriter
 		#if !SPRITER_NO_VAR
 		this.variables = [];
 		#end
+		
+		this.activeCharacterMap = this.scml.copyFolders();
 	}
 	
 	public function advanceTime(elapsedMS:Int):Void
@@ -147,26 +155,42 @@ class Spriter implements ISpriter
 	 * @param	reset to apply only the new character map, if not, you can have multiple character map at the same time. Default is false.
 	 * @return  this
 	 */
-	inline public function applyCharacterMap(name:String, reset:Bool = false):Spriter
+	public function applyCharacterMap(name:String, reset:Bool = false):Spriter
 	{
+		if (reset){
+			activeCharacterMap = scml.copyFolders();
+		}
 		#if SPRITER_CUSTOM_MAP
 		if (_customMap != null && _customMap.exists(name))
 		{
-			if (reset){
-				scml.resetCharacterMap();
-			}
-			
 			var currentMap = _customMap.get(name);
 			for (i in currentMap.folder...currentMap.folder + currentMap.length)
 			{
-				for (j in 0...scml.activeCharacterMap[i].files.length) 
+				for (j in 0...activeCharacterMap[i].files.length) 
 				{
-					scml.activeCharacterMap[i].files[j].name = StringTools.replace(scml.activeCharacterMap[i].files[j].name, currentMap.sub, currentMap.by);
+					activeCharacterMap[i].files[j].name = StringTools.replace(activeCharacterMap[i].files[j].name, currentMap.sub, currentMap.by);
 				}
 			}
 		}else{
 		#end
-		scml.applyCharacterMap(name, reset, currentEntityName);
+			if (currentEntity.characterMaps.exists(name)) {
+				
+				var charMap:CharacterMap = currentEntity.characterMaps.get(name);
+				
+				var len:Int = charMap.maps.length;
+				for(m in 0...len)
+				{
+					var currentMap:MapInstruction = charMap.maps[m];
+					if(currentMap.tarFolder > -1 && currentMap.tarFile > -1)
+					{
+						var targetFolder:SpriterFolder	=	activeCharacterMap[currentMap.tarFolder];
+						var targetFile:SpriterFile		=	targetFolder.files[currentMap.tarFile];
+						activeCharacterMap[currentMap.folder].files[currentMap.file]	=	targetFile;
+					}else {
+						activeCharacterMap[currentMap.folder].files[currentMap.file]	=	null;//hidden
+					}
+				}
+			}
 		#if SPRITER_CUSTOM_MAP
 		}
 		#end
@@ -389,21 +413,31 @@ class Spriter implements ISpriter
 	
 	#if !SPRITER_NO_SOUND
 	@:noCompletion
-	public function dispatchSound(folder:Int, file:Int):Void
+	inline public function dispatchSound(folder:Int, file:Int):Void
 	{
-		onSound(scml.folders[folder].files[file].name);
+		if(onSound != null)
+			onSound(scml.folders[folder].files[file].name);
+	}
+	#end
+	
+	#if !SPRITER_NO_EVENT
+	@:noCompletion
+	inline public function dispatchEvent(name:String):Void
+	{
+		if(onEvent != null)
+			onEvent(name);
 	}
 	#end
 	
 	#if !SPRITER_NO_TAG
 	@:noCompletion
-	public function clearTag():Void
+	inline public function clearTag():Void
 	{
 		if (tags.length > 0)
 			tags.splice(0, tags.length);//instead of creating an array each time, clear it
 	}
 	@:noCompletion
-	public function addTag(t:Int):Void
+	inline public function addTag(t:Int):Void
 	{
 		tags.push(scml.tags[t]);
 	}
@@ -436,6 +470,25 @@ class Spriter implements ISpriter
 		
 		if (onVarChanged != null && changed) {
 			onVarChanged(variable.name, temp);
+		}
+	}
+	
+	public function getPivots(folder:Int, file:Int):PivotInfo
+	{
+		var currentFile:SpriterFile = activeCharacterMap[folder].files[file];
+		if(currentFile != null){
+			return new PivotInfo(currentFile.pivotX, currentFile.pivotY);
+		}else {
+			return null;
+		}
+	}
+	public function getFileName(folder:Int, file:Int):String
+	{
+		var currentFile:SpriterFile = activeCharacterMap[folder].files[file];
+		if(currentFile != null){
+			return currentFile.name;
+		}else {
+			return null;
 		}
 	}
 	

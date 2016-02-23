@@ -141,7 +141,7 @@ class SpriterEngine
 		var info:SpatialInfo = new SpatialInfo(x, -y);//-y because use inverted y coordinates
 		
 		if (scml == null)
-			scml = default_scml.copy();
+			scml = default_scml;
 		//create the Spriter
 		var spriter:Spriter = new Spriter(id, scml, _lib, info);
 		if (autoRemoval) {
