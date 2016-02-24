@@ -26,7 +26,14 @@ class Spriter
 	public var scml:ScmlObject;
 	public var library:AbstractLibrary;
 	public var spriterName:String;
+	/**
+	 * Time elapsed since beginning of current animation
+	 */
 	public var timeMS:Int = 0;
+	/**
+	 * Time in the range of [0,currentAnimation.length]
+	 */
+	public var normalizedTime:Int = 0;
 	
 	/**
 	 * Manipulate positions (x,y), scale, alpha and rotation through this object.
@@ -69,9 +76,8 @@ class Spriter
 	
 	var activeCharacterMap:Array<SpriterFolder>;
 	
-	var loop:Float = 0;
-	var lastLoop:Float = 0;
-	var normalizedTime:Int = 0;
+	var loop:Int = 0;
+	var lastLoop:Int = 0;
 	var currentAnimation:SpriterAnimation;
 	var currentEntity:SpriterEntity;
 	/**
@@ -87,6 +93,8 @@ class Spriter
 	#if SPRITER_CUSTOM_MAP
 	var _customMap:Map<String, CustomCharMap>;
 	#end
+	
+	var hasReflect:Bool = false;
 	
 	
 	public function new(_name:String, _scml:ScmlObject, _library:AbstractLibrary, _info:SpatialInfo) 
@@ -120,15 +128,19 @@ class Spriter
 		if (!paused)
 		{
 			timeMS += Std.int(elapsedMS * playbackSpeed);
-			lastLoop = loop;
-			loop = timeMS / currentAnimation.length;
 			
 			if (currentAnimation.loopType == LOOPING)
 			{
-					
-					normalizedTime = timeMS % currentAnimation.length;
-					if (normalizedTime < 0)//backward
+					normalizedTime += Std.int(elapsedMS * playbackSpeed);
+					if (normalizedTime >= currentAnimation.length)//forward
+					{
+						normalizedTime -= currentAnimation.length;
+						++loop;
+					}else if (normalizedTime <= 0)//backward
+					{
 						normalizedTime += currentAnimation.length;
+						++loop;
+					}
 			
 			}else{//no looping
 					normalizedTime = Std.int(Math.max(0, Math.min(timeMS, currentAnimation.length)));
@@ -139,13 +151,17 @@ class Spriter
 		//callback
 		if (currentAnimation.loopType == LOOPING)
 		{
-			if (Std.int(loop) != Std.int(lastLoop) || (Std.int(loop) == 0 && !SpriterUtil.sameSign(lastLoop, loop))) {
+			if (loop > lastLoop) {
+				lastLoop = loop;
 				dispatchComplete();
 			}
 		}else {//no looping
 			var when:Int = playbackSpeed > 0 ? currentAnimation.length : 0;
-			if (normalizedTime == when)
+			if (normalizedTime == when) {
+				if (!onCompleteOnce && !hasReflect) onCompleteOnce = true;//force to avoid dispatching every frame when it's done
+				++loop;
 				dispatchComplete();
+			}
 		}
 	}
 	/**
@@ -366,7 +382,7 @@ class Spriter
 		{
 			loop = lastLoop = normalizedTime = timeMS = 0;
 		}else{
-			loop = lastLoop = 1;
+			loop = lastLoop = 0;
 			normalizedTime = timeMS = currentAnimation.length;
 		}
 	}
@@ -374,18 +390,27 @@ class Spriter
 	{
 		if (value)
 		{
-			playbackSpeed = -1;
-			resetTime();
+			if (playbackSpeed > 0)
+				playbackSpeed = SpriterUtil.changeSign(playbackSpeed);
 		}else {
-			playbackSpeed = 1;
-			resetTime();
+			if (playbackSpeed < 0)
+				playbackSpeed = SpriterUtil.changeSign(playbackSpeed);
 		}
+		resetTime();
 		return this;
 	}
-	public function reflect():Spriter
+	public function reflect(value:Bool = true):Spriter
 	{
-		onComplete = reflectOnEndAnim.bind(onComplete);
-		onCompleteOnce = true;
+		if (value)
+		{
+			onComplete = reflectOnEndAnim;
+			onCompleteOnce = false;
+			hasReflect = true;
+		}else {
+			onComplete = null;
+			onCompleteOnce = true;
+			hasReflect = false;
+		}
 		return this;
 	}
 	/**
@@ -492,12 +517,9 @@ class Spriter
 				this.onComplete = stackAnimsWithEntitiesChange.bind(entities, anims, nextAnim, endAnimsCallback);
 		}
 	}
-	function reflectOnEndAnim(callback:Void->Void):Void
+	inline function reflectOnEndAnim():Void
 	{
-		playbackSpeed = -playbackSpeed;
-		onComplete = callback;
-		onComplete();
-		reflect();
+		reverse(playbackSpeed > 0);	
 	}
 	
 	//ACCESS FROM SpriterAnimation

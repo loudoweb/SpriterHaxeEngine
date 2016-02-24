@@ -54,6 +54,11 @@ class SpriterUtil
 		return signOf(f1) == signOf(f2);
 	}
 	
+	inline static public function changeSign(f:Float):Float
+	{
+		return f *= -1;
+	}
+	
 	inline static public function clearArray(array:Array<Dynamic>):Void
 	{
 		if (array.length > 0)

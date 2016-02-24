@@ -134,7 +134,7 @@ Spriter Haxe Engine Features
 TODO
 ----
  - interpolation on variable
- - move all unique stuff from scml to Spriter to allow all spriters sharing the same scml (=reduce allocation)
+ - variable/tags of sub entities
  - add tilesheet stage 3d support : https://github.com/as3boyan/TilesheetStage3D/
  - add ash and haxepunk support
  - add Flambe support (waiting for pull request, see here https://github.com/quinnhoener/SpriterHaxeEngine)
@@ -153,12 +153,11 @@ Examples
  
 Additional information
 ------------
- - compatible with Spriter r5
+ - compatible with Spriter r6.1
  - With Tilelayer library, don't use openfl-bitfive for html5 target.
  
  
 Known issues
 ------------
- - [html5] some issues on html5 depending on the backend used and the Library used.
  - Please use the best rendering method according to your target.
  
