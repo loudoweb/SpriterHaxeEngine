@@ -53,4 +53,16 @@ class SpriterUtil
 	{
 		return signOf(f1) == signOf(f2);
 	}
+	
+	inline static public function clearArray(array:Array<Dynamic>):Void
+	{
+		if (array.length > 0)
+		{
+			#if cpp
+			array.splice(0, array.length);//allocates in hxcpp but fastest
+			#else
+			untyped array.length = 0;
+			#end
+		}
+	}
 }

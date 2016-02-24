@@ -135,7 +135,7 @@ class Spriter
 			}
 		}
 		//even if paused we need to draw it	
-		currentAnimation.setCurrentTime(normalizedTime, Std.int(elapsedMS * playbackSpeed), library, this, scml, scml.entities[currentEntityName], info);
+		currentAnimation.setCurrentTime(normalizedTime, Std.int(elapsedMS * playbackSpeed), library, this, currentEntity, info);
 		//callback
 		if (currentAnimation.loopType == LOOPING)
 		{
@@ -360,7 +360,7 @@ class Spriter
 		}
 	}
 	
-	inline public function resetTime():Void
+	public function resetTime():Void
 	{
 		if (playbackSpeed > 0)
 		{
@@ -393,7 +393,7 @@ class Spriter
 	 * @param	x
 	 * @param	y (spriter uses inverted y, so it will automatically inverted in this function)
 	 */
-	public function set(x:Float, y:Float):Spriter
+	inline public function set(x:Float, y:Float):Spriter
 	{
 		//-y because use inverted y coordinates
 		info.setPos(x, -y);
@@ -402,97 +402,18 @@ class Spriter
 	
 	public function destroy():Void
 	{
-		scml.destroy();
-		scml = null;
 		//info.put();
 		info = null;
-		//don't destroy library here since library is shared between all Spriter in the engine
-		library = null;
+		scml = null;//don't destroy scml here since it can be shared between many Spriter
+		library = null;//don't destroy library here since library is shared between all Spriter in the engine
 	}
-	
-	#if !SPRITER_NO_SOUND
-	@:noCompletion
-	inline public function dispatchSound(folder:Int, file:Int):Void
-	{
-		if(onSound != null)
-			onSound(scml.folders[folder].files[file].name);
-	}
-	#end
-	
-	#if !SPRITER_NO_EVENT
-	@:noCompletion
-	inline public function dispatchEvent(name:String):Void
-	{
-		if(onEvent != null)
-			onEvent(name);
-	}
-	#end
-	
-	#if !SPRITER_NO_TAG
-	@:noCompletion
-	inline public function clearTag():Void
-	{
-		if (tags.length > 0)
-			tags.splice(0, tags.length);//instead of creating an array each time, clear it
-	}
-	@:noCompletion
-	inline public function addTag(t:Int):Void
-	{
-		tags.push(scml.tags[t]);
-	}
-	#end
 	
 	#if !SPRITER_NO_VAR
-	@:noCompletion
-	public function updateVar(id:Int, value:String):Void
-	{
-		var variable:Variable<Dynamic> = currentEntity.variables[id];
-		
-		var temp:Dynamic = variable.convert(value);
-		var changed:Bool = false;
-		
-		if (variables.length > id)
-		{
-			if (variables[id] != temp)
-			{
-				variables[id] = temp;
-				changed = true;
-			}
-		}else {
-			for (i in variables.length...id)
-			{
-				variables[i] = i == id ? temp : null;
-			}
-			changed = true;
-		}
-		
-		
-		if (onVarChanged != null && changed) {
-			onVarChanged(variable.name, temp);
-		}
-	}
-	
-	public function getPivots(pivotToReturn:PivotInfo, folder:Int, file:Int):PivotInfo
-	{
-		var currentFile:SpriterFile = activeCharacterMap[folder].files[file];
-		if(currentFile != null){
-			pivotToReturn.pivotX = currentFile.pivotX;
-			pivotToReturn.pivotY = currentFile.pivotY;
-			return pivotToReturn;
-		}else {
-			return null;
-		}
-	}
-	public function getFileName(folder:Int, file:Int):String
-	{
-		var currentFile:SpriterFile = activeCharacterMap[folder].files[file];
-		if(currentFile != null){
-			return currentFile.name;
-		}else {
-			return null;
-		}
-	}
-	
+	/**
+	 * Get a variable value from the main current entity playing
+	 * @param	name
+	 * @return
+	 */
 	public function getVariable(name:String):Dynamic
 	{
 		for (i in 0...currentEntity.variables.length)
@@ -503,11 +424,18 @@ class Spriter
 		return null;
 	}
 	
+	/**
+	 * Get a variable value from the main current entity playing
+	 * @param	id if you know the id, should be faster to retrieve the variable
+	 * @return
+	 */
 	inline public function getVariableFromId(id:Int):Dynamic
 	{
 		return variables[id];
 	}
 	#end
+	
+	//INTERNAL
 	
 	function dispatchComplete():Void
 	{
@@ -571,4 +499,104 @@ class Spriter
 		onComplete();
 		reflect();
 	}
+	
+	//ACCESS FROM SpriterAnimation
+	
+	@:allow(spriter.definitions.SpriterAnimation)
+	function setSubEntityCurrentTime(t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo):Void
+	{
+		var tempEntityName:String = scml.entitiesName[entity];
+		var tempEntity:SpriterEntity = scml.entities.get(tempEntityName);
+		var tempAnimName:String = tempEntity.animationsName[animation];
+		var tempAnimation:SpriterAnimation = tempEntity.animations.get(tempAnimName);
+		var newTime:Int = Std.int(t * tempAnimation.length);
+		tempAnimation.setCurrentTime(newTime, tempAnimation.length, library, this, tempEntity, spatialInfo);
+	}
+	
+	@:allow(spriter.definitions.SpriterAnimation)
+	function getPivots(pivotToReturn:PivotInfo, folder:Int, file:Int):PivotInfo
+	{
+		var currentFile:SpriterFile = activeCharacterMap[folder].files[file];
+		if(currentFile != null){
+			pivotToReturn.pivotX = currentFile.pivotX;
+			pivotToReturn.pivotY = currentFile.pivotY;
+			return pivotToReturn;
+		}else {
+			return null;
+		}
+	}
+	
+	@:allow(spriter.definitions.SpriterAnimation)
+	function getFileName(folder:Int, file:Int):String
+	{
+		var currentFile:SpriterFile = activeCharacterMap[folder].files[file];
+		if(currentFile != null){
+			return currentFile.name;
+		}else {
+			return null;
+		}
+	}
+	
+	#if !SPRITER_NO_SOUND
+	@:allow(spriter.definitions.SpriterAnimation)
+	inline function dispatchSound(folder:Int, file:Int):Void
+	{
+		if(onSound != null)
+			onSound(scml.folders[folder].files[file].name);
+	}
+	#end
+	
+	#if !SPRITER_NO_EVENT
+	@:allow(spriter.definitions.SpriterAnimation)
+	inline function dispatchEvent(name:String):Void
+	{
+		if(onEvent != null)
+			onEvent(name);
+	}
+	#end
+	
+	#if !SPRITER_NO_TAG
+	@:allow(spriter.definitions.SpriterAnimation)
+	inline function clearTag():Void
+	{
+		SpriterUtil.clearArray(tags);//instead of creating an array each time, clear it
+	}
+	
+	@:allow(spriter.definitions.SpriterAnimation)
+	inline function addTag(t:Int):Void
+	{
+		tags.push(scml.tags[t]);
+	}
+	#end
+	
+	#if !SPRITER_NO_VAR
+	@:allow(spriter.definitions.SpriterAnimation)
+	function updateVar(id:Int, value:String):Void
+	{
+		var variable:Variable<Dynamic> = currentEntity.variables[id];
+		
+		var temp:Dynamic = variable.convert(value);
+		var changed:Bool = false;
+		
+		if (variables.length > id)
+		{
+			if (variables[id] != temp)
+			{
+				variables[id] = temp;
+				changed = true;
+			}
+		}else {
+			for (i in variables.length...id)
+			{
+				variables[i] = i == id ? temp : null;
+			}
+			changed = true;
+		}
+		
+		
+		if (onVarChanged != null && changed) {
+			onVarChanged(variable.name, temp);
+		}
+	}
+	#end
 }

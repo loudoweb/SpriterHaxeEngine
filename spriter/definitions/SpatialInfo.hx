@@ -115,7 +115,7 @@ class SpatialInfo implements ISpriterPooled
 		return out;
     }
 	
-	public function copy():SpatialInfo
+	inline public function copy():SpatialInfo
 	{
 		return new SpatialInfo(x, y, angle, scaleX, scaleY, a, spin);
 	}

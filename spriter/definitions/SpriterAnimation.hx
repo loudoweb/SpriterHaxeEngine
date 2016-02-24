@@ -3,8 +3,8 @@ import haxe.xml.Fast;
 import spriter.definitions.SpriterAnimation.LoopType;
 import spriter.definitions.SpriterTimeline.ObjectType;
 import spriter.engine.Spriter;
-import spriter.interfaces.IScml;
 import spriter.library.AbstractLibrary;
+import spriter.util.SpriterUtil;
 
 /**
  * ...
@@ -130,13 +130,13 @@ class SpriterAnimation
 	 * @param	currentEntity to use some features
 	 * @param	parentSpatialInfo SpatialInfo from the Spriter (positions, etc.)
 	 */
-	public function setCurrentTime(newTime:Int, elapsedTime:Int, library:AbstractLibrary, spriter:Spriter, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
+	inline public function setCurrentTime(newTime:Int, elapsedTime:Int, library:AbstractLibrary, spriter:Spriter, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
 		//update
-		updateCharacter(mainlineKeyFromTime(newTime), newTime, elapsedTime, library, spriter, root, currentEntity, parentSpatialInfo);
+		updateCharacter(mainlineKeyFromTime(newTime), newTime, elapsedTime, library, spriter, currentEntity, parentSpatialInfo);
     }
 
-    public function updateCharacter(mainKey:MainlineKey, newTime:Int, elapsedTime:Int, library:AbstractLibrary, spriter:Spriter, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
+    public function updateCharacter(mainKey:MainlineKey, newTime:Int, elapsedTime:Int, library:AbstractLibrary, spriter:Spriter, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
 		var currentKey:SpatialTimelineKey;
 		var	currentRef:Ref;
@@ -164,12 +164,10 @@ class SpriterAnimation
 
         //POINTS/BOXES
 		#if !SPRITER_NO_POINT
-		if (spriter.points.length > 0)
-			spriter.points.splice(0, spriter.points.length);//instead of creating an array each time, clear it
+		SpriterUtil.clearArray(spriter.points);//instead of creating an array each time, clear it
 		#end
 		#if !SPRITER_NO_BOX
-		if (spriter.boxes.length > 0)
-			spriter.boxes.splice(0, spriter.boxes.length);//instead of creating an array each time, clear it
+		SpriterUtil.clearArray(spriter.boxes);//instead of creating an array each time, clear it
 		#end
 			
 		//TIMELINE KEYS
@@ -201,7 +199,7 @@ class SpriterAnimation
 				}
 			}else if (Std.is(currentKey, SubEntityTimelineKey)){
 				var currentSubKey:SubEntityTimelineKey = cast currentKey;
-				root.setSubEntityCurrentTime(library, currentSubKey.t, currentSubKey.entity, currentSubKey.animation, _cachedSpatialInfo.copy(), spriter);
+				spriter.setSubEntityCurrentTime(currentSubKey.t, currentSubKey.entity, currentSubKey.animation, _cachedSpatialInfo.copy());
 			}else {
 				var currentObjectKey:ObjectTimelineKey = cast currentKey;
 				
@@ -381,7 +379,7 @@ class SpriterAnimation
 		return keyA;
     }
 	
-	private function getTimelineName(id:Int):String
+	inline function getTimelineName(id:Int):String
 	{
 		return timelines[id].name;
 	}

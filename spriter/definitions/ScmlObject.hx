@@ -2,15 +2,12 @@ package spriter.definitions;
 
 import haxe.Unserializer;
 import haxe.xml.Fast;
-import spriter.engine.Spriter;
-import spriter.interfaces.IScml;
-import spriter.library.AbstractLibrary;
 
 /**
  * ...
  * @author Loudo
  */
-class ScmlObject implements IScml
+class ScmlObject
 {
 
 	public var folders:Array<SpriterFolder>;
@@ -82,17 +79,6 @@ class ScmlObject implements IScml
 			}
 		}
 	}
-	//interface IScml begin
-	public function setSubEntityCurrentTime(library:AbstractLibrary, t:Float, entity:Int, animation:Int, spatialInfo:SpatialInfo, spriter:Spriter):Void
-	{
-		var entityName:String = entitiesName[entity];
-		var currentEnt:SpriterEntity =	entities.get(entityName);
-		var animationName:String = currentEnt.animationsName[animation];
-		var currentAnim:SpriterAnimation = currentEnt.animations.get(animationName);
-		var newTime:Int = Std.int(t * currentAnim.length);
-		currentAnim.setCurrentTime(newTime, currentAnim.length, library, spriter,  this, currentEnt, spatialInfo);
-	}
-	//interface IScml end
 	/**
 	 * Get the names of all animations in the scml file
 	 * @param	entity you have to speficy an entity where we can search the animations.
