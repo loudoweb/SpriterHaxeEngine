@@ -298,7 +298,7 @@ class SpriterAnimation
 		spatialInfo = null;
     }
 	
-	inline function isTriggered(triggerTime:Int, keyTime:Int, newTime:Int, elapsedTime:Int):Bool
+	function isTriggered(triggerTime:Int, keyTime:Int, newTime:Int, elapsedTime:Int):Bool
 	{
 		if (triggerTime == keyTime)
 		{

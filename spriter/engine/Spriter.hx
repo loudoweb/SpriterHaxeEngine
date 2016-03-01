@@ -10,6 +10,7 @@ import spriter.definitions.SpriterEntity;
 import spriter.definitions.SpriterFile;
 import spriter.definitions.SpriterFolder;
 import spriter.library.AbstractLibrary;
+import spriter.util.MathUtils;
 import spriter.util.SpriterUtil;
 import spriter.vars.Variable;
 #if SPRITER_CUSTOM_MAP
@@ -146,8 +147,8 @@ class Spriter
 					normalizedTime = Std.int(Math.max(0, Math.min(timeMS, currentAnimation.length)));
 			}
 		}
-		//even if paused we need to draw it	
-		currentAnimation.setCurrentTime(normalizedTime, Std.int(elapsedMS * playbackSpeed), library, this, currentEntity, info);
+		//even if paused we need to draw it
+		currentAnimation.setCurrentTime(normalizedTime, Std.int(MathUtils.fabs(elapsedMS * playbackSpeed)), library, this, currentEntity, info);
 		//callback
 		if (currentAnimation.loopType == LOOPING)
 		{

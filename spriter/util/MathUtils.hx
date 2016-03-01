@@ -6,6 +6,15 @@ package spriter.util;
  */
 class MathUtils
 {
+	inline static public function fabs(n:Float):Float
+	{
+		if(n >= 0) {
+			return n;
+		}else {
+			return -n;
+		}
+	}
+	
 	inline static public function linear(a:Float, b:Float, t:Float):Float
     {
 		return ((b-a)*t)+a;
@@ -101,19 +110,6 @@ class MathUtils
 	{
 		return sampleCurve(ay,by,cy,solveCurveX(ax,bx,cx,x,epsilon));
 	}
-
-
-	// Given an x value, find a parametric value it came from.
-
-	inline static function fabs(n:Float):Float
-	{
-		if(n >= 0) {
-			return n;
-		}else {
-			return -n;
-		}
-	}
-
 
 	static function solveCurveX(ax:Float, bx:Float, cx:Float, x:Float, epsilon:Float):Float
 	{
