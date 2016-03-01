@@ -9,15 +9,15 @@ import spriter.util.SpriterUtil;
  */
 class SpatialInfo implements ISpriterPooled 
 {
-	public var x:Float=0; 
-    public var y:Float=0; 
-    public var angle:Float=0;
-    public var scaleX:Float=1; 
-    public var scaleY:Float=1; 
+	public var x:Float = 0; 
+    public var y:Float = 0; 
+    public var angle:Float = 0;
+    public var scaleX:Float = 1; 
+    public var scaleY:Float = 1; 
 	/**
 	 * Alpha
 	 */
-    public var a:Float=1;
+    public var a:Float = 1;
     public var spin:Int = 1;
 	
 	private static var _pool = new SpriterPool<SpatialInfo>(SpatialInfo);
@@ -118,6 +118,10 @@ class SpatialInfo implements ISpriterPooled
 	inline public function copy():SpatialInfo
 	{
 		return new SpatialInfo(x, y, angle, scaleX, scaleY, a, spin);
+	}
+	public function clone(out:SpatialInfo):Void
+	{
+		out.init(x, y, angle, scaleX, scaleY, a, spin);//initializing the out object with the values of this object
 	}
 	
 	/*public function linear(infoA:SpatialInfo, infoB:SpatialInfo, spin:Int, t:Float):SpatialInfo

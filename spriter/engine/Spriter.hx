@@ -535,16 +535,13 @@ class Spriter
 		tempAnimation.setCurrentTime(newTime, tempAnimation.length, library, this, tempEntity, spatialInfo);
 	}
 	
-	@:allow(spriter.definitions.SpriterAnimation)
-	function getPivots(pivotToReturn:PivotInfo, folder:Int, file:Int):PivotInfo
+	@:allow(spriter.definitions)
+	function writeDefaultPivots(out:PivotInfo, folder:Int, file:Int):Void
 	{
 		var currentFile:SpriterFile = activeCharacterMap[folder].files[file];
 		if(currentFile != null){
-			pivotToReturn.pivotX = currentFile.pivotX;
-			pivotToReturn.pivotY = currentFile.pivotY;
-			return pivotToReturn;
-		}else {
-			return null;
+			out.pivotX = currentFile.pivotX;
+			out.pivotY = currentFile.pivotY;
 		}
 	}
 	

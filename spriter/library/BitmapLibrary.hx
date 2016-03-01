@@ -78,7 +78,8 @@ class BitmapLibrary extends AbstractLibrary
         _matrix = null;
 		_currentBd.dispose();
 		_currentBd = null;
-		_alphaBd.dispose();
+		if(_alphaBd != null)
+			_alphaBd.dispose();
 		_alphaBd = null;
 		render();//to unlock canvas and make it available
 		_canvas.dispose();

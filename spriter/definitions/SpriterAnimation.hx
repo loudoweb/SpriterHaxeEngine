@@ -20,7 +20,8 @@ class SpriterAnimation
 {
 	//spatial info cached and shared between all animations to avoid allocating new ones. Used by libraries to compute final coordinates and draw the object on the screen.
 	static var _cachedSpatialInfo:SpatialInfo = new SpatialInfo();
-	static var _cachedPivot:PivotInfo = new PivotInfo();
+	static var _cachedTK:TimelineKey = TimelineKey.createDefault();
+	static var _cachedTransformedBoneKeys:Array<SpatialInfo> = [];
 	
 	/*
 	 * SCML definitions
@@ -45,13 +46,12 @@ class SpriterAnimation
 	public var soundlines:Array<Metaline<SoundlineKey>>;
 	#end
 	
-	var _transformedBoneKeys:Array<SpatialInfo>;
+	
 	
 	public function new(fast:Fast) 
 	{
 		mainlineKeys = [];
 		timelines = [];
-		_transformedBoneKeys = [];
 		
 		
 		id = Std.parseInt(fast.att.id);
@@ -138,7 +138,7 @@ class SpriterAnimation
 
     public function updateCharacter(mainKey:MainlineKey, newTime:Int, elapsedTime:Int, library:AbstractLibrary, spriter:Spriter, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
-		var currentKey:SpatialTimelineKey;
+		var currentKey:TimelineKey;
 		var	currentRef:Ref;
 		var spatialInfo:SpatialInfo = null;
 		
@@ -149,17 +149,17 @@ class SpriterAnimation
         for (b in 0...len)
         {
             currentRef = mainKey.boneRefs[b];
-			currentKey = cast keyFromRef(currentRef, newTime);
+			currentKey = keyFromRef(currentRef, newTime, spriter);
             if (currentRef.parent >= 0)
 			{
-                spatialInfo = _transformedBoneKeys[currentRef.parent];
+                spatialInfo = _cachedTransformedBoneKeys[currentRef.parent];
             }
 			else 
 			{
 				spatialInfo = parentSpatialInfo;
 			}
 
-            currentKey.info.unmapFromParent(spatialInfo, _transformedBoneKeys[b]);//update _transformedBoneKeys[b]
+            currentKey.info.unmapFromParent(spatialInfo, _cachedTransformedBoneKeys[b]);//update _transformedBoneKeys[b]
         }
 
         //POINTS/BOXES
@@ -175,11 +175,11 @@ class SpriterAnimation
         for(o in 0...len)
         {
             currentRef = mainKey.objectRefs[o];
-			currentKey = cast keyFromRef(currentRef,newTime);
+			currentKey = keyFromRef(currentRef, newTime, spriter);
 			//trace(currentKey.info.a);
             if(currentRef.parent >= 0)
             {
-                spatialInfo = _transformedBoneKeys[currentRef.parent];
+                spatialInfo = _cachedTransformedBoneKeys[currentRef.parent];
             }
             else
             {
@@ -188,36 +188,35 @@ class SpriterAnimation
 			
 			currentKey.info.unmapFromParent(spatialInfo, _cachedSpatialInfo);//update _cachedSpatialInfo
 			
-			if (Std.is(currentKey, SpriteTimelineKey)) {
-				var currentSpriteKey:SpriteTimelineKey = cast currentKey;
-				//render from library
-				var currentKeyName:String = spriter.getFileName(currentSpriteKey.folder, currentSpriteKey.file);
-				if (currentKeyName != null) {//hidden object test (via mapping)
-					_cachedPivot = spriter.getPivots(_cachedPivot, currentSpriteKey.folder, currentSpriteKey.file);
-					_cachedPivot = currentKey.paint(_cachedPivot);//use default pivot or custom pivot
-					library.addGraphic(currentKeyName, _cachedSpatialInfo, _cachedPivot);
-				}
-			}else if (Std.is(currentKey, SubEntityTimelineKey)){
-				var currentSubKey:SubEntityTimelineKey = cast currentKey;
-				spriter.setSubEntityCurrentTime(currentSubKey.t, currentSubKey.entity, currentSubKey.animation, _cachedSpatialInfo.copy());
-			}else {
-				var currentObjectKey:ObjectTimelineKey = cast currentKey;
+			if (currentKey.objectType == SPRITE) {
 				
-				if (currentObjectKey.type == ObjectType.POINT)
-				{
-					#if !SPRITER_NO_POINT
-					_cachedPivot.setToDefault();
-					spriter.points.push(library.compute(_cachedSpatialInfo.copy(), _cachedPivot, 0, 0));
-					#end
-				}else {//BOX
-					#if !SPRITER_NO_BOX
-					_cachedPivot.setToDefault();
-					_cachedPivot = currentKey.paint(_cachedPivot);
-					var currentBox:SpriterBox = currentEntity.boxes_info.get(getTimelineName(currentRef.timeline));
-					spriter.boxes.push(library.computeRectCoordinates(_cachedSpatialInfo, _cachedPivot, currentBox.width, currentBox.height));
-					#end
+				//render from library
+				var currentKeyName:String = spriter.getFileName(currentKey.sprite.folder, currentKey.sprite.file);
+				if (currentKeyName != null) {//hidden object test (via mapping)
+					library.addGraphic(currentKeyName, _cachedSpatialInfo, currentKey.pivots);
 				}
+				
+			}else if(currentKey.objectType == ENTITY) {
+				
+				spriter.setSubEntityCurrentTime(currentKey.subentity.t, currentKey.subentity.entity, currentKey.subentity.animation, _cachedSpatialInfo.copy());
+				
 			}
+			#if !SPRITER_NO_POINT
+			else if(currentKey.objectType == POINT){
+				
+					currentKey.pivots.setToDefault();
+					spriter.points.push(library.compute(_cachedSpatialInfo.copy(), currentKey.pivots, 0, 0));
+					
+			}
+			#end
+			#if !SPRITER_NO_BOX
+			else if(currentKey.objectType == BOX){
+					
+				var currentBox:SpriterBox = currentEntity.boxes_info.get(getTimelineName(currentRef.timeline));
+				spriter.boxes.push(library.computeRectCoordinates(_cachedSpatialInfo, currentKey.pivots, currentBox.width, currentBox.height));
+					
+			}
+			#end
 			
 
             //objectKeys.push(currentKey);
@@ -317,9 +316,9 @@ class SpriterAnimation
 	}
 	
 	inline function ensureNumOfCachedTransformedBoneKeys(num:Int):Void {
-		if (num <= _transformedBoneKeys.length) return;
-		for (i in _transformedBoneKeys.length...num) {
-			_transformedBoneKeys.push(new SpatialInfo());
+		if (num <= _cachedTransformedBoneKeys.length) return;
+		for (i in _cachedTransformedBoneKeys.length...num) {
+			_cachedTransformedBoneKeys.push(new SpatialInfo());
 		}
 	}
 
@@ -343,14 +342,16 @@ class SpriterAnimation
 		return mainlineKeys[currentMainKey];
     }	
    
-    public function keyFromRef(ref:Ref, newTime:Int):TimelineKey
+    public function keyFromRef(ref:Ref, newTime:Int, spriter:Spriter):TimelineKey
     {
         var timeline:SpriterTimeline = timelines[ref.timeline];
         var keyA:TimelineKey = timeline.keys[ref.key];
+		keyA.clone(_cachedTK);
         
         if(timeline.keys.length == 1 || keyA.curveType == INSTANT)
         {
-			return keyA;
+			_cachedTK.writeDefaultPivots(spriter);
+			return _cachedTK;
         }
         
         var nextKeyIndex:Int = ref.key + 1;
@@ -363,20 +364,21 @@ class SpriterAnimation
             }
             else
             {
-                return keyA;
+				_cachedTK.writeDefaultPivots(spriter);
+                return _cachedTK;
             }
         }
   
         var keyB:TimelineKey = timeline.keys[nextKeyIndex];
         var keyBTime:Int = keyB.time;
-		//this line is for interpolation between last key and first key when looping //TOCHECK when backward animation
+		//this line is for interpolation between last key and first key when looping
         if(keyBTime < keyA.time)
         {
             keyBTime = keyBTime+length;
         }
-		keyA = keyA.copy();
-        keyA.interpolate(keyB, keyBTime, newTime);
-		return keyA;
+		
+		_cachedTK.interpolate(keyB, keyBTime, newTime, spriter);
+		return _cachedTK;
     }
 	
 	inline function getTimelineName(id:Int):String

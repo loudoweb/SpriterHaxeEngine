@@ -25,6 +25,7 @@ class TilelayerLibrary extends AbstractLibrary
 	 * Sprite where we render
 	 */
 	var _canvas:Sprite;
+	var _cache:Map<String, Array<TileSprite>>;
 	
 	/**
 	 * Advanced OpenFL renderer using Texture Atlas thanks to Tilelayer (https://github.com/elsassph/openfl-tilelayer)
@@ -38,6 +39,8 @@ class TilelayerLibrary extends AbstractLibrary
 		super(dataPath);
 		_canvas = canvas;
 		
+		_cache = new Map<String, Array<TileSprite>>();
+		
 		var sheetData = Assets.getText(dataPath);
 		var tilesheet = new SparrowTilesheet(Assets.getBitmapData(atlasPath), sheetData);
 		_layer = new TileLayer(tilesheet, true);
@@ -46,12 +49,25 @@ class TilelayerLibrary extends AbstractLibrary
 	
 	override public function getFile(name:String):Dynamic
 	{
+		if (_cache.exists(name) && _cache.get(name).length > 0)
+		{
+			return _cache.get(name).shift();
+		}
 		return new TileSprite(_layer, name);
 	}
 	
 	override public function clear():Void
 	{
-		_layer.removeAllChildren();//TODO destroy ? pool ?
+		var sprite:TileSprite;
+		for (tile in _layer.removeAllChildren())
+		{
+			sprite = cast tile;
+			if (!_cache.exists(sprite.tile))
+			{
+				_cache.set(sprite.tile, new Array<TileSprite>());
+			}
+			_cache.get(sprite.tile).push(sprite);
+		}
 	}
 	
 	override public function addGraphic(name:String, info:SpatialInfo, pivots:PivotInfo):Void

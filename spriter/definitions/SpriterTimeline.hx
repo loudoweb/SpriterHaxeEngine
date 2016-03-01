@@ -32,38 +32,11 @@ class SpriterTimeline
 		name = fast.has.name ? fast.att.name : "";
 		objectType = fast.has.object_type ? Type.createEnum(ObjectType, fast.att.object_type.toUpperCase()) : ObjectType.SPRITE;
 		
-		switch (objectType)
+					
+		for (k in fast.nodes.key)
 		{
-			case ObjectType.SPRITE:					
-				for (k in fast.nodes.key)
-				{
-					keys.push(new SpriteTimelineKey(k));
-				}
-	
-			case ObjectType.BONE:
-				for (k in fast.nodes.key)
-				{
-					keys.push(new BoneTimelineKey(k));
-				}
-			case ObjectType.POINT:
-				for (k in fast.nodes.key)
-				{
-					keys.push(new ObjectTimelineKey(k, objectType));
-				}
-			case ObjectType.BOX:
-				for (k in fast.nodes.key)
-				{
-					keys.push(new ObjectTimelineKey(k, objectType));
-				}
-			case ObjectType.ENTITY:
-				for (k in fast.nodes.key)
-				{
-					keys.push(new SubEntityTimelineKey(k));
-				}
-			default:
-				
+			keys.push(new TimelineKey(k, objectType));
 		}
-		
 	}
 	
 }
