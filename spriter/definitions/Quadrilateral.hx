@@ -1,8 +1,15 @@
 package spriter.definitions;
+#if openfl
 import openfl.geom.Point;
+#elseif flambe
+import flambe.math.Point;
+#elseif luxe
+typedef Point = phoenix.Vector;
+#end
 
 /**
- * ...
+ * Spriter box that can be useful to check collision.
+ * Spriter manual: http://www.brashmonkey.com/spriter_manual/adding%20collision%20rectangles%20to%20frames.htm
  * @author Loudo
  */
 class Quadrilateral
@@ -18,5 +25,4 @@ class Quadrilateral
 		this.p3 = p3;
 		this.p4 = p4;
 	}
-	
 }

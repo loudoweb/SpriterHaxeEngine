@@ -11,68 +11,84 @@ import spriter.definitions.SpatialInfo;
 import spriter.util.SpriterUtil;
 
 /**
- * ...
+ * Advanced OpenFL renderer using Texture Atlas thanks to Tilelayer (https://github.com/elsassph/openfl-tilelayer)
  * @author Loudo
  */
 class TilelayerLibrary extends AbstractLibrary
 {
-	private var _root:Sprite;
-	
-	private var _layer:TileLayer;
-	
-	private var _group:TileGroup;
+	/**
+	 * Tilelayer used for rendering
+	 */
+	var _layer:TileLayer;
 	
 	/**
-	 * Additional library for Spriter. It uses haxelib tilelayer.
-	 * 
-	 * @param	dataPath .json
-	 * @param	atlasPath .png
+	 * Sprite where we render
 	 */
-	public function new(dataPath:String = "", atlasPath:String = "") 
+	var _canvas:Sprite;
+	var _cache:Map<String, Array<TileSprite>>;
+	
+	/**
+	 * Advanced OpenFL renderer using Texture Atlas thanks to Tilelayer (https://github.com/elsassph/openfl-tilelayer)
+	 * 
+	 * @param	dataPath .xml of the atlas
+	 * @param	atlasPath .png of the atlas
+	 * @param	canvas rendering Sprite
+	 */
+	public function new(dataPath:String = "", atlasPath:String = "", canvas:Sprite) 
 	{
 		super(dataPath);
+		_canvas = canvas;
+		
+		_cache = new Map<String, Array<TileSprite>>();
+		
 		var sheetData = Assets.getText(dataPath);
 		var tilesheet = new SparrowTilesheet(Assets.getBitmapData(atlasPath), sheetData);
 		_layer = new TileLayer(tilesheet, true);
-		
-		/*_group = new TileGroup(_layer);
-		_layer.addChild(_group);*/
-	}
-	
-	override public function setRoot(root:Sprite):Void {
-		_root = root;
-		_root.addChild(_layer.view); // layer is NOT a DisplayObject
+		_canvas.addChild(_layer.view); // layer is NOT a DisplayObject
 	}
 	
 	override public function getFile(name:String):Dynamic
 	{
-		var sprite:TileSprite = new TileSprite(_layer, name);
-		return sprite;
+		if (_cache.exists(name) && _cache.get(name).length > 0)
+		{
+			return _cache.get(name).shift();
+		}
+		return new TileSprite(_layer, name);
 	}
 	
 	override public function clear():Void
 	{
-		_layer.removeAllChildren();
+		var sprite:TileSprite;
+		for (tile in _layer.removeAllChildren())
+		{
+			sprite = cast tile;
+			if (!_cache.exists(sprite.tile))
+			{
+				_cache.set(sprite.tile, new Array<TileSprite>());
+			}
+			_cache.get(sprite.tile).push(sprite);
+		}
 	}
 	
-	override public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
+	override public function addGraphic(name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
 		
 		var sprite:TileSprite = getFile(name);
 		_layer.addChild(sprite);
 		
-		var spatialResult:SpatialInfo = compute(info, pivots, sprite.width, sprite.height);
+		info = compute(info, pivots, sprite.width, sprite.height);
 		
 		
 		//sprite.offset = getPivotsRelativeToCenter(info, pivots, sprite.width, sprite.height);//TOFIX tilelayer seems buggy
-		sprite.x =  spatialResult.x;
-		sprite.y =  spatialResult.y;
-		sprite.rotation = SpriterUtil.toRadians(SpriterUtil.fixRotation(spatialResult.angle));
-		sprite.scaleX = spatialResult.scaleX;
-		sprite.scaleY = spatialResult.scaleY;
-		sprite.alpha = spatialResult.a;
+		sprite.x =  info.x;
+		sprite.y =  info.y;
+		sprite.rotation = SpriterUtil.toRadians(SpriterUtil.fixRotation(info.angle));
+		sprite.scaleX = info.scaleX;
+		sprite.scaleY = info.scaleY;
+		sprite.alpha = info.a;
 		
-		sprite.visible = true;
+		//info.put();//back to pool
+		info = null;
 	}
 	
 	private function getPivotsRelativeToCenter(info:SpatialInfo, pivots:PivotInfo, width:Float, height:Float):Point
@@ -99,7 +115,7 @@ class TilelayerLibrary extends AbstractLibrary
 		var x2 = (preX - pivotX) * c - (preY - pivotY) * s + pivotX;
         var y2 = (preX - pivotX) * s + (preY - pivotY) * c + pivotY;
 		
-		return new SpatialInfo(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
+		return info.init(x2, -y2, degreesUnder360, info.scaleX, info.scaleY, info.a, info.spin);
 	}
 	
 	override public function render():Void
@@ -112,8 +128,8 @@ class TilelayerLibrary extends AbstractLibrary
 		clear();
 		if (_layer.view != null && _layer.view.parent != null)
 			_layer.view.parent.removeChild(_layer.view);
-		_group = null;
 		_layer = null;
+		_canvas = null;
 	}
 	
 	

@@ -40,10 +40,10 @@ class H2dBitmapLibrary extends AbstractLibrary
 	override public function clear():Void
 	{
 		_root.visible = false;
-       _root.removeAllChildren();
+		_root.removeAllChildren();
     }
 	
-	override public function addGraphic(group:String, timeline:Int, key:Int, name:String, info:SpatialInfo, pivots:PivotInfo):Void
+	override public function addGraphic(name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
 		var tile : h2d.Tile = cast getFile(name);
 		var bmp = new h2d.Bitmap(tile #if !heaps , _sh #end);
@@ -61,11 +61,6 @@ class H2dBitmapLibrary extends AbstractLibrary
 		bmp.alpha = Math.abs(spatialResult.a);
 		_root.addChild( bmp );
 		_root.visible = false;
-	}
-	
-	override public function setRoot(root:Dynamic):Void 
-	{
-		
 	}
 	
 	override public function render():Void

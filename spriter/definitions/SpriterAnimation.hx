@@ -1,10 +1,10 @@
 package spriter.definitions;
 import haxe.xml.Fast;
-import spriter.definitions.Quadrilateral;
 import spriter.definitions.SpriterAnimation.LoopType;
 import spriter.definitions.SpriterTimeline.ObjectType;
-import spriter.interfaces.IScml;
+import spriter.engine.Spriter;
 import spriter.library.AbstractLibrary;
+import spriter.util.SpriterUtil;
 
 /**
  * ...
@@ -18,6 +18,11 @@ enum LoopType
  
 class SpriterAnimation
 {
+	//spatial info cached and shared between all animations to avoid allocating new ones. Used by libraries to compute final coordinates and draw the object on the screen.
+	static var _cachedSpatialInfo:SpatialInfo = new SpatialInfo();
+	static var _cachedTK:TimelineKey = TimelineKey.createDefault();
+	static var _cachedTransformedBoneKeys:Array<SpatialInfo> = [];
+	
 	/*
 	 * SCML definitions
 	 */
@@ -27,21 +32,26 @@ class SpriterAnimation
     public var loopType:LoopType;
     public var mainlineKeys:Array<MainlineKey>;
     public var timelines:Array<SpriterTimeline>;
-	public var taglines:Array<TaglineKey>;
-	public var varlines:Array<Varline>;
 	
-	/*
-	 * Custom definitions
-	 * 
-	 */
-	var loop:Int = 0;
-	public var points:Array<SpatialInfo>;
-	public var boxes:Array<Quadrilateral>;
+	#if !SPRITER_NO_TAG
+	public var taglines:Array<TaglineKey>;
+	#end
+	#if !SPRITER_NO_VAR
+	public var varlines:Array<Metaline<VarlineKey>>;
+	#end
+	#if !SPRITER_NO_EVENT
+	public var eventlines:Array<Metaline<EventlineKey>>;
+	#end
+	#if !SPRITER_NO_SOUND
+	public var soundlines:Array<Metaline<SoundlineKey>>;
+	#end
+	
+	
 	
 	public function new(fast:Fast) 
 	{
-		mainlineKeys = new Array<MainlineKey>();
-		timelines = new Array<SpriterTimeline>();
+		mainlineKeys = [];
+		timelines = [];
 		
 		
 		id = Std.parseInt(fast.att.id);
@@ -67,9 +77,30 @@ class SpriterAnimation
 		{
 			timelines.push(new SpriterTimeline(t));
 		}
+		#if !SPRITER_NO_SOUND
+		if (fast.hasNode.soundline)
+		{
+			soundlines = [];
+			for (tag in fast.nodes.soundline)
+			{
+				soundlines.push(new Metaline<SoundlineKey>(tag));
+			}
+		}
+		#end
+		#if !SPRITER_NO_EVENT
+		if (fast.hasNode.eventline)
+		{
+			eventlines = [];
+			for (tag in fast.nodes.eventline)
+			{
+				eventlines.push(new Metaline<EventlineKey>(tag));
+			}
+		}
+		#end
 		if (fast.hasNode.meta)
 		{
 			fast = fast.node.meta;
+			#if !SPRITER_NO_TAG
 			if (fast.hasNode.tagline)
 			{
 				taglines = [];
@@ -78,118 +109,114 @@ class SpriterAnimation
 					taglines.push(new TaglineKey(tag));
 				}
 			}
+			#end
+			#if !SPRITER_NO_VAR
 			if (fast.hasNode.varline)
 			{
 				varlines = [];
 				for (currVar in fast.nodes.varline)
 				{
-					varlines.push(new Varline(currVar));
+					varlines.push(new Metaline<VarlineKey>(currVar));
 				}
 			}
-			
+			#end
 		}
 	}
-	
-	public function setCurrentTime(newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
+	/**
+	 * 
+	 * @param	newTime Use a time between [0,length]
+	 * @param	library library to compute and draw the final graphics
+	 * @param	root IScml to use some features
+	 * @param	currentEntity to use some features
+	 * @param	parentSpatialInfo SpatialInfo from the Spriter (positions, etc.)
+	 */
+	inline public function setCurrentTime(newTime:Int, elapsedTime:Int, library:AbstractLibrary, spriter:Spriter, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
-		var currentTime:Int;
-		var tempLoop:Int;
-		switch(loopType)
-        {
-			case LOOPING:
-				tempLoop = loop;
-				loop = Std.int(newTime / length);
-				currentTime = newTime % length;
-				//update
-				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root, currentEntity, parentSpatialInfo);
-				if (root.metaDispatch == ONCE_PER_LOOP && tempLoop != loop) {
-					resetMetaDispatch();
-				}
-				//callback only at the first loop and once
-				if (loop == 1 && tempLoop < 1)
-					root.onEndAnim();
-				
-			case NO_LOOPING:
-				currentTime = Std.int(Math.min(newTime, length));
-				//update
-				updateCharacter(mainlineKeyFromTime(currentTime), currentTime, library, root, currentEntity, parentSpatialInfo);
-				//callback
-				if (currentTime == length)
-					root.onEndAnim();
-        }
+		//update
+		updateCharacter(mainlineKeyFromTime(newTime), newTime, elapsedTime, library, spriter, currentEntity, parentSpatialInfo);
     }
 
-    public function updateCharacter(mainKey:MainlineKey, newTime:Int, library:AbstractLibrary, root:IScml, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
+    public function updateCharacter(mainKey:MainlineKey, newTime:Int, elapsedTime:Int, library:AbstractLibrary, spriter:Spriter, currentEntity:SpriterEntity, parentSpatialInfo:SpatialInfo):Void
     {
-        var transformedBoneKeys:Array<SpatialInfo> = new Array<SpatialInfo>();
-		var currentKey:SpatialTimelineKey;
-		
+		var currentKey:TimelineKey;
 		var	currentRef:Ref;
-		var spatialInfo:SpatialInfo;
+		var spatialInfo:SpatialInfo = null;
+		
+		//BONES
 		var len:Int = mainKey.boneRefs.length;
+		ensureNumOfCachedTransformedBoneKeys(len);
+		
         for (b in 0...len)
         {
             currentRef = mainKey.boneRefs[b];
-			currentKey = cast keyFromRef(currentRef, newTime);
+			currentKey = keyFromRef(currentRef, newTime, spriter);
             if (currentRef.parent >= 0)
 			{
-                spatialInfo = transformedBoneKeys[currentRef.parent];
+                spatialInfo = _cachedTransformedBoneKeys[currentRef.parent];
             }
 			else 
 			{
 				spatialInfo = parentSpatialInfo;
 			}
 
-            spatialInfo = currentKey.info.unmapFromParent(spatialInfo);
-            transformedBoneKeys.push(spatialInfo);
+            currentKey.info.unmapFromParent(spatialInfo, _cachedTransformedBoneKeys[b]);//update _transformedBoneKeys[b]
         }
 
-        //var objectKeys:Array<TimelineKey>;
-		points = [];
-		boxes = [];
+        //POINTS/BOXES
+		#if !SPRITER_NO_POINT
+		SpriterUtil.clearArray(spriter.points);//instead of creating an array each time, clear it
+		#end
+		#if !SPRITER_NO_BOX
+		SpriterUtil.clearArray(spriter.boxes);//instead of creating an array each time, clear it
+		#end
+			
+		//TIMELINE KEYS
 		len = mainKey.objectRefs.length;
         for(o in 0...len)
         {
             currentRef = mainKey.objectRefs[o];
-			currentKey = cast keyFromRef(currentRef,newTime);
+			currentKey = keyFromRef(currentRef, newTime, spriter);
 			//trace(currentKey.info.a);
             if(currentRef.parent >= 0)
             {
-                spatialInfo = transformedBoneKeys[currentRef.parent];
+                spatialInfo = _cachedTransformedBoneKeys[currentRef.parent];
             }
             else
             {
                 spatialInfo = parentSpatialInfo;
             }
 			
-		    //currentKey.info = currentKey.info.unmapFromParent(parentInfo);//TOFIX and remove next line ?
-			spatialInfo = currentKey.info.unmapFromParent(spatialInfo);
-			var activePivots:PivotInfo;
-			if (Std.is(currentKey, SpriteTimelineKey)) {
-				var currentSpriteKey:SpriteTimelineKey = cast(currentKey, SpriteTimelineKey);
-				activePivots = root.getPivots(currentSpriteKey.folder, currentSpriteKey.file);
-				activePivots = currentKey.paint(activePivots.pivotX, activePivots.pivotY);
-				//render from library
-				var currentKeyName:String = root.getFileName(currentSpriteKey.folder, currentSpriteKey.file);
-				if (currentKeyName != null) {//hidden object test (via mapping)
-					library.addGraphic(root.spriterName, currentRef.timeline, currentRef.key, currentKeyName, spatialInfo, activePivots);
-				}
-			}else if (Std.is(currentKey, SubEntityTimelineKey)){
-				var currentSubKey:SubEntityTimelineKey = cast(currentKey, SubEntityTimelineKey);
-				root.setSubEntityCurrentTime(library, currentSubKey.t, currentSubKey.entity, currentSubKey.animation, spatialInfo);
-			}else {
-				activePivots = new PivotInfo();
-				activePivots = currentKey.paint(activePivots.pivotX, activePivots.pivotY);
-				var currentObjectKey:ObjectTimelineKey = cast(currentKey, ObjectTimelineKey);
+			currentKey.info.unmapFromParent(spatialInfo, _cachedSpatialInfo);//update _cachedSpatialInfo
+			
+			if (currentKey.objectType == SPRITE) {
 				
-				if (currentObjectKey.type == ObjectType.POINT)
-				{
-					points.push(library.compute(spatialInfo, activePivots,0,0));
-				}else {//BOX
-					var currentBox:SpriterBox = currentEntity.boxes_info.get(getTimelineName(currentRef.timeline));
-					boxes.push(library.computeRectCoordinates(spatialInfo, activePivots, currentBox.width, currentBox.height));
+				//render from library
+				var currentKeyName:String = spriter.getFileName(currentKey.sprite.folder, currentKey.sprite.file);
+				if (currentKeyName != null) {//hidden object test (via mapping)
+					library.addGraphic(currentKeyName, _cachedSpatialInfo, currentKey.pivots);
 				}
+				
+			}else if(currentKey.objectType == ENTITY) {
+				
+				spriter.setSubEntityCurrentTime(currentKey.subentity.t, currentKey.subentity.entity, currentKey.subentity.animation, _cachedSpatialInfo.copy());
+				
 			}
+			#if !SPRITER_NO_POINT
+			else if(currentKey.objectType == POINT){
+				
+					currentKey.pivots.setToDefault();
+					spriter.points.push(library.compute(_cachedSpatialInfo.copy(), currentKey.pivots, 0, 0));
+					
+			}
+			#end
+			#if !SPRITER_NO_BOX
+			else if(currentKey.objectType == BOX){
+					
+				var currentBox:SpriterBox = currentEntity.boxes_info.get(getTimelineName(currentRef.timeline));
+				spriter.boxes.push(library.computeRectCoordinates(_cachedSpatialInfo, currentKey.pivots, currentBox.width, currentBox.height));
+					
+			}
+			#end
 			
 
             //objectKeys.push(currentKey);
@@ -205,46 +232,95 @@ class SpriterAnimation
         }*/
 		
 		//following lines not in scml references yet
-		
-		if(taglines != null){
-			for (tag in taglines) {
-				if (tag.time == mainKey.time)
+		#if !SPRITER_NO_TAG
+		if (taglines != null)
+		{
+			for (tag in taglines)
+			{
+				if (isTriggered(tag.time, mainKey.time, newTime, elapsedTime))
 				{
-					if (root.metaDispatch == ALWAYS)
+					spriter.clearTag();
+					for (i in 0...tag.t.length)
 					{
-						root.onTag(tag.id);
-					}else if (root.metaDispatch == ONCE_PER_LOOP && mainKey.time != tag.lastDispatched) {
-						tag.lastDispatched = mainKey.time;
-						root.onTag(tag.id);
-					}else if (root.metaDispatch == ONCE && !tag.dispatched) {
-						tag.lastDispatched = mainKey.time;
-						root.onTag(tag.id);
+						spriter.addTag(tag.t[i]);
 					}
+					break;
 				}
 			}
 		}
+		#end
+		#if !SPRITER_NO_VAR
 		if (varlines != null)
 		{
-			for (_var in varlines) {
+			for (_var in varlines)
+			{
 				for (keyVar in _var.keys)
 				{
-					if (keyVar.time == mainKey.time)
+					if (isTriggered(keyVar.time, mainKey.time, newTime, elapsedTime))
 					{
-						if (root.metaDispatch == ALWAYS)
-						{
-							root.onVar(_var.id, keyVar.value);
-						}else if (root.metaDispatch == ONCE_PER_LOOP && mainKey.time != keyVar.lastDispatched) {
-							keyVar.lastDispatched = mainKey.time;
-							root.onVar(_var.id, keyVar.value);
-						}else if (root.metaDispatch == ONCE && !keyVar.dispatched) {
-							keyVar.lastDispatched = mainKey.time;
-							root.onVar(_var.id, keyVar.value);
-						}
+						spriter.updateVar(_var.id, keyVar.value);
 					}
 				}
 			}
 		}
+		#end
+		#if !SPRITER_NO_SOUND
+		if (soundlines != null)
+		{
+			for (sound in soundlines)
+			{
+				for (soundKey in sound.keys)
+				{
+					if (isTriggered(soundKey.time, mainKey.time, newTime, elapsedTime))
+					{
+						spriter.dispatchSound(soundKey.folder, soundKey.file);
+					}
+				}
+			}
+		}
+		#end
+		#if !SPRITER_NO_EVENT
+		if (eventlines != null)
+		{
+			for (event in eventlines)
+			{
+				for (eventKey in event.keys)
+				{
+					if (isTriggered(eventKey.time, mainKey.time, newTime, elapsedTime))
+					{
+						spriter.dispatchEvent(event.name);	
+					}
+				}
+			}
+		}
+		#end
+		//clean up
+		spatialInfo = null;
     }
+	
+	function isTriggered(triggerTime:Int, keyTime:Int, newTime:Int, elapsedTime:Int):Bool
+	{
+		if (triggerTime == keyTime)
+		{
+			if (newTime - elapsedTime < keyTime)
+			{
+				return true;
+			}else if (triggerTime == 0 && newTime == elapsedTime) { //allow to trigger the first frame
+				return true;
+			}else {
+				return false;
+			}
+		}else {
+			return false;
+		}
+	}
+	
+	inline function ensureNumOfCachedTransformedBoneKeys(num:Int):Void {
+		if (num <= _cachedTransformedBoneKeys.length) return;
+		for (i in _cachedTransformedBoneKeys.length...num) {
+			_cachedTransformedBoneKeys.push(new SpatialInfo());
+		}
+	}
 
     public function mainlineKeyFromTime(time:Int):MainlineKey
     {
@@ -266,14 +342,16 @@ class SpriterAnimation
 		return mainlineKeys[currentMainKey];
     }	
    
-    public function keyFromRef(ref:Ref, newTime:Int):TimelineKey
+    public function keyFromRef(ref:Ref, newTime:Int, spriter:Spriter):TimelineKey
     {
         var timeline:SpriterTimeline = timelines[ref.timeline];
-        var keyA:TimelineKey = timeline.keys[ref.key].copy();
+        var keyA:TimelineKey = timeline.keys[ref.key];
+		keyA.clone(_cachedTK);
         
         if(timeline.keys.length == 1 || keyA.curveType == INSTANT)
         {
-			return keyA;
+			_cachedTK.writeDefaultPivots(spriter);
+			return _cachedTK;
         }
         
         var nextKeyIndex:Int = ref.key + 1;
@@ -286,34 +364,26 @@ class SpriterAnimation
             }
             else
             {
-                return keyA;
+				_cachedTK.writeDefaultPivots(spriter);
+                return _cachedTK;
             }
         }
   
-        var keyB:TimelineKey = timeline.keys[nextKeyIndex].copy();
+        var keyB:TimelineKey = timeline.keys[nextKeyIndex];
         var keyBTime:Int = keyB.time;
-		//this line is for interpolation between last key and first key when looping //TOCHECK when backward animation
+		//this line is for interpolation between last key and first key when looping
         if(keyBTime < keyA.time)
         {
             keyBTime = keyBTime+length;
         }
 		
-        keyA.interpolate(keyB, keyBTime, newTime);
-		return keyA;
+		_cachedTK.interpolate(keyB, keyBTime, newTime, spriter);
+		return _cachedTK;
     }
 	
-	private function getTimelineName(id:Int):String
+	inline function getTimelineName(id:Int):String
 	{
 		return timelines[id].name;
-	}
-	
-	private function resetMetaDispatch():Void
-	{
-		if(taglines != null){
-			for (tag in taglines) {
-				tag.dispatched = false;
-			}
-		}
 	}
 	
 }

@@ -1,9 +1,11 @@
 package spriter.definitions;
 import haxe.xml.Fast;
+#if !SPRITER_NO_VAR
 import spriter.vars.Variable;
 import spriter.vars.VariableFloat;
 import spriter.vars.VariableInt;
 import spriter.vars.VariableString;
+#end
 
 /**
  * ...
@@ -17,8 +19,10 @@ class SpriterEntity
     public var characterMaps:Map<String,CharacterMap>;
     public var animations:Map<String,SpriterAnimation>;
 	public var animationsName:Array<String>;
-	public var variables:Array<Variable<Dynamic>>;
 	public var boxes_info:Map<String, SpriterBox>;
+	#if !SPRITER_NO_VAR
+	public var variables:Array<Variable<Dynamic>>;
+	#end
 
 	
 	public function new(fast:Fast) 
@@ -26,8 +30,10 @@ class SpriterEntity
 		characterMaps = new Map<String,CharacterMap>();
 		animations = new Map<String,SpriterAnimation>();
 		animationsName = [];
-		variables = new Array<Variable<Dynamic>>();
 		boxes_info = new Map<String, SpriterBox>();
+		#if !SPRITER_NO_VAR
+		variables = new Array<Variable<Dynamic>>();
+		#end
 		
 		id = Std.parseInt(fast.att.id);
 		name = fast.att.name;
@@ -37,6 +43,7 @@ class SpriterEntity
 			characterMaps.set(cm.att.name, new CharacterMap(cm));
 		}
 		
+		#if !SPRITER_NO_VAR
 		if(fast.hasNode.var_defs){
 			for (v in fast.node.var_defs.elements)
 			{
@@ -51,6 +58,7 @@ class SpriterEntity
 				}
 			}
 		}
+		#end
 		
 		for (oi in fast.nodes.obj_info)
 		{

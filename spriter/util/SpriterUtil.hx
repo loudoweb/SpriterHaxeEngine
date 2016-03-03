@@ -44,7 +44,30 @@ class SpriterUtil
 		return 1 - pivotY;
 	}
 	
-    
-
+	inline static public function signOf(f:Float):Int
+	{
+		return (f < 0) ? -1 : 1;
+	}
 	
+	inline static public function sameSign(f1:Float, f2:Float):Bool
+	{
+		return signOf(f1) == signOf(f2);
+	}
+	
+	inline static public function changeSign(f:Float):Float
+	{
+		return f *= -1;
+	}
+	
+	inline static public function clearArray(array:Array<Dynamic>):Void
+	{
+		if (array.length > 0)
+		{
+			#if cpp
+			array.splice(0, array.length);//allocates in hxcpp but fastest
+			#else
+			untyped array.length = 0;
+			#end
+		}
+	}
 }

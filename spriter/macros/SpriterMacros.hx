@@ -1,5 +1,13 @@
 package spriter.macros;
+import haxe.io.Bytes;
+import haxe.io.Output;
 import haxe.macro.Expr;
+import haxe.Serializer;
+import spriter.definitions.ScmlObject;
+#if (!flash && !js)
+import sys.FileSystem;
+import sys.io.FileOutput;
+#end
 
 /**
  * ...
@@ -9,8 +17,9 @@ class SpriterMacros
 {
 	/**
 	 * Check texture packer atlas to add .png at the end of files.
-	 * Because Spriter's SCML use file name with .png at the end and Texture Packer not.
+	 * Because Spriter's SCML use file name with .png at the end and Sparrow atlas not.
 	 * So it will correct this for you.
+	 * You can use other atlas file instead : Spriter, spriterhaxeengine (https://github.com/loudoweb/SpriterHaxeEngine/tree/master/texturePackerExporter/spriterhaxeengine)
 	 * Data format : Sparrow, Starling only
 	 * @param	pathToXml
 	 * @return  pathToXml
@@ -210,4 +219,58 @@ class SpriterMacros
 		}
 		return xml;
 	}
+	macro public static function cacheSCML(scmlPath:String, output:String) 
+	{
+		#if (!flash && !js)	
+		var file = sys.io.File.getContent(scmlPath);
+		var result:String = createCache(file);
+		if (result != "") {
+			trace('saving cache scml file in : ' + output);
+			var fo:FileOutput = sys.io.File.write(output, true);
+			fo.writeString(result);
+			fo.close();
+		}
+		#end
+		return macro null;
+	}
+	#if (!flash && !js)
+	static function createCache(file:String):String
+	{
+		var serializer:Serializer = new Serializer();
+		serializer.serialize(new ScmlObject(Xml.parse(file)));
+		return serializer.toString();
+	}
+	#end
+	macro public static function cacheFolderSCML(scmlFolderPath:String, output:String) 
+	{
+		#if (!flash && !js)
+		trace('checking scml files in : ' + scmlFolderPath);
+		
+		var files:Array<String> = FileSystem.readDirectory(scmlFolderPath);
+		var result:String = createCacheFromFolder(scmlFolderPath, files);
+		if (result != "") {
+			trace('saving cache scml files in : ' + output);
+			var fo:FileOutput = sys.io.File.write(output, true);
+			fo.writeString(result);
+			fo.close();
+		}
+		#end
+		return macro null;
+	}
+	#if (!flash && !js)
+	static function createCacheFromFolder(path:String, files:Array<String>):String
+	{
+		var map:Map<String, ScmlObject> = new Map<String, ScmlObject>();
+		var serializer:Serializer = new Serializer();
+		for (file in files) {
+			if (file.indexOf(".scml") != -1)
+			{
+				var xml_s = sys.io.File.getContent(path + file);
+				map.set(file.substr(0, file.length - 5), new ScmlObject(Xml.parse(xml_s)));
+			}
+		}
+		serializer.serialize(map);
+		return serializer.toString();
+	}
+	#end
 }

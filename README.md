@@ -3,49 +3,83 @@ SpriterHaxeEngine
 
 The point of this project is to offer a Brashmonkey's Spriter SCML renderer compatible with Haxe 3 and openfl.
 Base code of SCML definitions from http://www.brashmonkey.com/ScmlDocs/ScmlReference.html 
+
 Inspired by 
  - https://github.com/Acemobe/SpriterAS3Anim
  - https://bitbucket.org/ClockworkMagpie/haxe-spriter/
  - https://github.com/ibilon/HaxePunk-Spriter
 
-Install it:
+Install:
 ``haxelib install SpriterHaxeEngine``
 
-Configure it:
+Choose your drawing library:
 
 ```as3
+/**
+* Example with the BitmapLibrary which uses BitmapData.copypixels() and BitmapData.draw()
+*/
 //set the root canvas where to add all the animations
 var canvas:BitmapData = new BitmapData(800, 480);
 var spriterRoot:Bitmap = new Bitmap(canvas, PixelSnapping.AUTO, true);
-
-//you can use a different library to feet your needs. This one use BitmapData.copypixels() and BitmapData.draw()
+addChild(spriterRoot);
+//choose a rendering method.
 var lib:BitmapLibrary = new BitmapLibrary('assets/', canvas);
 
-//here is the engine : it will update all your Spriter's entities
-engine = new SpriterEngine(Assets.getText('assets/test.scml'), lib, null );
+/**
+* Example with the TilelayerLibrary which uses Tilelayer (haxelib install tilelayer)
+*/
+//set the root canvas where to add all the animations
+var spriterRoot:Sprite = new Sprite();
+addChild(spriterRoot);
+//choose a rendering method.
+var lib:TilelayerLibrary = new TilelayerLibrary('assets/atlas.xml' , 'assets/atlas.png', spriterRoot);
+
+/**
+* Other libraries exist to use Spriter with flixel and other rendering method!
+*/
+```
+
+Instantiate the engine:
+
+```as3
+//Create the engine.
+//you can specify a default scml or you can specify it later in addSpriter()
+engine = new SpriterEngine(Assets.getText('assets/test.scml'), lib );
 		
-//to add and entity
-engine.addEntity('entityName', x,  y);
+//Add a Spriter in the engine. A Spriter contains all data from the scml (all entities, animations, boxes, tags...)
+//By default, it will play the first animation of the first entity of your scml
+engine.addSpriter('uniqueId', x,  y);
 
-//set the "run" animation of the entity
-engine.getEntity('entityName').playAnim('run', myCallback);
+//Set the "run" animation of the entity
+engine.getSpriter('uniqueId').playAnim('run', myCallback);
 
-//apply the "gun" map of the entity
-engine.getEntity('entityName').applyCharacterMap('gun', true);
+//Apply the "gun" map of the entity
+engine.getSpriter('uniqueId').applyCharacterMap('gun', true);
 
-//update on enter frame
+//Update on enter frame to draw all Spriters on screen
 engine.update();
 
-//callback on end anim
-function myCallback(s:Spriter, entity:String, anim:String):Void
+//Callback on end anim
+function myCallback(s:Spriter):Void
 
-//var and tag callback
-engine.getEntityAt(0).scml.tagCallback = function tagCallback(tag:String):Void{}
-engine.getEntityAt(0).scml.varChangeCallback function varCallback(variable:Variable<Dynamic>):Void{}
+//callback
+engine.getSpriterAt(0).onVarChanged = function varCallback(name:String, value:Dynamic):Void{}
+engine.getSpriterAt(0).onEvent = function eventCallback(name:String):Void{}
+engine.getSpriterAt(0).onSound = function soundCallback(name:String):Void{}
 
-//points and boxes
-var points:Array<SpatialInfo> = engine.getEntityAt(0).getPoints();
-var boxes:Array<Quadrilateral> = engine.getEntityAt(0).getBoxes();
+//current points and boxes
+var points:Array<SpatialInfo> = engine.getSpriterAt(0).points;
+var boxes:Array<Quadrilateral> = engine.getSpriterAt(0).boxes;
+
+//current tags
+var tags:Array<String> = engine.getSpriterAt(0).tags;
+
+//current variables values
+var value:Dynamic = engine.getSpriterAt(0).getVariable('myVar');
+
+
+//stack anims
+engine.getSpriter('uniqueId').playAnimsStackFromEntity("entityName", ["anim1","anim2"], myCallback).
 
 ```
 
@@ -60,6 +94,7 @@ Spriter Haxe Engine Features
  - Fixed tick, variable tick or use your own time
  - Pause
  - simple auto removal
+ - default scml
  
 **Spriter entity**
  - character mapping by name
@@ -67,19 +102,27 @@ Spriter Haxe Engine Features
  - callback when animation ended
  - play, stack anim, pause
  - you can display duplicate of spriter entity and manipulate them separatly
- - callback when variable changes
- - callback when tag dispatches
+ - callback when events, sounds are triggered
+ - callback when variables change
  - Points (usage example : to shot a bullet when gun fire)
  - Boxes (usage example : hitbox)
+ - Tags (usage example : state vulnerable)
  - sub entities
+ - playing backward and reflect
 
 **Libraries**
  - Simple bitmap library (bitmaps handled with addChild, dependency : openfl)
  - BitmapData library (copypixels, dependency : openfl)
  - Tilelayer library (drawTiles using only one tilesheet)(dependency : https://github.com/elsassph/openfl-tilelayer and openfl).
  - DrawTiles library (using many tilesheets)(dependency : https://github.com/elsassph/openfl-tilelayer and openfl).
- - Flixel Library (atlas support or bitmaps handled with addChild, , dependency : flixel) by Zaphod
+ - Flixel Library (atlas support or bitmaps handled with addChild, dependency : flixel) by Zaphod
+ - Heaps Library (h3d/heaps, dependency : https://github.com/ncannasse/heaps) by Delahee
+ - Luxe Library (dependency : https://github.com/underscorediscovery/luxe)
  - override the AbstractLibrary to provide a new library
+ 
+**Other features**
+ - own texture packer exporter
+ - macro to parse scml into binaries
 
 **Cross-platform**
  - flash
@@ -90,14 +133,19 @@ Spriter Haxe Engine Features
 
 TODO
 ----
+ - interpolation on variable
+ - variable/tags of sub entities
  - add tilesheet stage 3d support : https://github.com/as3boyan/TilesheetStage3D/
  - add ash and haxepunk support
  - add Flambe support (waiting for pull request, see here https://github.com/quinnhoener/SpriterHaxeEngine)
+ - add Kha support (waiting for pull request, see here https://github.com/sh-dave/SpriterHaxeEngine/tree/dev)
  - Optimized engine : draw call only when needed. So "instant" keys are not updated between keys.
  - animation callback optimization
  - check Garbage collector
- - binary scml
- - use multiple scml in the engine
+ 
+WIKI
+-----------
+ The [wiki](https://github.com/loudoweb/SpriterHaxeEngine/wiki) provides more details on features and how it works.
  
 Examples
 ------------
@@ -105,12 +153,11 @@ Examples
  
 Additional information
 ------------
- - compatible with Spriter r3
+ - compatible with Spriter r6.1
  - With Tilelayer library, don't use openfl-bitfive for html5 target.
  
  
 Known issues
 ------------
- - [html5] some issues on html5 depending on the backend used and the Library used.
  - Please use the best rendering method according to your target.
  
