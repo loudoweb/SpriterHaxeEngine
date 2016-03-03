@@ -2,7 +2,7 @@ package spriter.library;
 
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.group.FlxGroup;
+import flixel.group.FlxSpriteGroup;
 import openfl.Assets;
 import spriter.definitions.PivotInfo;
 import spriter.definitions.SpatialInfo;
@@ -16,7 +16,7 @@ import spriter.util.SpriterUtil;
  */
 class FlixelLibrary extends AbstractLibrary
 {
-	private var _flxGroup:FlxTypedGroup<FlxSprite>;
+	private var _flxGroup:FlxTypedSpriteGroup<FlxSprite>;
 	
 	private var _sprites:Map<String, Array<FlxSprite>>;
 	
@@ -30,7 +30,7 @@ class FlixelLibrary extends AbstractLibrary
 	 * 
 	 * Usage examples:
 	 * 1) without atlases
-	 * var spriterGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
+	 * var spriterGroup:FlxTypedSpriteGroup<FlxSprite> = new FlxTypedSpriteGroup<FlxSprite>();
 	 * var lib:FlixelLibrary = new FlixelLibrary(spriterGroup, 'assets/sprites/brawler/');
 	 * engine = new SpriterEngine(Assets.getText('assets/sprites/brawler/brawler.scml'), lib, null);
 	 * var len:Int = 1;
@@ -41,7 +41,7 @@ class FlixelLibrary extends AbstractLibrary
 	 * add(spriterGroup);
 	 *
 	 * 2) with atlases
-	 * var spriterGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
+	 * var spriterGroup:FlxTypedSpriteGroup<FlxSprite> = new FlxTypedSpriteGroup<FlxSprite>();
 	 * var atlasFrames:FlxAtlasFrames = FlxAtlasFrames.fromSparrow("assets/ugly/ugly.png", "assets/ugly/ugly.xml");
 	 * var lib:FlixelLibrary = new FlixelLibrary(spriterGroup, null, atlasFrames);
 	 * engine = new SpriterEngine(Assets.getText('assets/ugly/ugly.scml'), lib, null);
@@ -55,7 +55,7 @@ class FlixelLibrary extends AbstractLibrary
 	 * 
 	 * and don't forget to call engine.update(Std.int(1000 * elapsed)); at the state update() method
 	 */
-	public function new(group:FlxTypedGroup<FlxSprite>, basePath:String = null, atlasFrames:FlxAtlasFrames = null) 
+	public function new(group:FlxTypedSpriteGroup<FlxSprite>, basePath:String = null, atlasFrames:FlxAtlasFrames = null) 
 	{
 		super(basePath);
 		
