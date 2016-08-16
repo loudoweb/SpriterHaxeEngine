@@ -150,4 +150,9 @@ class SpatialInfo implements ISpriterPooled
 		
 	}
 	
+	public function toString():String
+	{
+		return '[SpatialInfo: $x, $y, $scaleX, $scaleY, $angle, $a]';
+	}
+	
 }
