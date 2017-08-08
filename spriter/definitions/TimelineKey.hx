@@ -56,7 +56,7 @@ class TimelineKey
 		return c;
 	}
 	
-	public function new(fast:Fast = null, type:ObjectType) 
+	public function new(fast:Fast, type:ObjectType) 
 	{
 		this.objectType = type;
 		

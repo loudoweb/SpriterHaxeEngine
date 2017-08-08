@@ -11,7 +11,7 @@ class SoundlineKey extends EventlineKey
 
 	public var folder:Int;
 	public var file:Int;
-	public function new(fast:Fast=null) 
+	public function new(fast:Fast) 
 	{
 		super(fast);
 		if(fast != null){
@@ -22,7 +22,7 @@ class SoundlineKey extends EventlineKey
 	
 	override public function copy ():EventlineKey
 	{
-		var	copy:EventlineKey = new SoundlineKey();
+		var	copy:EventlineKey = new SoundlineKey(null);
 		return clone (copy);
 	}
 

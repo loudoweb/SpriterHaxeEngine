@@ -9,7 +9,7 @@ class EventlineKey
 {
 	public var id:Int;
 	public var time:Int = 0;
-	public function new(fast:Fast = null) 
+	public function new(fast:Fast) 
 	{
 		if(fast != null){
 			id = fast.has.id ? Std.parseInt(fast.att.id) : 0;
@@ -18,7 +18,7 @@ class EventlineKey
 	}
 	public function copy ():EventlineKey
 	{
-		var	copy:EventlineKey = new EventlineKey();
+		var	copy:EventlineKey = new EventlineKey(null);
 		return clone (copy);
 	}
 

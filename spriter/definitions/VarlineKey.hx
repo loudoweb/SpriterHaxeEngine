@@ -8,7 +8,7 @@ import haxe.xml.Fast;
 class VarlineKey extends TimelineKey
 {
 	public var value:String;
-	public function new(fast:Fast = null) 
+	public function new(fast:Fast) 
 	{
 		if(fast != null){
 			value = fast.att.val;
