@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import haxe.xml.Access;
 
 /**
  * ...
@@ -11,14 +11,14 @@ class CharacterMap
 	public var name:String;
     public var maps:Array<MapInstruction>;
 	
-	public function new(fast:Fast) 
+	public function new(xml:Access) 
 	{
 		maps = new Array<MapInstruction>();
 		
-		id = Std.parseInt(fast.att.id);
-		name = fast.att.name;
+		id = Std.parseInt(xml.att.id);
+		name = xml.att.name;
 		
-		for (m in fast.nodes.map)
+		for (m in xml.nodes.map)
 		{
 			maps.push(new MapInstruction(m));
 		}

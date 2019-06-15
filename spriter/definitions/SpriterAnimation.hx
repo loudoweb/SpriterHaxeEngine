@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import haxe.xml.Access;
 import spriter.definitions.SpriterAnimation.LoopType;
 import spriter.definitions.SpriterTimeline.ObjectType;
 import spriter.engine.Spriter;
@@ -48,18 +48,18 @@ class SpriterAnimation
 	
 	
 	
-	public function new(fast:Fast) 
+	public function new(xml:Access) 
 	{
 		mainlineKeys = [];
 		timelines = [];
 		
 		
-		id = Std.parseInt(fast.att.id);
-		name = fast.att.name;
-		length = Std.parseInt(fast.att.length);
-		//loopType = fast.has.looping ? Type.createEnum(LoopType, fast.att.looping.toUpperCase()) : LOOPING;
-		if (fast.has.looping) {
-			if (fast.att.looping == "true") {
+		id = Std.parseInt(xml.att.id);
+		name = xml.att.name;
+		length = Std.parseInt(xml.att.length);
+		//loopType = xml.has.looping ? Type.createEnum(LoopType, xml.att.looping.toUpperCase()) : LOOPING;
+		if (xml.has.looping) {
+			if (xml.att.looping == "true") {
 				loopType = LOOPING;
 			}else {
 				loopType = NO_LOOPING;
@@ -68,53 +68,53 @@ class SpriterAnimation
 			loopType = LOOPING;
 		}
 		
-		for (mk in fast.node.mainline.nodes.key)
+		for (mk in xml.node.mainline.nodes.key)
 		{
 			mainlineKeys.push(new MainlineKey(mk));
 		}
 		
-		for (t in fast.nodes.timeline)
+		for (t in xml.nodes.timeline)
 		{
 			timelines.push(new SpriterTimeline(t));
 		}
 		#if !SPRITER_NO_SOUND
-		if (fast.hasNode.soundline)
+		if (xml.hasNode.soundline)
 		{
 			soundlines = [];
-			for (tag in fast.nodes.soundline)
+			for (tag in xml.nodes.soundline)
 			{
 				soundlines.push(new Metaline<SoundlineKey>(tag));
 			}
 		}
 		#end
 		#if !SPRITER_NO_EVENT
-		if (fast.hasNode.eventline)
+		if (xml.hasNode.eventline)
 		{
 			eventlines = [];
-			for (tag in fast.nodes.eventline)
+			for (tag in xml.nodes.eventline)
 			{
 				eventlines.push(new Metaline<EventlineKey>(tag));
 			}
 		}
 		#end
-		if (fast.hasNode.meta)
+		if (xml.hasNode.meta)
 		{
-			fast = fast.node.meta;
+			xml = xml.node.meta;
 			#if !SPRITER_NO_TAG
-			if (fast.hasNode.tagline)
+			if (xml.hasNode.tagline)
 			{
 				taglines = [];
-				for (tag in fast.node.tagline.nodes.key)
+				for (tag in xml.node.tagline.nodes.key)
 				{
 					taglines.push(new TaglineKey(tag));
 				}
 			}
 			#end
 			#if !SPRITER_NO_VAR
-			if (fast.hasNode.varline)
+			if (xml.hasNode.varline)
 			{
 				varlines = [];
-				for (currVar in fast.nodes.varline)
+				for (currVar in xml.nodes.varline)
 				{
 					varlines.push(new Metaline<VarlineKey>(currVar));
 				}

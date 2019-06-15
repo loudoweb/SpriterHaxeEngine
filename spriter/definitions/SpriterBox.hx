@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import haxe.xml.Access;
 
 /**
  * ...
@@ -13,15 +13,15 @@ class SpriterBox
 	public var width:Float;
 	public var height:Float;
 	
-	public function new(fast:Fast = null) 
+	public function new(xml:Access = null) 
 	{
-		if(fast != null){
-			name = fast.att.name;
-			pivotX = fast.has.pivot_x ? Std.parseFloat(fast.att.pivot_x) : 0;
-			pivotY = fast.has.pivot_y ? Std.parseFloat(fast.att.pivot_y) : 0;
+		if(xml != null){
+			name = xml.att.name;
+			pivotX = xml.has.pivot_x ? Std.parseFloat(xml.att.pivot_x) : 0;
+			pivotY = xml.has.pivot_y ? Std.parseFloat(xml.att.pivot_y) : 0;
 			
-			width = fast.has.w ? Std.parseFloat(fast.att.w) : 0;
-			height = fast.has.h ? Std.parseFloat(fast.att.h) : 0;
+			width = xml.has.w ? Std.parseFloat(xml.att.w) : 0;
+			height = xml.has.h ? Std.parseFloat(xml.att.h) : 0;
 		}
 	}
 	

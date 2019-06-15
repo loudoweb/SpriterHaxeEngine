@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import haxe.xml.Access;
 import spriter.engine.SpriterEngineParam;
 
 /**
@@ -13,20 +13,20 @@ class MainlineKey
     public var boneRefs:Array<Ref>; // <bone_ref> tags
     public var objectRefs:Array<Ref>; // <object_ref> tags 
 	
-	public function new(fast:Fast) 
+	public function new(xml:Access) 
 	{
 		boneRefs = new Array<Ref>();
 		objectRefs = new Array<Ref>();
 		
-		id = Std.parseInt(fast.att.id);
-		time = fast.has.time ? Std.parseInt(fast.att.time) : 0;
+		id = Std.parseInt(xml.att.id);
+		time = xml.has.time ? Std.parseInt(xml.att.time) : 0;
 		
-		for (br in fast.nodes.bone_ref)
+		for (br in xml.nodes.bone_ref)
 		{
 			boneRefs.push(new Ref(br));
 		}
 		
-		for (or in fast.nodes.object_ref)
+		for (or in xml.nodes.object_ref)
 		{
 			objectRefs.push(new Ref(or));
 		}

@@ -120,7 +120,7 @@ class MathUtils
 		var d2:Float;
 		var i:Int;
 
-		// First try a few iterations of Newton's method -- normally very fast.
+		// First try a few iterations of Newton's method -- normally very xml.
 		for (i in 0...8) 
 		{
 			x2 = sampleCurve(ax, bx, cx, t2) - x; 

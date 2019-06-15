@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import haxe.xml.Access;
 
 /**
  * ...
@@ -9,13 +9,13 @@ import haxe.xml.Fast;
 //Internal helpers
 #if (haxe_ver < 3.3)
 typedef ConstructibleKey = {
-  public function new(fast:Fast):Void;
+  public function new(xml:Access):Void;
 }
 #end
  
 @:generic
 #if (haxe_ver >= 3.3)
-class Metaline<T:haxe.Constraints.Constructible<Fast->Void>> {
+class Metaline<T:haxe.Constraints.Constructible<Access->Void>> {
 #else
 class Metaline<T:ConstructibleKey> {
 #end
@@ -24,14 +24,14 @@ class Metaline<T:ConstructibleKey> {
 	public var name:String;
 	public var keys:Array<T>;
 	
-	public function new(fast:Fast) 
+	public function new(xml:Access) 
 	{
-		if(fast != null){
-			id = fast.has.def ? Std.parseInt(fast.att.def) : fast.has.id ? Std.parseInt(fast.att.id) : -1;
-			if (fast.has.name)
-				name = fast.att.name;
+		if(xml != null){
+			id = xml.has.def ? Std.parseInt(xml.att.def) : xml.has.id ? Std.parseInt(xml.att.id) : -1;
+			if (xml.has.name)
+				name = xml.att.name;
 			keys = [];
-			for (key in fast.nodes.key)
+			for (key in xml.nodes.key)
 			{
 				keys.push(new T(key));
 			}

@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import haxe.xml.Access;
 
 /**
  * ...
@@ -13,13 +13,13 @@ class Ref
     public var key:Int;
 	public var z_index:Int;
 	
-	public function new(fast:Fast) 
+	public function new(xml:Access) 
 	{
-		id = Std.parseInt(fast.att.id);
-		parent = fast.has.parent ? Std.parseInt(fast.att.parent) : -1;
-		timeline = Std.parseInt(fast.att.timeline);
-		key = Std.parseInt(fast.att.key);
-		z_index = fast.has.z_index ? Std.parseInt(fast.att.z_index) : 0;
+		id = Std.parseInt(xml.att.id);
+		parent = xml.has.parent ? Std.parseInt(xml.att.parent) : -1;
+		timeline = Std.parseInt(xml.att.timeline);
+		key = Std.parseInt(xml.att.key);
+		z_index = xml.has.z_index ? Std.parseInt(xml.att.z_index) : 0;
 	}
 	
 }

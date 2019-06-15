@@ -1,6 +1,6 @@
 package spriter.definitions;
 
-import haxe.xml.Fast;
+import haxe.xml.Access;
 
 /**
  * ...
@@ -11,12 +11,12 @@ class SoundlineKey extends EventlineKey
 
 	public var folder:Int;
 	public var file:Int;
-	public function new(fast:Fast) 
+	public function new(xml:Access) 
 	{
-		super(fast);
-		if(fast != null){
-			folder = Std.parseInt(fast.node.object.att.folder);
-			file = Std.parseInt(fast.node.object.att.file);
+		super(xml);
+		if(xml != null){
+			folder = Std.parseInt(xml.node.object.att.folder);
+			file = Std.parseInt(xml.node.object.att.file);
 		}
 	}
 	
