@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Access;
+import spriter.xml.Access;
 
 /**
  * ...

@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Access;
+import spriter.xml.Access;
 #if !SPRITER_NO_VAR
 import spriter.vars.Variable;
 import spriter.vars.VariableFloat;

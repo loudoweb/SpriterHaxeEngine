@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Access;
+import spriter.xml.Access;
 import spriter.definitions.SpriterAnimation.LoopType;
 import spriter.definitions.SpriterTimeline.ObjectType;
 import spriter.engine.Spriter;

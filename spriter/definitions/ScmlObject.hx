@@ -1,7 +1,7 @@
 package spriter.definitions;
 
 import haxe.Unserializer;
-import haxe.xml.Access;
+import spriter.xml.Access;
 
 /**
  * ...
