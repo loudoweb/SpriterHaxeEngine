@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import spriter.xml.Access;
 import spriter.definitions.SpriterTimeline.ObjectType;
 import spriter.definitions.TimelineKey.CurveType;
 import spriter.engine.Spriter;
@@ -56,28 +56,28 @@ class TimelineKey
 		return c;
 	}
 	
-	public function new(fast:Fast, type:ObjectType) 
+	public function new(xml:Access, type:ObjectType) 
 	{
 		this.objectType = type;
 		
-		if (fast != null) {
-			id = fast.has.id ? Std.parseInt(fast.att.id) : 0;
-			time = fast.has.time ? Std.parseInt(fast.att.time) : 0;
-			curveType = fast.has.curve_type ? Type.createEnum(CurveType, fast.att.curve_type.toUpperCase()) : CurveType.LINEAR;
-			c1 = fast.has.c1 ? Std.parseFloat(fast.att.c1) : 0;
-			c2 = fast.has.c2 ? Std.parseFloat(fast.att.c2) : 0;
-			c3 = fast.has.c3 ? Std.parseFloat(fast.att.c3) : 0;
-			c4 = fast.has.c4 ? Std.parseFloat(fast.att.c4) : 0;
+		if (xml != null) {
+			id = xml.has.id ? Std.parseInt(xml.att.id) : 0;
+			time = xml.has.time ? Std.parseInt(xml.att.time) : 0;
+			curveType = xml.has.curve_type ? Type.createEnum(CurveType, xml.att.curve_type.toUpperCase()) : CurveType.LINEAR;
+			c1 = xml.has.c1 ? Std.parseFloat(xml.att.c1) : 0;
+			c2 = xml.has.c2 ? Std.parseFloat(xml.att.c2) : 0;
+			c3 = xml.has.c3 ? Std.parseFloat(xml.att.c3) : 0;
+			c4 = xml.has.c4 ? Std.parseFloat(xml.att.c4) : 0;
 			
-			var child:Fast;
+			var child:Access;
 			if (objectType != VARIABLE)
 			{
-				var spin = fast.has.spin ? Std.parseInt(fast.att.spin) : 1;
+				var spin = xml.has.spin ? Std.parseInt(xml.att.spin) : 1;
 			
-				if (fast.hasNode.object){
-					child = fast.node.object;
+				if (xml.hasNode.object){
+					child = xml.node.object;
 				}else {
-					child = fast.node.bone;
+					child = xml.node.bone;
 				}
 				
 				var x = child.has.x ? Std.parseFloat(child.att.x) : 0;

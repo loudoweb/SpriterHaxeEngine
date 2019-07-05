@@ -78,7 +78,7 @@ class AtlasUtil
 		var tilesheet:TilesheetEx = new TilesheetEx(img, textureScale);
 		
 		var ins = new Point(0, 0);
-		var x = new haxe.xml.Fast( Xml.parse(xml).firstElement() );
+		var x = new spriter.xml.Access( Xml.parse(xml).firstElement() );
 
 		for (texture in x.nodes.Sub)
 		{

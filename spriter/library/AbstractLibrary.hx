@@ -1,4 +1,5 @@
 package spriter.library;
+import haxe.io.Path;
 import spriter.definitions.PivotInfo;
 import spriter.definitions.Quadrilateral;
 import spriter.definitions.SpatialInfo;
@@ -116,6 +117,11 @@ class AbstractLibrary
 	public function destroy():Void
 	{
 		
+	}
+
+	private function getFullPath(relativePath:String):String
+	{
+		return Path.join([_basePath, relativePath]);
 	}
 	
 }

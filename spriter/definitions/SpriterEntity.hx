@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import spriter.xml.Access;
 #if !SPRITER_NO_VAR
 import spriter.vars.Variable;
 import spriter.vars.VariableFloat;
@@ -25,7 +25,7 @@ class SpriterEntity
 	#end
 
 	
-	public function new(fast:Fast) 
+	public function new(xml:Access) 
 	{
 		characterMaps = new Map<String,CharacterMap>();
 		animations = new Map<String,SpriterAnimation>();
@@ -35,17 +35,17 @@ class SpriterEntity
 		variables = new Array<Variable<Dynamic>>();
 		#end
 		
-		id = Std.parseInt(fast.att.id);
-		name = fast.att.name;
+		id = Std.parseInt(xml.att.id);
+		name = xml.att.name;
 		
-		for (cm in fast.nodes.character_map)
+		for (cm in xml.nodes.character_map)
 		{
 			characterMaps.set(cm.att.name, new CharacterMap(cm));
 		}
 		
 		#if !SPRITER_NO_VAR
-		if(fast.hasNode.var_defs){
-			for (v in fast.node.var_defs.elements)
+		if(xml.hasNode.var_defs){
+			for (v in xml.node.var_defs.elements)
 			{
 				switch(v.att.type)
 				{
@@ -60,13 +60,13 @@ class SpriterEntity
 		}
 		#end
 		
-		for (oi in fast.nodes.obj_info)
+		for (oi in xml.nodes.obj_info)
 		{
 			boxes_info.set(oi.att.name, new SpriterBox(oi));
 		}
 		
 		
-		for (a in fast.nodes.animation)
+		for (a in xml.nodes.animation)
 		{
 			animations.set(a.att.name, new SpriterAnimation(a));
 			animationsName.push(a.att.name);

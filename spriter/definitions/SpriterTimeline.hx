@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import spriter.xml.Access;
 import spriter.definitions.SpriterTimeline.ObjectType;
 
 /**
@@ -24,16 +24,16 @@ class SpriterTimeline
     public var objectType:ObjectType; // enum : SPRITE,BONE,BOX,POINT,SOUND,ENTITY,VARIABLE
     public var keys:Array<TimelineKey>;
 	
-	public function new(fast:Fast) 
+	public function new(xml:Access) 
 	{
 		keys = new Array<TimelineKey>();
 		
-		id = Std.parseInt(fast.att.id);
-		name = fast.has.name ? fast.att.name : "";
-		objectType = fast.has.object_type ? Type.createEnum(ObjectType, fast.att.object_type.toUpperCase()) : ObjectType.SPRITE;
+		id = Std.parseInt(xml.att.id);
+		name = xml.has.name ? xml.att.name : "";
+		objectType = xml.has.object_type ? Type.createEnum(ObjectType, xml.att.object_type.toUpperCase()) : ObjectType.SPRITE;
 		
 					
-		for (k in fast.nodes.key)
+		for (k in xml.nodes.key)
 		{
 			keys.push(new TimelineKey(k, objectType));
 		}

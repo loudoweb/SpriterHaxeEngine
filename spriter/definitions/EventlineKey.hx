@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import spriter.xml.Access;
 
 /**
  * ...
@@ -9,11 +9,11 @@ class EventlineKey
 {
 	public var id:Int;
 	public var time:Int = 0;
-	public function new(fast:Fast) 
+	public function new(xml:Access) 
 	{
-		if(fast != null){
-			id = fast.has.id ? Std.parseInt(fast.att.id) : 0;
-			time = fast.has.time ? Std.parseInt(fast.att.time) : 0;
+		if(xml != null){
+			id = xml.has.id ? Std.parseInt(xml.att.id) : 0;
+			time = xml.has.time ? Std.parseInt(xml.att.time) : 0;
 		}
 	}
 	public function copy ():EventlineKey

@@ -1,9 +1,6 @@
 package spriter.library;
-import flash.display.BitmapData;
-import flash.geom.ColorTransform;
-import flash.geom.Matrix;
-import flash.geom.Point;
-import openfl.Assets;
+import haxe.io.Path;
+import hxd.res.Loader;
 import spriter.definitions.PivotInfo;
 import spriter.definitions.SpatialInfo;
 import spriter.util.ColorUtils;
@@ -12,27 +9,30 @@ import spriter.util.SpriterUtil;
 /**
  * ...
  * @author david Blackmagic elahee
+ * @author Tommy Brosman
  */
 class H2dBitmapLibrary extends AbstractLibrary
 {
-	public var _root : h2d.Sprite;
-	
-	var _parent : h2d.Sprite;
-	var _sh : h2d.Drawable.DrawableShader;
-	var _tileCache : haxe.ds.UnsafeStringMap<h2d.Tile>;
-	public function new(basePath:String, parent : h2d.Sprite ) 
+	public var _root : h2d.Object;
+	var _parent : h2d.Object;
+	var _tileCache : Map<String, h2d.Tile>;
+
+	public function new(basePath:String, parent:h2d.Object) 
 	{
 		super(basePath);
 		_parent = parent;
-		_tileCache = new haxe.ds.UnsafeStringMap();
-		_root = new h2d.Sprite(_parent);
+		_tileCache = new Map<String, h2d.Tile>();
+		_root = new h2d.Object(_parent);
 	}
 	
-	override public function getFile(name:String):Dynamic {
+	override public function getFile(name:String):Dynamic
+	{
 		if ( _tileCache.exists( name ))
 			return _tileCache.get(name);
 		
-		_tileCache.set( name , h2d.Tile.fromAssets(_basePath + name));
+		var loader:Loader = hxd.Res.loader;
+		var tile:h2d.Tile = loader.load(name).toTile();
+		_tileCache.set(name, tile);
 			
 		return _tileCache.get(name);
 	}
@@ -40,17 +40,14 @@ class H2dBitmapLibrary extends AbstractLibrary
 	override public function clear():Void
 	{
 		_root.visible = false;
-		_root.removeAllChildren();
-    }
+		_root.removeChildren();
+  }
 	
 	override public function addGraphic(name:String, info:SpatialInfo, pivots:PivotInfo):Void
 	{
-		var tile : h2d.Tile = cast getFile(name);
-		var bmp = new h2d.Bitmap(tile #if !heaps , _sh #end);
-		#if !heaps
-		if ( _sh == null ) _sh = bmp.shader;
-		#end
-		
+		var fullPath:String = getFullPath(name);
+		var tile:h2d.Tile = cast getFile(fullPath);
+		var bmp = new h2d.Bitmap(tile);
 		var spatialResult:SpatialInfo = compute(info, pivots, tile.width, tile.height);
 		
 		bmp.scaleX = spatialResult.scaleX;
@@ -76,5 +73,4 @@ class H2dBitmapLibrary extends AbstractLibrary
 			t.dispose();
 		_tileCache = null;
 	}
-	
 }

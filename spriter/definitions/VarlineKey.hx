@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import spriter.xml.Access;
 
 /**
  * ...
@@ -8,11 +8,11 @@ import haxe.xml.Fast;
 class VarlineKey extends TimelineKey
 {
 	public var value:String;
-	public function new(fast:Fast) 
+	public function new(xml:Access) 
 	{
-		if(fast != null){
-			value = fast.att.val;
+		if(xml != null){
+			value = xml.att.val;
 		}
-		super(fast, VARIABLE);
+		super(xml, VARIABLE);
 	}
 }

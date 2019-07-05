@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import spriter.xml.Access;
 
 /**
  * ...
@@ -10,13 +10,13 @@ class TaglineKey
 	public var id:Int;
 	public var time:Int = 0;
 	public var t:Array<Int>;
-	public function new(fast:Fast = null) 
+	public function new(xml:Access = null) 
 	{
-		if(fast != null){
-			id = fast.has.id ? Std.parseInt(fast.att.id) : 0;
-			time = fast.has.time ? Std.parseInt(fast.att.time) : 0;
+		if(xml != null){
+			id = xml.has.id ? Std.parseInt(xml.att.id) : 0;
+			time = xml.has.time ? Std.parseInt(xml.att.time) : 0;
 			t = [];
-			for (tag in fast.nodes.tag)
+			for (tag in xml.nodes.tag)
 			{
 				t.push(Std.parseInt(tag.att.t));
 			}

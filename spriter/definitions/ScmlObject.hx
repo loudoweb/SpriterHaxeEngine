@@ -1,7 +1,7 @@
 package spriter.definitions;
 
 import haxe.Unserializer;
-import haxe.xml.Fast;
+import spriter.xml.Access;
 
 /**
  * ...
@@ -45,12 +45,12 @@ class ScmlObject
 			entities = new Map<String,SpriterEntity>();
 			entitiesName = [];
 			
-			var fast = new Fast(source.firstElement());
+			var xml = new Access(source.firstElement());
 			
-			if (fast.att.scml_version != "1.0")
+			if (xml.att.scml_version != "1.0")
 				trace("Warning, unsupported format.");
 			
-			for(el in fast.elements)
+			for(el in xml.elements)
 			{
 				if(el.name == "folder")
 				{

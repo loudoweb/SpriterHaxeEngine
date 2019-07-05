@@ -5,6 +5,8 @@ import openfl.geom.Point;
 import flambe.math.Point;
 #elseif luxe
 typedef Point = phoenix.Vector;
+#elseif heaps
+typedef Point = h2d.col.Point;
 #end
 
 /**

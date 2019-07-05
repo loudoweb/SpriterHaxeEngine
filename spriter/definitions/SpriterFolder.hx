@@ -1,5 +1,5 @@
 package spriter.definitions;
-import haxe.xml.Fast;
+import spriter.xml.Access;
 
 /**
  * ...
@@ -13,17 +13,17 @@ class SpriterFolder
     public var files:Array<SpriterFile>;
 	
 	
-	public function new(fast:Fast = null) 
+	public function new(xml:Access = null) 
 	{
 		files = new Array<SpriterFile>();
 		
-		if(fast != null){
-			id = Std.parseInt(fast.att.id);
-			if(fast.hasNode.name){
-				name = fast.att.name;
+		if(xml != null){
+			id = Std.parseInt(xml.att.id);
+			if(xml.hasNode.name){
+				name = xml.att.name;
 			}
 			
-			for (f in fast.nodes.file)
+			for (f in xml.nodes.file)
 			{
 				files.push(new SpriterFile(f));
 			}
