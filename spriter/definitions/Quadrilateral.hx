@@ -7,6 +7,8 @@ import flambe.math.Point;
 typedef Point = phoenix.Vector;
 #elseif heaps
 typedef Point = h2d.col.Point;
+#elseif test
+typedef Point = test.Point;
 #end
 
 /**
