@@ -1,0 +1,22 @@
+#
+# Build and run tests
+#
+-cp .
+
+# Needed for haxe.unit on Haxe 4
+-lib hx3compat
+
+# Turn off dead code elimination so that all sources are compiled
+-dce no
+
+# Specify that we should be using the test definition for Point, etc rather than a type from a specific library
+-D test=true
+
+# Force Haxe to generate a specific version of the HashLink bytecode
+-D hl_ver=1.9.0
+
+-main test.TestMain
+-hl bin/test.hl
+
+# Run the tests
+-cmd hl bin/test.hl

@@ -1,0 +1,16 @@
+#
+# Build and run tests
+#
+-cp .
+
+# Turn off dead code elimination so that all sources are compiled
+-dce no
+
+# Specify that we should be using the test definition for Point, etc rather than a type from a specific library
+-D test=true
+
+-main test.TestMain
+-hl bin/test.hl
+
+# Run the tests (requires HashLink 1.1)
+-cmd hl bin/test.hl
