@@ -63,11 +63,7 @@ class SpriterUtil
 	{
 		if (array.length > 0)
 		{
-			#if cpp
 			array.splice(0, array.length);//allocates in hxcpp but fastest
-			#else
-			untyped array.length = 0;
-			#end
 		}
 	}
 }
