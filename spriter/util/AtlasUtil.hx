@@ -9,9 +9,10 @@ typedef SpriterJSON = {
   var tags:Array<String>;
 }
 /**
- * ...
+ * Create TilesheetEx to make Spriter atlases compatible with Tilelayer.
  * TODO rotation
  * @author loudo (Ludovic Bas)
+ * @deprecated since Tilemap feature in OpenFL >= 6.0
  */
 class AtlasUtil
 {
