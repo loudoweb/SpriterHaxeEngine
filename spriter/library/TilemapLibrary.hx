@@ -16,15 +16,15 @@ import spriter.util.SpriterUtil;
  */
 class TilemapLibrary extends AbstractLibrary
 {
-	public var view:Sprite;
-	
 
-	var tilesetsLibrary:Array<TilesetEx>;//all your Tileset
-	var tilesCache:Array<Tile>;
+	public var view:Sprite;
 	public var tilemap:Tilemap;
+	public var tilesetsLibrary:Array<TilesetEx>;//all your Tileset
+
+	var tilesCache:Array<Tile>;
 	/**
 	 * 
-	 * @param	tilesetEx Find this class in openfl-atlas on haxelib (https://github.com/loudowev/openfl-atlas)
+	 * @param	tilesetEx Find this class in openfl-atlas on haxelib (https://github.com/loudoweb/openfl-atlas)
 	 * @param	view the single canvas you want to draw into
 	 * @param	width size of bitmapData
 	 * @param	height size of bitmapData
@@ -109,12 +109,9 @@ class TilemapLibrary extends AbstractLibrary
 			tile.tileset = lib;
 			tile.x = info.x;
 			tile.y = info.y;
-			trace('___',info.scaleX, info.scaleY);
 			tile.scaleX = info.scaleX;
 			tile.scaleY = info.scaleY;
-			trace(tile.scaleX, tile.scaleY);
 			tile.rotation = info.angle;
-			trace(tile.scaleX, tile.scaleY);
 			tile.alpha = info.a;
 		}else {
 			
