@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://www.codeandweb.com/texturepacker for SpriterHaxeEngine-->
 <!-- {{smartUpdateKey}} -->
 <TextureAtlas imagePath="{{texture.fullName}}">{% for sprite in allSprites %}
-	<Sub name="{{sprite.fullName}}" x="{{sprite.frameRect.x}}" y="{{sprite.frameRect.y}}" w="{{sprite.frameRect.width}}" h="{{sprite.frameRect.height}}" {% if sprite.trimmed %} frameX="{{sprite.cornerOffset.x}}" frameY="{{sprite.cornerOffset.y}}" frameW="{{sprite.untrimmedSize.width}}" frameH="{{sprite.untrimmedSize.height}}"{% endif %}/>{% endfor %}
+	<Sub name="{{sprite.trimmedName}}" x="{{sprite.frameRect.x}}" y="{{sprite.frameRect.y}}" w="{{sprite.frameRect.width}}" h="{{sprite.frameRect.height}}" {% if sprite.trimmed %} fX="{{sprite.cornerOffset.x}}" fY="{{sprite.cornerOffset.y}}" fW="{{sprite.untrimmedSize.width}}" fH="{{sprite.untrimmedSize.height}}"{% endif %}/>{% endfor %}
 </TextureAtlas>

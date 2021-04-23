@@ -70,6 +70,9 @@ class TilemapLibrary extends AbstractLibrary
 		var lib:TilesetEx = null;
 		var tileID:Int = -1;
 		var size:Rectangle = null;
+		var short = name.split("/");
+		name = short[short.length - 1];
+		name = name.substring(0, name.indexOf('.'));
 		
 		for (i in 0...tilesetsLibrary.length)
 		{
