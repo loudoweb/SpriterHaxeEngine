@@ -22,7 +22,7 @@ Choose your drawing library:
 var spriterRoot:Sprite = new Sprite();
 addChild(spriterRoot);
 //get an atlas
-//var tileset:TilesetEx = new SpriterTileset(Assets.getBitmapData('assets/atlas.png'), Assets.getText('assets/atlas.xml'));
+var tileset:TilesetEx = new SpriterTileset(Assets.getBitmapData('assets/atlas.png'), Assets.getText('assets/atlas.xml'));
 //choose a rendering method.
 var lib = new TilemapLibrary([tileset], spriterRoot, stage.stageWidth, stage.stageHeight);
 
