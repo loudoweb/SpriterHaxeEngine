@@ -1,4 +1,5 @@
 package spriter.engine;
+import spriter.util.SpriterUtil;
 import spriter.definitions.ScmlObject;
 import spriter.definitions.SpatialInfo;
 import spriter.library.AbstractLibrary;
@@ -257,7 +258,7 @@ class SpriterEngine
 			current.destroy();
 			current = null;
 		}
-		_spriters = new Array<Spriter>();
+		SpriterUtil.clearArray(_spriters);
 		_spritersNamed = new Map<String ,Spriter>();
 		_lib.clear();
 	}
@@ -388,6 +389,15 @@ class SpriterEngine
 	function get_framerate():Int
 	{
 		return _framerate;
+	}
+
+	/**
+	 * How many spriters are currently playing
+	 * @return Int
+	 */
+	inline public function numSpriters():Int
+	{
+		return _spriters.length;
 	}
 	
 }
