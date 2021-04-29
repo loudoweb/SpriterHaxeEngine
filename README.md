@@ -113,11 +113,11 @@ Spriter Haxe Engine Features
  - playing backward and reflect
 
 **Libraries**
- - TilemapLibrary (use openfl tilemap, dependency: [openfl](https://github.com/openfl/openfl, [openfl-atlas](https://github.com/loudoweb/openfl-atlas))
+ - TilemapLibrary (use openfl tilemap, dependency: [openfl](https://github.com/openfl/openfl), [openfl-atlas](https://github.com/loudoweb/openfl-atlas))
  - Simple bitmap library (bitmaps handled with addChild, dependency : [openfl](https://github.com/openfl/openfl))
- - BitmapData library (copypixels, dependency : [openfl](https://github.com/openfl/openfl)
- - Tilelayer library (drawTiles using only one tilesheet)(dependency : [openfl-tilelayer](https://github.com/elsassph/openfl-tilelayer) and openfl).
- - DrawTiles library (using many tilesheets)(dependency : [openfl-tilelayer](https://github.com/elsassph/openfl-tilelayer) and openfl).
+ - BitmapData library (copypixels, dependency : [openfl](https://github.com/openfl/openfl))
+ - Tilelayer library (drawTiles using only one tilesheet)(dependency : [openfl-tilelayer](https://github.com/elsassph/openfl-tilelayer) and [openfl](https://github.com/openfl/openfl)).
+ - DrawTiles library (using many tilesheets)(dependency : [openfl-tilelayer](https://github.com/elsassph/openfl-tilelayer) and [openfl](https://github.com/openfl/openfl)).
  - Flixel Library (atlas support or bitmaps handled with addChild, dependency : [flixel](https://github.com/HaxeFlixel/flixel)) by Zaphod
  - Heaps Library (h3d/heaps, dependency : [heaps](https://github.com/ncannasse/heaps) ) by Delahee
  - Luxe Library (dependency : [luxe](https://github.com/underscorediscovery/luxe) )
