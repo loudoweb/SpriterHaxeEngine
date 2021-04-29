@@ -35,7 +35,7 @@ class FlixelLibrary extends AbstractLibrary
 	 * engine = new SpriterEngine(Assets.getText('assets/sprites/brawler/brawler.scml'), lib, null);
 	 * var len:Int = 1;
 	 * for (i in 0...len) {
-	 *  	engine.addEntity('lib_' + Std.int(i+1), 100 + 50 * (i % 10), 100 + 50 * (Std.int(i / 10) % 6));
+	 *  	engine.addSpriter('lib_' + Std.int(i+1), 100 + 50 * (i % 10), 100 + 50 * (Std.int(i / 10) % 6));
 	 * }
 	 * 
 	 * add(spriterGroup);
@@ -47,7 +47,7 @@ class FlixelLibrary extends AbstractLibrary
 	 * engine = new SpriterEngine(Assets.getText('assets/ugly/ugly.scml'), lib, null);
 	 * var len:Int = 1;
 	 * for (i in 0...len) {
-	 *  	engine.addEntity('lib_' + Std.int(i+1), 100 + 50 * (i % 10), 100 + 50 * (Std.int(i / 10) % 6));
+	 *  	engine.addSpriter('lib_' + Std.int(i+1), 100 + 50 * (i % 10), 100 + 50 * (Std.int(i / 10) % 6));
 	 * }
 	 * 
 	 * add(spriterGroup);

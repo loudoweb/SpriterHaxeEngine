@@ -16,6 +16,17 @@ Choose your drawing library:
 
 ```as3
 /**
+* Example with the TilemapLibrary which uses openfl-atlas (haxelib install openfl-atlas)
+*/
+//set the root canvas where to add all the animations
+var spriterRoot:Sprite = new Sprite();
+addChild(spriterRoot);
+//get an atlas
+//var tileset:TilesetEx = new SpriterTileset(Assets.getBitmapData('assets/atlas.png'), Assets.getText('assets/atlas.xml'));
+//choose a rendering method.
+var lib = new TilemapLibrary([tileset], spriterRoot, stage.stageWidth, stage.stageHeight);
+
+/**
 * Example with the BitmapLibrary which uses BitmapData.copypixels() and BitmapData.draw()
 */
 //set the root canvas where to add all the animations
@@ -24,15 +35,6 @@ var spriterRoot:Bitmap = new Bitmap(canvas, PixelSnapping.AUTO, true);
 addChild(spriterRoot);
 //choose a rendering method.
 var lib:BitmapLibrary = new BitmapLibrary('assets/', canvas);
-
-/**
-* Example with the TilelayerLibrary which uses Tilelayer (haxelib install tilelayer)
-*/
-//set the root canvas where to add all the animations
-var spriterRoot:Sprite = new Sprite();
-addChild(spriterRoot);
-//choose a rendering method.
-var lib:TilelayerLibrary = new TilelayerLibrary('assets/atlas.xml' , 'assets/atlas.png', spriterRoot);
 
 /**
 * Other libraries exist to use Spriter with flixel and other rendering method!
@@ -111,13 +113,14 @@ Spriter Haxe Engine Features
  - playing backward and reflect
 
 **Libraries**
- - Simple bitmap library (bitmaps handled with addChild, dependency : openfl)
- - BitmapData library (copypixels, dependency : openfl)
- - Tilelayer library (drawTiles using only one tilesheet)(dependency : https://github.com/elsassph/openfl-tilelayer and openfl).
- - DrawTiles library (using many tilesheets)(dependency : https://github.com/elsassph/openfl-tilelayer and openfl).
- - Flixel Library (atlas support or bitmaps handled with addChild, dependency : flixel) by Zaphod
- - Heaps Library (h3d/heaps, dependency : https://github.com/ncannasse/heaps) by Delahee
- - Luxe Library (dependency : https://github.com/underscorediscovery/luxe)
+ - TilemapLibrary (use openfl tilemap, dependency: [openfl](https://github.com/openfl/openfl, [openfl-atlas](https://github.com/loudoweb/openfl-atlas))
+ - Simple bitmap library (bitmaps handled with addChild, dependency : [openfl](https://github.com/openfl/openfl))
+ - BitmapData library (copypixels, dependency : [openfl](https://github.com/openfl/openfl)
+ - Tilelayer library (drawTiles using only one tilesheet)(dependency : [openfl-tilelayer](https://github.com/elsassph/openfl-tilelayer) and openfl).
+ - DrawTiles library (using many tilesheets)(dependency : [openfl-tilelayer](https://github.com/elsassph/openfl-tilelayer) and openfl).
+ - Flixel Library (atlas support or bitmaps handled with addChild, dependency : [flixel](https://github.com/HaxeFlixel/flixel)) by Zaphod
+ - Heaps Library (h3d/heaps, dependency : [heaps](https://github.com/ncannasse/heaps) ) by Delahee
+ - Luxe Library (dependency : [luxe](https://github.com/underscorediscovery/luxe) )
  - override the AbstractLibrary to provide a new library
  
 **Other features**
