@@ -24,6 +24,8 @@ class ScmlObject
 	#end
 
     public var currentTime:Float; 
+
+	public var isShortenedPath(default, null):Bool;
 		
 	public static function unserialize(bin:String):ScmlObject
 	{
@@ -37,9 +39,16 @@ class ScmlObject
 		var map:Map<String, ScmlObject> = cast serializer.unserialize();
 		return map;
 	}
-		
-	public function new(source:Xml = null) 
+	
+	/**
+	 * Parse the scml
+	 * @param source 
+	 * @param isShortenedPath = false; if true remove path and extension of the files
+	 */
+	public function new(source:Xml = null, isShortenedPath = false) 
 	{
+		this.isShortenedPath = isShortenedPath;
+
 		if(source != null){
 			folders = new Array<SpriterFolder>();
 			entities = new Map<String,SpriterEntity>();
@@ -54,7 +63,7 @@ class ScmlObject
 			{
 				if(el.name == "folder")
 				{
-					folders.push(new SpriterFolder(el));
+					folders.push(new SpriterFolder(el, isShortenedPath));
 				}
 				else if(el.name == "entity")
 				{

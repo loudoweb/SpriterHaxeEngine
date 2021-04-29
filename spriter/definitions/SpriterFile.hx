@@ -14,11 +14,20 @@ class SpriterFile
 	public var width:Float;
 	public var height:Float;
 	
-	public function new(xml:Access = null) 
+	public function new(xml:Access = null, isShortenedPath = false) 
 	{
 		if(xml != null){
 			id = Std.parseInt(xml.att.id);
 			name = xml.att.name;
+
+			if(isShortenedPath)
+			{
+				var parts = name.split("/");
+				name = parts[parts.length - 1];
+				var dot = name.indexOf('.');
+				name = name.substring(0, dot == -1 ? name.length : dot);
+			}
+
 			pivotX = xml.has.pivot_x ? Std.parseFloat(xml.att.pivot_x) : 0;
 			pivotY = xml.has.pivot_y ? Std.parseFloat(xml.att.pivot_y) : 1;
 			

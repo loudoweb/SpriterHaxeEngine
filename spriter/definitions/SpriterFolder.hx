@@ -12,8 +12,11 @@ class SpriterFolder
 	public var name:String = '';
     public var files:Array<SpriterFile>;
 	
-	
-	public function new(xml:Access = null) 
+	/**
+	 * @param xml 
+	 * @param isShortenedPath = false; if true remove path and extension of the files
+	 */
+	public function new(xml:Access = null, isShortenedPath = false) 
 	{
 		files = new Array<SpriterFile>();
 		
@@ -25,7 +28,7 @@ class SpriterFolder
 			
 			for (f in xml.nodes.file)
 			{
-				files.push(new SpriterFile(f));
+				files.push(new SpriterFile(f, isShortenedPath));
 			}
 		}
 	}
