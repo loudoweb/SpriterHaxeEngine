@@ -37,7 +37,6 @@ local.properties
 .buildpath
 
 # haxelib
-*.json
 *.zip
 
 

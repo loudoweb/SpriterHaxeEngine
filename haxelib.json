@@ -1,0 +1,10 @@
+{
+  "name": "SpriterHaxeEngine",
+  "url" : "https://github.com/loudoweb/SpriterHaxeEngine/",
+  "license": "MIT",
+  "tags": ["openfl", "game", "animation", "cross", "flash", "cpp", "html5", "android", "neko"],
+  "description": "Brashmonkey's Spriter SCML renderer compatible with Haxe and openfl.",
+  "version": "2.2.0",
+  "releasenote": "fix newer haxe version; improve hl; improve TilemapLibrary; newer examples; add ability to know how many spriters are in the engine and a way to shorten the path of the files",
+  "contributors": ["loudoweb"]
+}
