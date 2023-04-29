@@ -132,7 +132,7 @@ class Spriter
 			
 			if (currentAnimation.loopType == LOOPING)
 			{
-					normalizedTime += Std.int(elapsedMS * playbackSpeed);
+					normalizedTime = timeMS;
 					if (normalizedTime >= currentAnimation.length)//forward
 					{
 						normalizedTime -= currentAnimation.length;
@@ -148,7 +148,7 @@ class Spriter
 			}
 		}
 		//even if paused we need to draw it
-		currentAnimation.setCurrentTime(normalizedTime, Std.int(MathUtils.fabs(elapsedMS * playbackSpeed)), library, this, currentEntity, info);
+		currentAnimation.setCurrentTime(normalizedTime, timeMS, library, this, currentEntity, info);
 		//callback
 		if (currentAnimation.loopType == LOOPING)
 		{
