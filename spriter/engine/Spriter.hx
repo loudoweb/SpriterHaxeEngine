@@ -10,7 +10,6 @@ import spriter.definitions.SpriterEntity;
 import spriter.definitions.SpriterFile;
 import spriter.definitions.SpriterFolder;
 import spriter.library.AbstractLibrary;
-import spriter.util.MathUtils;
 import spriter.util.SpriterUtil;
 import spriter.vars.Variable;
 #if SPRITER_CUSTOM_MAP
@@ -387,6 +386,25 @@ class Spriter
 			normalizedTime = timeMS = currentAnimation.length;
 		}
 	}
+	
+	public function getNextKeyTime():Int
+	{
+		var nextTime = 0;
+		
+		var len:Int = currentAnimation.mainlineKeys.length;
+		for (m in 0...len)
+		{
+			if(currentAnimation.mainlineKeys[m].time > timeMS)
+			{
+				nextTime = currentAnimation.mainlineKeys[m].time;
+				break;
+			}
+			
+		}
+		
+		return nextTime;
+	}
+	
 	public function reverse(value:Bool = true):Spriter
 	{
 		if (value)
