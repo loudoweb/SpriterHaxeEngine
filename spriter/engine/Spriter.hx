@@ -405,6 +405,32 @@ class Spriter
 		return nextTime;
 	}
 	
+	public function getPrevKeyTime():Int 
+	{
+		var i = currentAnimation.mainlineKeys.length - 1;
+		
+		var prevTime = currentAnimation.mainlineKeys[i].time;
+		while(i >= 0) {
+		  if(currentAnimation.mainlineKeys[i].time < timeMS)
+			{
+				prevTime = currentAnimation.mainlineKeys[i].time;
+				break;
+			}
+		  i--;
+		}
+		return prevTime;
+	}
+	
+	public function nextFrame():Void
+	{
+		timeMS = getNextKeyTime();
+	}
+	
+	public function prevFrame():Void
+	{
+		timeMS = getPrevKeyTime();
+	}
+	
 	public function reverse(value:Bool = true):Spriter
 	{
 		if (value)
