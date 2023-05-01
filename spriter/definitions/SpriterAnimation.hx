@@ -46,6 +46,8 @@ class SpriterAnimation
 	public var soundlines:Array<Metaline<SoundlineKey>>;
 	#end
 	
+	var _triggerTime:Int;
+	
 	
 	
 	public function new(xml:Access) 
@@ -121,10 +123,13 @@ class SpriterAnimation
 			}
 			#end
 		}
+		
+		_triggerTime = -1;
 	}
 	/**
 	 * 
-	 * @param	newTime Use a time between [0,length]
+	 * @param	newTime Use a time between [0,length[
+	 * @param	elapsedTime elapsed time
 	 * @param	library library to compute and draw the final graphics
 	 * @param	root IScml to use some features
 	 * @param	currentEntity to use some features
@@ -231,6 +236,8 @@ class SpriterAnimation
             objectKeys[k].paint();
         }*/
 		
+		var triggerResult = false;
+		
 		//following lines not in scml references yet
 		#if !SPRITER_NO_TAG
 		if (taglines != null)
@@ -239,6 +246,7 @@ class SpriterAnimation
 			{
 				if (isTriggered(tag.time, mainKey.time, newTime, elapsedTime))
 				{
+					triggerResult = true;
 					spriter.clearTag();
 					for (i in 0...tag.t.length)
 					{
@@ -258,6 +266,7 @@ class SpriterAnimation
 				{
 					if (isTriggered(keyVar.time, mainKey.time, newTime, elapsedTime))
 					{
+						triggerResult = true;
 						spriter.updateVar(_var.id, keyVar.value);
 					}
 				}
@@ -273,6 +282,7 @@ class SpriterAnimation
 				{
 					if (isTriggered(soundKey.time, mainKey.time, newTime, elapsedTime))
 					{
+						triggerResult = true;
 						spriter.dispatchSound(soundKey.folder, soundKey.file);
 					}
 				}
@@ -288,24 +298,42 @@ class SpriterAnimation
 				{
 					if (isTriggered(eventKey.time, mainKey.time, newTime, elapsedTime))
 					{
+						triggerResult = true;
 						spriter.dispatchEvent(event.name);	
 					}
 				}
 			}
 		}
 		#end
+		
+		if(triggerResult)
+			_triggerTime = mainKey.time;
+		else if (_triggerTime != mainKey.time)
+			_triggerTime = -1;//we reset if we changed the mainkey because it'll allow to trigger when play back and forth
+		
 		//clean up
 		spatialInfo = null;
     }
 	
-	function isTriggered(triggerTime:Int, keyTime:Int, newTime:Int, elapsedTime:Int):Bool
+	/**
+	 * Check if an event, variable or sound is triggered.
+	 * By checking if triggerTime and keyTime have same value;
+	 * And then if triggerTime has been reached for the first time (in the current loop)
+	 * @param	triggerTime
+	 * @param	keyTime
+	 * @param	newTime
+	 * @param	elapsedTime
+	 * @return Bool
+	 */
+	function isTriggered(eventTime:Int, keyTime:Int, newTime:Int, elapsedTime:Int):Bool
 	{
-		if (triggerTime == keyTime)
+		if (eventTime == keyTime)
 		{
-			if (newTime - elapsedTime < keyTime)
+			//TODO on jumping on a frame on individual spriters, we may update(0) to have better control of times, but this won't trigger anything because elapsed time equals 0
+			if (newTime - elapsedTime <= keyTime && _triggerTime != keyTime)
 			{
 				return true;
-			}else if (triggerTime == 0 && newTime == elapsedTime) { //allow to trigger the first frame
+			}else if (eventTime == 0 && newTime == elapsedTime) { //allow to trigger the first frame
 				return true;
 			}else {
 				return false;

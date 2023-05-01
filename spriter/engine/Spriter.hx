@@ -12,6 +12,7 @@ import spriter.definitions.SpriterFolder;
 import spriter.library.AbstractLibrary;
 import spriter.util.SpriterUtil;
 import spriter.vars.Variable;
+import spriter.util.MathUtils;
 #if SPRITER_CUSTOM_MAP
 import spriter.definitions.CustomCharMap;
 #end
@@ -27,11 +28,12 @@ class Spriter
 	public var library:AbstractLibrary;
 	public var spriterName:String;
 	/**
-	 * Time elapsed since beginning of current animation
+	 * Time elapsed since beginning of current animation. Value could be negative if you play the animation in reverse.
+	 * You can change the value
 	 */
 	public var timeMS:Int = 0;
 	/**
-	 * Time in the range of [0,currentAnimation.length]
+	 * Time in the range of [0,currentAnimation.length[ in ms
 	 */
 	public var normalizedTime:Int = 0;
 	
@@ -125,37 +127,33 @@ class Spriter
 	
 	public function advanceTime(elapsedMS:Int):Void
 	{
+		var speedElapsed = Std.int(elapsedMS * playbackSpeed);
 		if (!paused)
 		{
-			timeMS += Std.int(elapsedMS * playbackSpeed);
+			timeMS += speedElapsed;
+			//TODO shouldn't be negative in reverse playback (TOFIX trigger event in reverse playback)
 			
 			if (currentAnimation.loopType == LOOPING)
 			{
-					normalizedTime = timeMS;
-					if (normalizedTime >= currentAnimation.length)//forward
-					{
-						normalizedTime -= currentAnimation.length;
-						++loop;
-					}else if (normalizedTime <= 0)//backward
-					{
-						normalizedTime += currentAnimation.length;
-						++loop;
-					}
+				normalizedTime = timeMS % currentAnimation.length;
+				loop = Std.int(timeMS / currentAnimation.length);
 			
-			}else{//no looping
-					normalizedTime = Std.int(Math.max(0, Math.min(timeMS, currentAnimation.length)));
+			}else{
+				//no looping
+				normalizedTime = Std.int(Math.max(0, Math.min(timeMS, currentAnimation.length)));
 			}
 		}
 		//even if paused we need to draw it
-		currentAnimation.setCurrentTime(normalizedTime, timeMS, library, this, currentEntity, info);
+		currentAnimation.setCurrentTime(normalizedTime, speedElapsed, library, this, currentEntity, info);
 		//callback
 		if (currentAnimation.loopType == LOOPING)
 		{
-			if (loop > lastLoop) {
+			if (loop != lastLoop) {
 				lastLoop = loop;
 				dispatchComplete();
 			}
-		}else {//no looping
+		}else {
+			//no looping
 			var when:Int = playbackSpeed > 0 ? currentAnimation.length : 0;
 			if (normalizedTime == when) {
 				if (!onCompleteOnce && !hasReflect) onCompleteOnce = true;//force to avoid dispatching every frame when it's done
@@ -350,7 +348,7 @@ class Spriter
 	
 	/**
 	 * Play a stack of animations whatever the entity.
-	 * @param	name of the entity
+	 * @param	name of the entities
 	 * @param	anims names of the animations in order
 	 * @param	endAnimCallback function callback, return (s:Spriter, entity:String, anim:String)
 	 * @param	removeCallback remove function callback after dispatch
@@ -423,12 +421,12 @@ class Spriter
 	
 	public function nextFrame():Void
 	{
-		timeMS = getNextKeyTime();
+		normalizedTime = timeMS = getNextKeyTime();
 	}
 	
 	public function prevFrame():Void
 	{
-		timeMS = getPrevKeyTime();
+		normalizedTime = timeMS = getPrevKeyTime();
 	}
 	
 	public function reverse(value:Bool = true):Spriter
