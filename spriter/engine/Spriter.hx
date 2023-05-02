@@ -10,9 +10,9 @@ import spriter.definitions.SpriterEntity;
 import spriter.definitions.SpriterFile;
 import spriter.definitions.SpriterFolder;
 import spriter.library.AbstractLibrary;
-import spriter.util.MathUtils;
 import spriter.util.SpriterUtil;
 import spriter.vars.Variable;
+import spriter.util.MathUtils;
 #if SPRITER_CUSTOM_MAP
 import spriter.definitions.CustomCharMap;
 #end
@@ -28,13 +28,26 @@ class Spriter
 	public var library:AbstractLibrary;
 	public var spriterName:String;
 	/**
-	 * Time elapsed since beginning of current animation
+	 * Time in ms that can be used to jump to a specific time.
+	 * Beware of specifities that make it difficult to read: 
+	 * - time elapsed since beginning of current animation. 
+	 * - Resetted when starting new animation or on reflection.
+	 * - Starting at animation length when animating backward and then become negative.
+	 * @see also progress property that should be more convenient
 	 */
-	public var timeMS:Int = 0;
+	public var time:Int = 0;
 	/**
-	 * Time in the range of [0,currentAnimation.length]
+	 * Time in the range of [0,currentAnimation.length[ in ms
+	 * Calculated from time and playbackSpeed
 	 */
-	public var normalizedTime:Int = 0;
+	public var normalizedTime(default, null):Int = 0;
+	
+	/**
+	 * Time progression in the range of [0,1] in ms that can be used to jump to a specific progression
+	 */
+	public var progress(get, set):Float;
+	//used to update progress without calling setter that modifies time and normalized Time
+	var _progress:Float;
 	
 	/**
 	 * Manipulate positions (x,y), scale, alpha and rotation through this object.
@@ -126,37 +139,43 @@ class Spriter
 	
 	public function advanceTime(elapsedMS:Int):Void
 	{
+		var speedElapsed = Std.int(elapsedMS * playbackSpeed);
+		var changedSign = false;
 		if (!paused)
 		{
-			timeMS += Std.int(elapsedMS * playbackSpeed);
+			var prevValue = time;
+			time += speedElapsed;
+			changedSign = !SpriterUtil.sameSign(prevValue, time);
 			
 			if (currentAnimation.loopType == LOOPING)
 			{
-					normalizedTime += Std.int(elapsedMS * playbackSpeed);
-					if (normalizedTime >= currentAnimation.length)//forward
-					{
-						normalizedTime -= currentAnimation.length;
-						++loop;
-					}else if (normalizedTime <= 0)//backward
-					{
-						normalizedTime += currentAnimation.length;
-						++loop;
-					}
+				if(time >= 0)
+				{
+					normalizedTime = time % currentAnimation.length;
+				}else{
+					normalizedTime = ((currentAnimation.length + (time % currentAnimation.length)) % currentAnimation.length);
+				}
+				
+				loop = Std.int(time / currentAnimation.length);
 			
-			}else{//no looping
-					normalizedTime = Std.int(Math.max(0, Math.min(timeMS, currentAnimation.length)));
+			}else{
+				//no looping
+				normalizedTime = Std.int(Math.max(0, Math.min(time, currentAnimation.length)));
 			}
+			
 		}
+		_progress = normalizedTime / currentAnimation.length;
 		//even if paused we need to draw it
-		currentAnimation.setCurrentTime(normalizedTime, Std.int(MathUtils.fabs(elapsedMS * playbackSpeed)), library, this, currentEntity, info);
+		currentAnimation.setCurrentTime(normalizedTime, MathUtils.abs(speedElapsed), library, this, currentEntity, info);
 		//callback
 		if (currentAnimation.loopType == LOOPING)
 		{
-			if (loop > lastLoop) {
+			if (loop != lastLoop || changedSign) {
 				lastLoop = loop;
 				dispatchComplete();
 			}
-		}else {//no looping
+		}else {
+			//no looping
 			var when:Int = playbackSpeed > 0 ? currentAnimation.length : 0;
 			if (normalizedTime == when) {
 				if (!onCompleteOnce && !hasReflect) onCompleteOnce = true;//force to avoid dispatching every frame when it's done
@@ -351,7 +370,7 @@ class Spriter
 	
 	/**
 	 * Play a stack of animations whatever the entity.
-	 * @param	name of the entity
+	 * @param	name of the entities
 	 * @param	anims names of the animations in order
 	 * @param	endAnimCallback function callback, return (s:Spriter, entity:String, anim:String)
 	 * @param	removeCallback remove function callback after dispatch
@@ -377,16 +396,97 @@ class Spriter
 		}
 	}
 	
+	/**
+	 * Reset time to start time or end time depending of playback direction.
+	 */
 	public function resetTime():Void
 	{
 		if (playbackSpeed > 0)
 		{
-			loop = lastLoop = normalizedTime = timeMS = 0;
-		}else{
 			loop = lastLoop = 0;
-			normalizedTime = timeMS = currentAnimation.length;
+			progress = 0;
+		}else{
+			loop = 0;
+			lastLoop = 0;
+			progress = 1;
 		}
 	}
+	
+	/**
+	 * Set time progression
+	 * @param	p progress of the animation. Value must be [0,1].
+	 */
+	function set_progress(p:Float):Float
+	{
+		if (p < 0)
+			p = 0;
+		else if (p > 1)
+			p = 1;
+		_progress = p;
+		time = normalizedTime = Std.int(p * currentAnimation.length);
+		return _progress;
+	}
+	function get_progress():Float
+	{
+		return _progress;
+	}
+	
+	public function getNextKeyTime():Int
+	{
+		var nextTime = 0;
+		
+		var len:Int = currentAnimation.mainlineKeys.length;
+		for (m in 0...len)
+		{
+			if(currentAnimation.mainlineKeys[m].time > time)
+			{
+				nextTime = currentAnimation.mainlineKeys[m].time;
+				break;
+			}
+			
+		}
+		
+		return nextTime;
+	}
+	
+	public function getPrevKeyTime():Int 
+	{
+		var i = currentAnimation.mainlineKeys.length - 1;
+		
+		var prevTime = currentAnimation.mainlineKeys[i].time;
+		while(i >= 0) {
+		  if(currentAnimation.mainlineKeys[i].time < time)
+			{
+				prevTime = currentAnimation.mainlineKeys[i].time;
+				break;
+			}
+		  i--;
+		}
+		return prevTime;
+	}
+	
+	/**
+	 * Set the current time to the next frame time
+	 */
+	public function nextFrame():Void
+	{
+		var t = getNextKeyTime();
+		progress = t / currentAnimation.length;
+	}
+	/**
+	 * Set the current time to the previous frame time
+	 */
+	public function prevFrame():Void
+	{
+		var t =  getPrevKeyTime();
+		progress = t / currentAnimation.length;
+	}
+	
+	/**
+	 * Reverse the playback speed and reset the time to start or end time depending if playing forward or backward
+	 * @param	value
+	 * @return
+	 */
 	public function reverse(value:Bool = true):Spriter
 	{
 		if (value)
@@ -400,6 +500,11 @@ class Spriter
 		resetTime();
 		return this;
 	}
+	/**
+	 * Set to true to animate forward and then backward
+	 * @param	value
+	 * @return
+	 */
 	public function reflect(value:Bool = true):Spriter
 	{
 		if (value)

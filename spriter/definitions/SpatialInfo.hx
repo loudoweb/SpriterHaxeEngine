@@ -61,6 +61,12 @@ class SpatialInfo implements ISpriterPooled
 		return this;
 	}
 	
+	/**
+	 * Convenient method to set both x and y in one line.
+	 * @param	x
+	 * @param	y
+	 * @return
+	 */
 	public function setPos(x:Float = 0, y:Float = 0):SpatialInfo
 	{
 		this.x = x; 
@@ -68,6 +74,11 @@ class SpatialInfo implements ISpriterPooled
 		return this;
 	}
 	
+	/**
+	 * Convenient method to set both scaleX and scaleY.
+	 * @param	scale
+	 * @return
+	 */
 	public function setScale(scale:Float):SpatialInfo
 	{
 		this.scaleX = scale; 
@@ -75,10 +86,10 @@ class SpatialInfo implements ISpriterPooled
 		return this;
 	}
 	/**
-	 * 
+	 * Get SpatialInfo modified by parent.
 	 * @param	parentInfo
 	 * @param	out if null, this method will override this SpatialInfo
-	 * @return
+	 * @return SpatialInfo modified with parent values. Use out if specified.
 	 */
 	public function unmapFromParent(parentInfo:SpatialInfo, out:SpatialInfo = null):SpatialInfo
     {
@@ -115,10 +126,18 @@ class SpatialInfo implements ISpriterPooled
 		return out;
     }
 	
+	/**
+	 * Create a new SpatialInfo with values from this.
+	 * @return new SpatialInfo
+	 */
 	inline public function copy():SpatialInfo
 	{
 		return new SpatialInfo(x, y, angle, scaleX, scaleY, a, spin);
 	}
+	/**
+	 * Copy SpatialInfo from other values
+	 * @param	out spatialInfo to copy
+	 */
 	public function clone(out:SpatialInfo):Void
 	{
 		out.init(x, y, angle, scaleX, scaleY, a, spin);//initializing the out object with the values of this object
