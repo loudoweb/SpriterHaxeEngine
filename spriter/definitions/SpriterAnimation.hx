@@ -306,6 +306,7 @@ class SpriterAnimation
 		}
 		#end
 		
+		//we store the trigger time only when everything has been tested (if not we'll only trigger first event...)
 		if(triggerResult)
 			_triggerTime = mainKey.time;
 		else if (_triggerTime != mainKey.time)
@@ -329,7 +330,6 @@ class SpriterAnimation
 	{
 		if (eventTime == keyTime)
 		{
-			//TODO on jumping on a frame on individual spriters, we may update(0) to have better control of times, but this won't trigger anything because elapsed time equals 0
 			if (newTime - elapsedTime <= keyTime && _triggerTime != keyTime)
 			{
 				return true;

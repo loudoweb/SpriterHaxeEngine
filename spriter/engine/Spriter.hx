@@ -28,12 +28,14 @@ class Spriter
 	public var library:AbstractLibrary;
 	public var spriterName:String;
 	/**
-	 * Time elapsed since beginning of current animation. Value could be negative if you play the animation in reverse.
-	 * You can change the value
+	 * Time elapsed since beginning of current animation. Resetted when starting new animation or on reflection.
+	 * Starting at animation length when animating backward and then become negative.
+	 * You can change the value to jump at a specific frame but beware of consequences.
 	 */
 	public var timeMS:Int = 0;
 	/**
 	 * Time in the range of [0,currentAnimation.length[ in ms
+	 * Calculated from timeMS and playbackSpeed
 	 */
 	public var normalizedTime:Int = 0;
 	
@@ -128,14 +130,22 @@ class Spriter
 	public function advanceTime(elapsedMS:Int):Void
 	{
 		var speedElapsed = Std.int(elapsedMS * playbackSpeed);
+		var changedSign = false;
 		if (!paused)
 		{
+			var prevValue = timeMS;
 			timeMS += speedElapsed;
-			//TODO shouldn't be negative in reverse playback (TOFIX trigger event in reverse playback)
+			changedSign = !SpriterUtil.sameSign(prevValue, timeMS);
 			
 			if (currentAnimation.loopType == LOOPING)
 			{
-				normalizedTime = timeMS % currentAnimation.length;
+				if(timeMS >= 0)
+				{
+					normalizedTime = timeMS % currentAnimation.length;
+				}else{
+					normalizedTime = ((currentAnimation.length + (timeMS % currentAnimation.length)) % currentAnimation.length);
+				}
+				
 				loop = Std.int(timeMS / currentAnimation.length);
 			
 			}else{
@@ -144,11 +154,11 @@ class Spriter
 			}
 		}
 		//even if paused we need to draw it
-		currentAnimation.setCurrentTime(normalizedTime, speedElapsed, library, this, currentEntity, info);
+		currentAnimation.setCurrentTime(normalizedTime, MathUtils.abs(speedElapsed), library, this, currentEntity, info);
 		//callback
 		if (currentAnimation.loopType == LOOPING)
 		{
-			if (loop != lastLoop) {
+			if (loop != lastLoop || changedSign) {
 				lastLoop = loop;
 				dispatchComplete();
 			}
@@ -419,16 +429,26 @@ class Spriter
 		return prevTime;
 	}
 	
+	/**
+	 * Set the current time to the next frame time
+	 */
 	public function nextFrame():Void
 	{
 		normalizedTime = timeMS = getNextKeyTime();
 	}
-	
+	/**
+	 * Set the current time to the previous frame time
+	 */
 	public function prevFrame():Void
 	{
 		normalizedTime = timeMS = getPrevKeyTime();
 	}
 	
+	/**
+	 * Reverse the playback speed and reset the time to start or end time depending if playing forward or backward
+	 * @param	value
+	 * @return
+	 */
 	public function reverse(value:Bool = true):Spriter
 	{
 		if (value)
@@ -442,6 +462,11 @@ class Spriter
 		resetTime();
 		return this;
 	}
+	/**
+	 * Set to true to animate forward and then backward
+	 * @param	value
+	 * @return
+	 */
 	public function reflect(value:Bool = true):Spriter
 	{
 		if (value)

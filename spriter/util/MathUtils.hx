@@ -6,7 +6,8 @@ package spriter.util;
  */
 class MathUtils
 {
-	inline static public function fabs(n:Float):Float
+	@:generic
+	inline static public function abs<T:Float>(n:T):T
 	{
 		if(n >= 0) {
 			return n;
@@ -118,19 +119,18 @@ class MathUtils
 		var t2:Float = x;
 		var x2:Float;
 		var d2:Float;
-		var i:Int;
 
 		// First try a few iterations of Newton's method -- normally very fast.
 		for (i in 0...8) 
 		{
 			x2 = sampleCurve(ax, bx, cx, t2) - x; 
-			if(fabs(x2) < epsilon) {
+			if(abs(x2) < epsilon) {
 				return t2;
 			} 
 
 			d2 = sampleCurveDerivativeX(ax, bx, cx, t2); 
 
-			if(fabs(d2) < 1e-6) {
+			if(abs(d2) < 1e-6) {
 				break;
 			} 
 
@@ -155,7 +155,7 @@ class MathUtils
 		while(t0 < t1) 
 		{
 			x2 = sampleCurve(ax, bx, cx, t2); 
-			if(fabs(x2-x) < epsilon) {
+			if(abs(x2-x) < epsilon) {
 				return t2;
 			} 
 			if(x > x2) {
