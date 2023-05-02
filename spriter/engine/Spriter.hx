@@ -28,16 +28,26 @@ class Spriter
 	public var library:AbstractLibrary;
 	public var spriterName:String;
 	/**
-	 * Time elapsed since beginning of current animation. Resetted when starting new animation or on reflection.
-	 * Starting at animation length when animating backward and then become negative.
-	 * You can change the value to jump at a specific frame but beware of consequences.
+	 * Time in ms that can be used to jump to a specific time.
+	 * Beware of specifities that make it difficult to read: 
+	 * - time elapsed since beginning of current animation. 
+	 * - Resetted when starting new animation or on reflection.
+	 * - Starting at animation length when animating backward and then become negative.
+	 * @see also progress property that should be more convenient
 	 */
-	public var timeMS:Int = 0;
+	public var time:Int = 0;
 	/**
 	 * Time in the range of [0,currentAnimation.length[ in ms
-	 * Calculated from timeMS and playbackSpeed
+	 * Calculated from time and playbackSpeed
 	 */
-	public var normalizedTime:Int = 0;
+	public var normalizedTime(default, null):Int = 0;
+	
+	/**
+	 * Time progression in the range of [0,1] in ms that can be used to jump to a specific progression
+	 */
+	public var progress(get, set):Float;
+	//used to update progress without calling setter that modifies time and normalized Time
+	var _progress:Float;
 	
 	/**
 	 * Manipulate positions (x,y), scale, alpha and rotation through this object.
@@ -133,26 +143,28 @@ class Spriter
 		var changedSign = false;
 		if (!paused)
 		{
-			var prevValue = timeMS;
-			timeMS += speedElapsed;
-			changedSign = !SpriterUtil.sameSign(prevValue, timeMS);
+			var prevValue = time;
+			time += speedElapsed;
+			changedSign = !SpriterUtil.sameSign(prevValue, time);
 			
 			if (currentAnimation.loopType == LOOPING)
 			{
-				if(timeMS >= 0)
+				if(time >= 0)
 				{
-					normalizedTime = timeMS % currentAnimation.length;
+					normalizedTime = time % currentAnimation.length;
 				}else{
-					normalizedTime = ((currentAnimation.length + (timeMS % currentAnimation.length)) % currentAnimation.length);
+					normalizedTime = ((currentAnimation.length + (time % currentAnimation.length)) % currentAnimation.length);
 				}
 				
-				loop = Std.int(timeMS / currentAnimation.length);
+				loop = Std.int(time / currentAnimation.length);
 			
 			}else{
 				//no looping
-				normalizedTime = Std.int(Math.max(0, Math.min(timeMS, currentAnimation.length)));
+				normalizedTime = Std.int(Math.max(0, Math.min(time, currentAnimation.length)));
 			}
+			
 		}
+		_progress = normalizedTime / currentAnimation.length;
 		//even if paused we need to draw it
 		currentAnimation.setCurrentTime(normalizedTime, MathUtils.abs(speedElapsed), library, this, currentEntity, info);
 		//callback
@@ -384,15 +396,39 @@ class Spriter
 		}
 	}
 	
+	/**
+	 * Reset time to start time or end time depending of playback direction.
+	 */
 	public function resetTime():Void
 	{
 		if (playbackSpeed > 0)
 		{
-			loop = lastLoop = normalizedTime = timeMS = 0;
-		}else{
 			loop = lastLoop = 0;
-			normalizedTime = timeMS = currentAnimation.length;
+			progress = 0;
+		}else{
+			loop = 0;
+			lastLoop = 0;
+			progress = 1;
 		}
+	}
+	
+	/**
+	 * Set time progression
+	 * @param	p progress of the animation. Value must be [0,1].
+	 */
+	function set_progress(p:Float):Float
+	{
+		if (p < 0)
+			p = 0;
+		else if (p > 1)
+			p = 1;
+		_progress = p;
+		time = normalizedTime = Std.int(p * currentAnimation.length);
+		return _progress;
+	}
+	function get_progress():Float
+	{
+		return _progress;
 	}
 	
 	public function getNextKeyTime():Int
@@ -402,7 +438,7 @@ class Spriter
 		var len:Int = currentAnimation.mainlineKeys.length;
 		for (m in 0...len)
 		{
-			if(currentAnimation.mainlineKeys[m].time > timeMS)
+			if(currentAnimation.mainlineKeys[m].time > time)
 			{
 				nextTime = currentAnimation.mainlineKeys[m].time;
 				break;
@@ -419,7 +455,7 @@ class Spriter
 		
 		var prevTime = currentAnimation.mainlineKeys[i].time;
 		while(i >= 0) {
-		  if(currentAnimation.mainlineKeys[i].time < timeMS)
+		  if(currentAnimation.mainlineKeys[i].time < time)
 			{
 				prevTime = currentAnimation.mainlineKeys[i].time;
 				break;
@@ -434,14 +470,16 @@ class Spriter
 	 */
 	public function nextFrame():Void
 	{
-		normalizedTime = timeMS = getNextKeyTime();
+		var t = getNextKeyTime();
+		progress = t / currentAnimation.length;
 	}
 	/**
 	 * Set the current time to the previous frame time
 	 */
 	public function prevFrame():Void
 	{
-		normalizedTime = timeMS = getPrevKeyTime();
+		var t =  getPrevKeyTime();
+		progress = t / currentAnimation.length;
 	}
 	
 	/**
